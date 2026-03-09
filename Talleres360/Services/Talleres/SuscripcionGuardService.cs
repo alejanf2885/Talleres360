@@ -1,8 +1,9 @@
-﻿using Talleres360.Interfaces.Talleres;
+﻿using Talleres360.Interfaces.Seguridad;
+using Talleres360.Interfaces.Talleres;
 
 namespace Talleres360.Services.Talleres
 {
-    public class SuscripcionGuardService
+    public class SuscripcionGuardService : ISuscripcionGuardService
     {
 
         private readonly ITallerRepository _tallerRepo;
