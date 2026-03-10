@@ -51,7 +51,8 @@ namespace Talleres360.Services.Clientes
                 Email = request.Email,
                 AceptaComunicaciones = request.AceptaComunicaciones,
                 Eliminado = false,
-                FechaCreacion = DateTime.UtcNow
+                FechaCreacion = DateTime.UtcNow,
+                FechaFirmaRGPD = DateTime.UtcNow
             };
 
             await _customerRepo.AddAsync(nuevoCliente);
