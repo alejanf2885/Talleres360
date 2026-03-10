@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Talleres360.Data;
+using Talleres360.Dtos;
 using Talleres360.Interfaces.Clientes;
 using Talleres360.Models;
 using System.Linq;
@@ -37,6 +38,41 @@ namespace Talleres360.Repositories.Clientes
             return resultado;
         }
 
+        public async Task<PagedResponse<Cliente>> GetAllByTallerIdPagedAsync(int tallerId, PaginationParams pagination, string? buscar = null)
+        {
+            var query = _context.Clientes
+               .Where(c => c.TallerId == tallerId && !c.Eliminado);
+
+            if (!string.IsNullOrWhiteSpace(buscar))
+            {
+                string criterio = buscar.Trim().ToLower();
+                query = query.Where(c =>
+                    c.Nombre.Contains(criterio) ||
+                    (c.Apellidos != null && c.Apellidos.Contains(criterio)) ||
+                    c.Telefono.Contains(criterio) ||
+                    (c.Email != null && c.Email.Contains(criterio))
+                );
+            }
+
+            // Contar el total antes de paginar
+            int totalCount = await query.CountAsync();
+
+            // Aplicar paginación
+            var items = await query
+                .OrderByDescending(c => c.FechaCreacion)
+                .Skip((pagination.PageNumber - 1) * pagination.PageSize)
+                .Take(pagination.PageSize)
+                .ToListAsync();
+
+            return new PagedResponse<Cliente>
+            {
+                Data = items,
+                PageNumber = pagination.PageNumber,
+                PageSize = pagination.PageSize,
+                TotalCount = totalCount
+            };
+        }
+
         public async Task<Cliente?> GetByIdAsync(int id)
         {
             Cliente? cliente = await _context.Clientes
@@ -51,6 +87,15 @@ namespace Talleres360.Repositories.Clientes
                 .CountAsync(c => c.TallerId == tallerId && !c.Eliminado);
 
             return total;
+        }
+
+        public async Task<int> CountNuevosEsteMesAsync(int tallerId)
+        {
+            var inicioMes = new DateTime(DateTime.UtcNow.Year, DateTime.UtcNow.Month, 1);
+            int nuevos = await _context.Clientes
+                .CountAsync(c => c.TallerId == tallerId && !c.Eliminado && c.FechaCreacion >= inicioMes);
+
+            return nuevos;
         }
 
         public async Task AddAsync(Cliente cliente)
