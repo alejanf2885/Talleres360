@@ -11,5 +11,6 @@ namespace Talleres360.Interfaces.Usuarios
         Task<bool> ExisteEmailAsync(string email);
         Task<Credencial?> GetCredencialLocalByUsuarioIdAsync(int usuarioId);
         Task ActualizarUltimoAccesoAsync(int usuarioId);
+        Task<Usuario?> GetByIdAsync(int id);
     }
 }

@@ -63,5 +63,10 @@ namespace Talleres360.Repositories.Usuarios
                 await _context.SaveChangesAsync();
             }
         }
+
+        public async Task<Usuario?> GetByIdAsync(int id)
+        {
+            return await _context.Usuarios.FirstOrDefaultAsync(u => u.Id == id);
+        }
     }
 }

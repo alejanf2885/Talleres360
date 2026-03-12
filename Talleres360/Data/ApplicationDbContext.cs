@@ -13,6 +13,7 @@ namespace Talleres360.Data
         public DbSet<Credencial> Credenciales { get; set; }
         public DbSet<Plan> Planes { get; set; }
         public DbSet<Cliente> Clientes { get; set; }
+        public DbSet<TokenSeguridad> TokensSeguridad { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
