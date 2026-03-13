@@ -1,15 +1,19 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Talleres360.Models.Enums;
 
 namespace Talleres360.Models
 {
-    [Table("VEHICULOS")]
-    public class Vehiculo
+    [Table("VW_VEHICULODETALLES")]
+    public class VehiculoDetalle
     {
         [Key]
         [Column("ID")]
         public int Id { get; set; }
+
+        [Column("TALLERID")]
+        public int TallerId { get; set; }
 
         [Column("CLIENTEID")]
         public int? ClienteId { get; set; }
@@ -24,8 +28,6 @@ namespace Talleres360.Models
         public int ModeloId { get; set; }
 
         [Column("MATRICULA")]
-        [Required]
-        [StringLength(15)]
         public string Matricula { get; set; } = string.Empty;
 
         [Column("AÑO")]
@@ -41,10 +43,13 @@ namespace Talleres360.Models
         public DateTime? FechaUltimaActualizacionKm { get; set; }
 
         [Column("ELIMINADO")]
-        public bool Eliminado { get; set; } = false;
+        public bool Eliminado { get; set; }
 
-        [Column("TALLERID")]             
-        public int TallerId { get; set; }
+        [Column("MARCANOMBRE")]
+        public string MarcaNombre { get; set; } = string.Empty;
+
+        [Column("MODELONOMBRE")]
+        public string ModeloNombre { get; set; } = string.Empty;
 
         [NotMapped]
         public TipoVehiculo Tipo => (TipoVehiculo)TipoVehiculoId;
