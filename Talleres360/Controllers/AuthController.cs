@@ -30,8 +30,8 @@ namespace Talleres360.API.Controllers
             _refreshTokenService = refreshTokenService;
         }
 
-        // --- REGISTRO ---
         [HttpPost("register")]
+        [EnableRateLimiting("AuthStrict")]
         public async Task<IActionResult> Register([FromBody] RegistroRequest request)
         {
             var (success, message) = await _registroTallerService.RegistrarNuevoClienteSaaSAsync(
@@ -46,24 +46,32 @@ namespace Talleres360.API.Controllers
         }
 
         [HttpPost("login")]
-        [EnableRateLimiting("LoginLimiter")]
+        [EnableRateLimiting("AuthStrict")]
         public async Task<IActionResult> Login([FromBody] LoginRequest request)
         {
             Usuario? usuario = await _authService.ValidarLoginAsync(request.Email, request.Password);
 
             if (usuario == null)
             {
-                return Unauthorized(new { Error = "Credenciales incorrectas o cuenta inactiva." });
+                return Unauthorized(new { Error = "Credenciales incorrectas." });
             }
 
             string jwtToken = _tokenService.GenerarJwtToken(usuario);
-
             string refreshToken = await _refreshTokenService.CrearRefreshTokenAsync(usuario.Id);
+
+            CookieOptions cookieOptions = new CookieOptions
+            {
+                HttpOnly = true, 
+                Secure = true,   
+                SameSite = SameSiteMode.Strict, 
+                Expires = DateTime.UtcNow.AddDays(7)
+            };
+
+            Response.Cookies.Append("refreshToken", refreshToken, cookieOptions);
 
             return Ok(new
             {
                 Token = jwtToken,
-                RefreshToken = refreshToken, 
                 Usuario = new
                 {
                     usuario.Id,
@@ -76,36 +84,45 @@ namespace Talleres360.API.Controllers
         }
 
         [HttpPost("refresh")]
-        public async Task<IActionResult> Refresh([FromBody] RefreshTokenRequest request)
+        [EnableRateLimiting("RefreshPolicy")]
+        public async Task<IActionResult> Refresh()
         {
-            if (string.IsNullOrWhiteSpace(request.RefreshToken))
+            var refreshToken = Request.Cookies["refreshToken"];
+
+            if (string.IsNullOrWhiteSpace(refreshToken))
             {
-                return BadRequest(new { Error = "El Refresh Token es obligatorio." });
+                return Unauthorized(new { Error = "No hay token de refresco." });
             }
 
-            var resultado = await _refreshTokenService.ValidarYRenovarAsync(request.RefreshToken);
+            var resultado = await _refreshTokenService.ValidarYRenovarAsync(refreshToken);
 
             if (!resultado.Exito)
             {
-                // Si falla (caducado o robado), devuelve 401 y Angular cerrará la sesión
                 return Unauthorized(new { Error = resultado.MensajeError });
             }
 
-            return Ok(new
+            var cookieOptions = new CookieOptions
             {
-                Token = resultado.NuevoJwtToken,
-                RefreshToken = resultado.NuevoRefreshToken
-            });
+                HttpOnly = true,
+                Secure = true,
+                SameSite = SameSiteMode.Strict,
+                Expires = DateTime.UtcNow.AddDays(7)
+            };
+            Response.Cookies.Append("refreshToken", resultado.NuevoRefreshToken, cookieOptions);
+
+            return Ok(new { Token = resultado.NuevoJwtToken });
         }
 
         [HttpPost("logout")]
-        public async Task<IActionResult> Logout([FromBody] LogoutRequest request)
+        public async Task<IActionResult> Logout()
         {
-            if (!string.IsNullOrWhiteSpace(request.RefreshToken))
+            var refreshToken = Request.Cookies["refreshToken"];
+            if (!string.IsNullOrWhiteSpace(refreshToken))
             {
-                // Quemamos el token en la base de datos para que nadie más pueda usarlo
-                await _refreshTokenService.RevocarRefreshTokenAsync(request.RefreshToken);
+                await _refreshTokenService.RevocarRefreshTokenAsync(refreshToken);
             }
+
+            Response.Cookies.Delete("refreshToken");
 
             return Ok(new { Mensaje = "Sesión cerrada correctamente." });
         }

@@ -14,6 +14,11 @@ namespace Talleres360.Data
         public DbSet<Plan> Planes { get; set; }
         public DbSet<Cliente> Clientes { get; set; }
         public DbSet<TokenSeguridad> TokensSeguridad { get; set; }
+        public DbSet<Marca> Marcas { get; set; }
+        public DbSet<Modelo> Modelos { get; set; }
+        public DbSet<Vehiculo> Vehiculos { get; set; }
+        
+        public DbSet<VehiculoDetalle> VehiculosDetalle { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

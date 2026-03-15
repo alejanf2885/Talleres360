@@ -15,11 +15,13 @@ using Talleres360.Interfaces.Planes;
 using Talleres360.Interfaces.Seguridad;
 using Talleres360.Interfaces.Talleres;
 using Talleres360.Interfaces.Usuarios;
+using Talleres360.Interfaces.Vehiculos;
 using Talleres360.Repositories;
 using Talleres360.Repositories.Clientes;
 using Talleres360.Repositories.Planes;
 using Talleres360.Repositories.Talleres;
 using Talleres360.Repositories.Usuarios;
+using Talleres360.Repositories.Vehiculos;
 using Talleres360.Services.Auth;
 using Talleres360.Services.Cache;
 using Talleres360.Services.Clientes;
@@ -27,6 +29,7 @@ using Talleres360.Services.Password;
 using Talleres360.Services.Seguridad;
 using Talleres360.Services.Talleres;
 using Talleres360.Services.Usuarios;
+using Talleres360.Services.Vehiculos;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -55,13 +58,16 @@ builder.Services.AddScoped<IUsuarioRepository, UsuarioRepository>();
 builder.Services.AddScoped<ITallerRepository, TallerRepository>();
 builder.Services.AddScoped<IPlanRepository, PlanRepository>();
 builder.Services.AddScoped<ICustomerRepository, CustomerRepository>();
-builder.Services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>(); // NUEVO
+builder.Services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
+builder.Services.AddScoped<IVehiculoRepository, VehiculoRepository>();
 
 // Servicios Core
 builder.Services.AddSingleton<IPasswordService, BcryptPasswordService>();
 builder.Services.AddScoped<ITallerService, TallerService>();
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IUserContextService, UserContextService>();
+builder.Services.AddScoped<IVehiculoService, VehiculoService>();
+
 
 // Seguridad y Gestión
 builder.Services.AddScoped<ISuscripcionGuardService, SuscripcionGuardService>();
@@ -99,26 +105,36 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend", policy =>
     {
-        policy.AllowAnyOrigin()
+        policy.WithOrigins("http://localhost:4200") 
               .AllowAnyHeader()
-              .AllowAnyMethod();
+              .AllowAnyMethod()
+              .AllowCredentials(); 
     });
 });
 
 // =========================================================
-// 6. RATE LIMITER
+// 6. RATE LIMITER (Políticas de Seguridad)
 // =========================================================
 builder.Services.AddRateLimiter(options =>
 {
-    options.AddPolicy("LoginLimiter", httpContext =>
+    options.AddPolicy("AuthStrict", httpContext =>
     {
         var ip = httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown";
-
-        // Limita a 5 peticiones cada 2 minutos por IP para evitar fuerza bruta
         return RateLimitPartition.GetFixedWindowLimiter(ip, _ => new FixedWindowRateLimiterOptions
         {
             PermitLimit = 5,
             Window = TimeSpan.FromMinutes(2),
+            QueueLimit = 0
+        });
+    });
+
+    options.AddPolicy("RefreshPolicy", httpContext =>
+    {
+        var ip = httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown";
+        return RateLimitPartition.GetFixedWindowLimiter(ip, _ => new FixedWindowRateLimiterOptions
+        {
+            PermitLimit = 10,
+            Window = TimeSpan.FromMinutes(1),
             QueueLimit = 0
         });
     });
