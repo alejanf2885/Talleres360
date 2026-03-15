@@ -105,26 +105,36 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend", policy =>
     {
-        policy.AllowAnyOrigin()
+        policy.WithOrigins("http://localhost:4200") 
               .AllowAnyHeader()
-              .AllowAnyMethod();
+              .AllowAnyMethod()
+              .AllowCredentials(); 
     });
 });
 
 // =========================================================
-// 6. RATE LIMITER
+// 6. RATE LIMITER (Políticas de Seguridad)
 // =========================================================
 builder.Services.AddRateLimiter(options =>
 {
-    options.AddPolicy("LoginLimiter", httpContext =>
+    options.AddPolicy("AuthStrict", httpContext =>
     {
         var ip = httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown";
-
-        // Limita a 5 peticiones cada 2 minutos por IP para evitar fuerza bruta
         return RateLimitPartition.GetFixedWindowLimiter(ip, _ => new FixedWindowRateLimiterOptions
         {
             PermitLimit = 5,
             Window = TimeSpan.FromMinutes(2),
+            QueueLimit = 0
+        });
+    });
+
+    options.AddPolicy("RefreshPolicy", httpContext =>
+    {
+        var ip = httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown";
+        return RateLimitPartition.GetFixedWindowLimiter(ip, _ => new FixedWindowRateLimiterOptions
+        {
+            PermitLimit = 10,
+            Window = TimeSpan.FromMinutes(1),
             QueueLimit = 0
         });
     });
