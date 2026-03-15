@@ -18,6 +18,11 @@ namespace Talleres360.Repositories.Vehiculos
             _context = context;
         }
 
+        public async Task<bool> PerteneceATallerAsync(int id, int tallerId)
+        {
+            return await _context.Vehiculos.AnyAsync(v => v.Id == id && v.TallerId == tallerId);
+        }
+
         public async Task<Vehiculo?> GetByIdAsync(int id)
         {
             Vehiculo? vehiculo = await _context.Vehiculos.FindAsync(id);

@@ -30,7 +30,6 @@ namespace Talleres360.API.Controllers
             _refreshTokenService = refreshTokenService;
         }
 
-        // --- REGISTRO ---
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] RegistroRequest request)
         {
@@ -87,7 +86,6 @@ namespace Talleres360.API.Controllers
 
             if (!resultado.Exito)
             {
-                // Si falla (caducado o robado), devuelve 401 y Angular cerrará la sesión
                 return Unauthorized(new { Error = resultado.MensajeError });
             }
 
@@ -103,7 +101,6 @@ namespace Talleres360.API.Controllers
         {
             if (!string.IsNullOrWhiteSpace(request.RefreshToken))
             {
-                // Quemamos el token en la base de datos para que nadie más pueda usarlo
                 await _refreshTokenService.RevocarRefreshTokenAsync(request.RefreshToken);
             }
 

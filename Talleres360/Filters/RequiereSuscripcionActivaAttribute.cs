@@ -40,7 +40,7 @@ namespace Talleres360.API.Filters
                 {
                     context.Result = new ObjectResult(new { mensaje = guard.Mensaje })
                     {
-                        StatusCode = StatusCodes.Status403Forbidden
+                        StatusCode = StatusCodes.Status402PaymentRequired
                     };
                     return;
                 }

@@ -15,11 +15,13 @@ using Talleres360.Interfaces.Planes;
 using Talleres360.Interfaces.Seguridad;
 using Talleres360.Interfaces.Talleres;
 using Talleres360.Interfaces.Usuarios;
+using Talleres360.Interfaces.Vehiculos;
 using Talleres360.Repositories;
 using Talleres360.Repositories.Clientes;
 using Talleres360.Repositories.Planes;
 using Talleres360.Repositories.Talleres;
 using Talleres360.Repositories.Usuarios;
+using Talleres360.Repositories.Vehiculos;
 using Talleres360.Services.Auth;
 using Talleres360.Services.Cache;
 using Talleres360.Services.Clientes;
@@ -27,6 +29,7 @@ using Talleres360.Services.Password;
 using Talleres360.Services.Seguridad;
 using Talleres360.Services.Talleres;
 using Talleres360.Services.Usuarios;
+using Talleres360.Services.Vehiculos;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -55,13 +58,16 @@ builder.Services.AddScoped<IUsuarioRepository, UsuarioRepository>();
 builder.Services.AddScoped<ITallerRepository, TallerRepository>();
 builder.Services.AddScoped<IPlanRepository, PlanRepository>();
 builder.Services.AddScoped<ICustomerRepository, CustomerRepository>();
-builder.Services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>(); // NUEVO
+builder.Services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
+builder.Services.AddScoped<IVehiculoRepository, VehiculoRepository>();
 
 // Servicios Core
 builder.Services.AddSingleton<IPasswordService, BcryptPasswordService>();
 builder.Services.AddScoped<ITallerService, TallerService>();
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IUserContextService, UserContextService>();
+builder.Services.AddScoped<IVehiculoService, VehiculoService>();
+
 
 // Seguridad y Gestión
 builder.Services.AddScoped<ISuscripcionGuardService, SuscripcionGuardService>();

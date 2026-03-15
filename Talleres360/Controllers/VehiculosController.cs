@@ -4,7 +4,7 @@ using Talleres360.Dtos.Vehiculos;
 using Talleres360.Filters;
 using Talleres360.Interfaces.Vehiculos;
 using Talleres360.Models;
-using Talleres360.Extensions; // Asegúrate de importar tus extensiones
+using Talleres360.Extensions;
 
 namespace Talleres360.Controllers
 {
@@ -19,25 +19,31 @@ namespace Talleres360.Controllers
             _vehiculoService = vehiculoService;
         }
 
+        [TallerAuthorize<IVehiculoRepository>]
+        [HttpGet]
+        [TallerAuthorize<IVehiculoRepository>]
         [HttpGet]
         public async Task<ActionResult<PagedResponse<VehiculoDetalle>>> GetAll(
-            [FromQuery] int pageNumber = 1,
-            [FromQuery] int pageSize = 10,
-            [FromQuery] VehiculoFiltroDto? filtro = null)
+        [FromQuery] int pageNumber = 1,
+        [FromQuery] int pageSize = 10,
+        [FromQuery] VehiculoFiltroDto? filtro = null)
         {
-            // Usamos la extensión para obtener el TallerId del Token de forma segura
-            int tallerId = User.GetTallerId();
+            int? tallerId = User.GetTallerId();
+
+            if (!tallerId.HasValue)
+            {
+                return Unauthorized("No se pudo identificar el taller del usuario.");
+            }
 
             var response = await _vehiculoService.GetAllDetalleByTallerAsync(
-                tallerId,
+                tallerId.Value,
                 pageNumber,
                 pageSize,
                 filtro);
 
             return Ok(response);
         }
-
-        [TallerAuthorize]
+        [TallerAuthorize<IVehiculoRepository>]
         [HttpGet("{id:int}")]
         public async Task<ActionResult<VehiculoDetalle?>> GetById(int id)
         {
@@ -47,12 +53,13 @@ namespace Talleres360.Controllers
             return Ok(detalle);
         }
 
+        [TallerAuthorize<IVehiculoRepository>]
         [HttpGet("matricula/{matricula}")]
         public async Task<ActionResult<VehiculoDetalle?>> GetByMatricula(string matricula)
         {
             if (string.IsNullOrWhiteSpace(matricula)) return BadRequest("La matrícula es requerida.");
 
-            int tallerId = User.GetTallerId();
+            int? tallerId = User.GetTallerId();
             var detalle = await _vehiculoService.GetDetalleByMatriculaAsync(matricula);
 
             if (detalle == null || detalle.TallerId != tallerId)
@@ -63,37 +70,59 @@ namespace Talleres360.Controllers
             return Ok(detalle);
         }
 
+        [TallerAuthorize<IVehiculoRepository>]
         [HttpPost]
-        public async Task<ActionResult> Add([FromBody] Vehiculo? vehiculo)
+        public async Task<ActionResult<VehiculoDetalle>> Add([FromBody] Vehiculo? vehiculo)
         {
-            // 1. Blindaje contra NULL
             if (vehiculo == null) return BadRequest("El cuerpo de la petición no puede estar vacío.");
 
-            // 2. Seguridad: Forzamos el TallerId del Token (ignora lo que venga en el JSON)
-            vehiculo.TallerId = User.GetTallerId();
+            int? tId = User.GetTallerId();
+            if (!tId.HasValue)
+            {
+                return Unauthorized();
+            }
 
-            // 3. Validación de duplicados
+            vehiculo.TallerId = tId.Value;
+
             if (await _vehiculoService.ExistsAsync(vehiculo.Matricula))
             {
                 return Conflict($"Ya existe un vehículo con matrícula {vehiculo.Matricula}");
             }
 
             await _vehiculoService.AddAsync(vehiculo);
-            return CreatedAtAction(nameof(GetById), new { id = vehiculo.Id }, vehiculo);
+
+            VehiculoDetalle? vehiculoActualizado = await _vehiculoService.GetDetalleByIdAsync(vehiculo.Id);
+
+            if (vehiculoActualizado == null)
+            {
+                return StatusCode(500, "El vehículo se guardó correctamente, pero hubo un error al recuperar sus detalles.");
+            }
+            return CreatedAtAction(nameof(GetById), new { id = vehiculo.Id }, vehiculoActualizado);
         }
 
-        [TallerAuthorize]
+        [TallerAuthorize<IVehiculoRepository>]
         [HttpPut("{id:int}")]
-        public async Task<ActionResult> Update(int id, [FromBody] Vehiculo? vehiculo)
+        public async Task<ActionResult<VehiculoDetalle>> Update(int id, [FromBody] Vehiculo? vehiculo)
         {
             if (vehiculo == null) return BadRequest("Los datos son requeridos.");
 
             if (id != vehiculo.Id) return BadRequest("El Id de la ruta no coincide con el del objeto.");
 
-            vehiculo.TallerId = User.GetTallerId();
+            int? tallerId = User.GetTallerId();
+            if (tallerId == null)
+                return Unauthorized();
+
+            vehiculo.TallerId = tallerId.Value;
 
             await _vehiculoService.UpdateAsync(vehiculo);
-            return NoContent();
+
+            VehiculoDetalle? vehiculoActualizado = await _vehiculoService.GetDetalleByIdAsync(vehiculo.Id);
+
+            if (vehiculoActualizado == null)
+            {
+                return StatusCode(500, "El vehículo se guardó correctamente, pero hubo un error al recuperar sus detalles.");
+            }
+            return Ok(vehiculoActualizado);
         }
     }
 }

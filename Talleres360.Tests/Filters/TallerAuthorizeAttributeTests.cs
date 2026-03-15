@@ -7,6 +7,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using System.Security.Claims;
 using Talleres360.Filters;
+using Talleres360.Interfaces;
 using Talleres360.Interfaces.Vehiculos;
 using Talleres360.Models;
 using Xunit;
@@ -18,7 +19,7 @@ namespace Talleres360.Tests.Filters
         [Theory]
         [InlineData(10, 1, 1, true, false, false)]  // Vehículo pertenece al taller → continua
         [InlineData(10, 1, 2, false, true, false)]  // Vehículo no pertenece → forbid
-        [InlineData(99, 1, null, false, true, false)] // Vehículo null → forbid
+        [InlineData(99, 1, null, false, true, false)] // Vehículo null (no pertenece) → forbid
         [InlineData(10, null, 1, false, true, false)] // Claim null → forbid
         [InlineData(10, 1, 1, true, false, true)] // Parametro distinto → continua sin llamar al repo
         [InlineData(10, 1, 1, false, false, false, true)] // Repo null → status 500
@@ -38,20 +39,20 @@ namespace Talleres360.Tests.Filters
                 var repoMock = new Mock<IVehiculoRepository>();
                 if (vehiculoTallerId.HasValue)
                 {
-                    repoMock.Setup(x => x.GetDetalleByIdAsync(vehiculoId))
-                        .ReturnsAsync(new VehiculoDetalle { Id = vehiculoId, TallerId = vehiculoTallerId.Value });
+                    repoMock.Setup(x => x.PerteneceATallerAsync(vehiculoId, claimTallerId ?? 0))
+                        .ReturnsAsync(claimTallerId == vehiculoTallerId.Value);
                 }
                 else
                 {
-                    repoMock.Setup(x => x.GetDetalleByIdAsync(vehiculoId))
-                        .ReturnsAsync((VehiculoDetalle?)null);
+                    repoMock.Setup(x => x.PerteneceATallerAsync(vehiculoId, It.IsAny<int>()))
+                        .ReturnsAsync(false);
                 }
                 repo = repoMock.Object;
             }
 
             var attribute = parametroDistinto
-                ? new TallerAuthorizeAttribute("otroId")
-                : new TallerAuthorizeAttribute();
+                ? new TallerAuthorizeAttribute<IVehiculoRepository>("otroId")
+                : new TallerAuthorizeAttribute<IVehiculoRepository>();
 
             var context = BuildContext(repo, claimTallerId, vehiculoId);
 
@@ -73,7 +74,10 @@ namespace Talleres360.Tests.Filters
             }
             else if (esperaForbid)
             {
-                Assert.IsType<ForbidResult>(context.Result);
+                if (claimTallerId == null)
+                    Assert.IsType<UnauthorizedResult>(context.Result);
+                else
+                    Assert.IsType<ForbidResult>(context.Result);
                 Assert.False(nextCalled);
             }
             else if (esperaContinuar)
@@ -86,7 +90,7 @@ namespace Talleres360.Tests.Filters
             if (parametroDistinto && repo != null)
             {
                 var mock = Mock.Get(repo);
-                mock.Verify(x => x.GetDetalleByIdAsync(It.IsAny<int>()), Times.Never);
+                mock.Verify(x => x.PerteneceATallerAsync(It.IsAny<int>(), It.IsAny<int>()), Times.Never);
             }
         }
 

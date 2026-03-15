@@ -4,15 +4,16 @@ namespace Talleres360.Extensions
 {
     public static class ClaimsPrincipalExtensions
     {
-        public static int GetTallerId(this ClaimsPrincipal user)
+        public static int? GetTallerId(this ClaimsPrincipal user)
         {
             var claim = user.FindFirst("TallerId")?.Value;
 
-            if (string.IsNullOrEmpty(claim))
-                throw new UnauthorizedAccessException("El usuario no tiene un TallerId asociado.");
+            if (!int.TryParse(claim, out var tallerId))
+                return null;
 
-            return int.Parse(claim);
+            return tallerId;
         }
+
 
         public static int GetUserId(this ClaimsPrincipal user)
         {

@@ -22,8 +22,8 @@ namespace Talleres360.Tests.Controllers
             MethodInfo? getByIdMethod = controllerType.GetMethod("GetById");
             MethodInfo? updateMethod = controllerType.GetMethod("Update");
 
-            var getByIdAttr = getByIdMethod?.GetCustomAttributes(typeof(TallerAuthorizeAttribute), false);
-            var updateAttr = updateMethod?.GetCustomAttributes(typeof(TallerAuthorizeAttribute), false);
+            var getByIdAttr = getByIdMethod?.GetCustomAttributes(typeof(TallerAuthorizeAttribute<IVehiculoRepository>), false);
+            var updateAttr = updateMethod?.GetCustomAttributes(typeof(TallerAuthorizeAttribute<IVehiculoRepository>), false);
 
             Assert.NotNull(getByIdAttr);
             Assert.Single(getByIdAttr!);

@@ -2,10 +2,11 @@
 using Talleres360.Dtos;
 using Talleres360.Dtos.Vehiculos;
 using Talleres360.Models;
+using Talleres360.Interfaces;
 
 namespace Talleres360.Interfaces.Vehiculos
 {
-    public interface IVehiculoRepository
+    public interface IVehiculoRepository : ITallerRecursoRepository
     {
     
         Task<Vehiculo?> GetByIdAsync(int id);
