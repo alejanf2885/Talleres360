@@ -30,18 +30,14 @@ namespace Talleres360.Services.Talleres
         public async Task<(bool Success, string Message)> RegistrarNuevoClienteSaaSAsync(
             string nombreTaller, string nombreAdmin, string email, string password)
         {
-            // Iniciamos transacción para asegurar que no se creen datos huérfanos
             using IDbContextTransaction transaction = await _context.Database.BeginTransactionAsync();
 
             try
             {
-                // A. Buscamos el plan PRO usando el Enum para el Reverse Trial
                 Plan? plan = await _planRepo.GetPlanPorNombreAsync(PlanTipo.PRO.ToString());
                 if (plan == null)
                     return (false, "Error: El plan PRO no está configurado en la base de datos.");
 
-                // B. Creamos el taller marcado como TRIAL
-                // Generamos CIF temporal único para evitar conflictos con la restricción UNIQUE
                 string cifTemporal = $"TEMP{DateTime.UtcNow:yyyyMMddHHmmss}{Guid.NewGuid():N}".Substring(0, 20);
 
                 Taller taller = new Taller
@@ -49,16 +45,15 @@ namespace Talleres360.Services.Talleres
                     Nombre = nombreTaller,
                     PlanId = plan.Id,
                     CIF = cifTemporal,
-                    TipoSuscripcion = "TRIAL", // Activamos los 30 días de prueba
+                    TipoSuscripcion = "TRIAL", 
                     Activo = true,
                     PerfilConfigurado = false,
-                    FechaCreacion = DateTime.UtcNow // Estándar UTC
+                    FechaCreacion = DateTime.UtcNow 
                 };
 
                 await _tallerRepo.AddAsync(taller);
                 await _context.SaveChangesAsync();
 
-                // C. Delegamos en UsuarioService la creación del administrador
                 var resultUsuario = await _usuarioService.CrearUsuarioAdminAsync(
                     taller.Id, nombreAdmin, email, password);
 
@@ -68,14 +63,12 @@ namespace Talleres360.Services.Talleres
                     return (false, resultUsuario.Message);
                 }
 
-                // E. Todo correcto, consolidamos cambios
                 await transaction.CommitAsync();
 
-                return (true, "Taller y administrador registrados con éxito.");
+                return (true, resultUsuario.Message);
             }
             catch (Exception ex)
             {
-                // Si algo falla, se deshace todo (Rollback automático del taller y usuario)
                 await transaction.RollbackAsync();
                 return (false, "Error crítico en el registro: " + ex.Message);
             }

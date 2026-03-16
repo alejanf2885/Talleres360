@@ -2,7 +2,9 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Http;
 using Microsoft.IdentityModel.Tokens;
+using Resend;
 using Scalar.AspNetCore;
 using System.Text;
 using System.Threading.RateLimiting;
@@ -10,6 +12,7 @@ using Talleres360.Data;
 using Talleres360.Interfaces.Auth;
 using Talleres360.Interfaces.Cache;
 using Talleres360.Interfaces.Clientes;
+using Talleres360.Interfaces.Emails;
 using Talleres360.Interfaces.Password;
 using Talleres360.Interfaces.Planes;
 using Talleres360.Interfaces.Seguridad;
@@ -30,6 +33,7 @@ using Talleres360.Services.Seguridad;
 using Talleres360.Services.Talleres;
 using Talleres360.Services.Usuarios;
 using Talleres360.Services.Vehiculos;
+using Resend;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -37,21 +41,34 @@ var builder = WebApplication.CreateBuilder(args);
 // 1. BASE DE DATOS
 // =========================================================
 string connectionString = builder.Configuration.GetConnectionString("SqlSaas")
-    ?? throw new InvalidOperationException("No se encontró la cadena de conexión 'SqlSaas'.");
+    ?? throw new InvalidOperationException("No se encontrÃ³ la cadena de conexiÃ³n 'SqlSaas'.");
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(connectionString));
 
 // =========================================================
-// 2. CACHÉ
+// 2. CACHÃ‰
 // =========================================================
 builder.Services.AddMemoryCache();
 builder.Services.AddScoped<ICacheService, CacheService>();
 
 // =========================================================
-// 3. INYECCIÓN DE DEPENDENCIAS (IoC)
+// 3. INYECCIÃ“N DE DEPENDENCIAS (IoC)
 // =========================================================
 builder.Services.AddHttpContextAccessor();
+
+
+// --- CONFIGURACIÃ“N DE RESEND  ---
+
+builder.Services.AddOptions();
+builder.Services.AddHttpClient<ResendClient>();
+builder.Services.Configure<ResendClientOptions>(o =>
+{
+    o.ApiToken = builder.Configuration["ResendSettings:ApiKey"] ?? "";
+});
+builder.Services.AddTransient<IResend, ResendClient>();
+builder.Services.AddScoped<IEmailService, ResendEmailService>();
+
 
 // Repositorios
 builder.Services.AddScoped<IUsuarioRepository, UsuarioRepository>();
@@ -69,7 +86,7 @@ builder.Services.AddScoped<IUserContextService, UserContextService>();
 builder.Services.AddScoped<IVehiculoService, VehiculoService>();
 
 
-// Seguridad y Gestión
+// Seguridad y GestiÃ³n
 builder.Services.AddScoped<ISuscripcionGuardService, SuscripcionGuardService>();
 builder.Services.AddScoped<ICustomerService, CustomerService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
@@ -77,8 +94,11 @@ builder.Services.AddScoped<IUsuarioService, UsuarioService>();
 builder.Services.AddScoped<IRegistroTallerService, RegistroTallerService>();
 builder.Services.AddScoped<IRefreshTokenService, RefreshTokenService>(); // NUEVO
 
+
+
+
 // =========================================================
-// 4. AUTENTICACIÓN JWT
+// 4. AUTENTICACIÃ“N JWT
 // =========================================================
 var jwtKey = builder.Configuration["Jwt:Key"] ?? "TuSuperClaveSecretaDeDesarrolloMuyLarga123456789!";
 var keyBytes = Encoding.UTF8.GetBytes(jwtKey);
@@ -113,7 +133,7 @@ builder.Services.AddCors(options =>
 });
 
 // =========================================================
-// 6. RATE LIMITER (Políticas de Seguridad)
+// 6. RATE LIMITER (PolÃ­ticas de Seguridad)
 // =========================================================
 builder.Services.AddRateLimiter(options =>
 {
@@ -142,9 +162,9 @@ builder.Services.AddRateLimiter(options =>
     options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
 });
 
-// =========================================================
+// ========================================
 // 7. CONTROLADORES Y OPENAPI
-// =========================================================
+// ========================================
 builder.Services.AddControllers();
 
 builder.Services.AddOpenApi(options =>
