@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
 using Talleres360.API.Controllers;
@@ -26,12 +27,19 @@ namespace Talleres360.Tests.Controllers
             _tokenServiceMock = new Mock<ITokenService>();
             _refreshTokenServiceMock = new Mock<IRefreshTokenService>();
 
+            var httpContext = new DefaultHttpContext();
             _controller = new AuthController(
                 _authServiceMock.Object,
                 _registroTallerServiceMock.Object,
                 _tokenServiceMock.Object,
                 _refreshTokenServiceMock.Object
-            );
+            )
+            {
+                ControllerContext = new ControllerContext
+                {
+                    HttpContext = httpContext
+                }
+            };
         }
 
         [Fact]
@@ -59,13 +67,10 @@ namespace Talleres360.Tests.Controllers
             
             // Usando reflection o dinámico para obtener las propiedades del objeto anónimo
             var tokenProperty = value.GetType().GetProperty("Token");
-            var refreshTokenProperty = value.GetType().GetProperty("RefreshToken");
 
             Assert.NotNull(tokenProperty);
-            Assert.NotNull(refreshTokenProperty);
 
             Assert.Equal("jwt-token-valido", tokenProperty.GetValue(value, null));
-            Assert.Equal("refresh-token-generado", refreshTokenProperty.GetValue(value, null));
         }
 
         [Fact]
@@ -84,14 +89,16 @@ namespace Talleres360.Tests.Controllers
             var unauthorizedResult = Assert.IsType<UnauthorizedObjectResult>(result);
             var value = unauthorizedResult.Value;
             var errorProp = value.GetType().GetProperty("Error");
-            Assert.Equal("Credenciales incorrectas o cuenta inactiva.", errorProp.GetValue(value, null));
+            Assert.Equal("Credenciales incorrectas.", errorProp.GetValue(value, null));
         }
 
         [Fact]
         public async Task Refresh_TokenValido_DebeRetornarNuevosTokens()
         {
             // Arrange
-            var request = new RefreshTokenRequest { RefreshToken = "token-valido" };
+            var refreshTokenCookie = "token-valido";
+            _controller.ControllerContext.HttpContext.Request.Headers["Cookie"] = $"refreshToken={refreshTokenCookie}";
+            
             var refreshResult = new TokenRefreshResult
             {
                 Exito = true,
@@ -99,39 +106,39 @@ namespace Talleres360.Tests.Controllers
                 NuevoRefreshToken = "nuevo-refresh"
             };
 
-            _refreshTokenServiceMock.Setup(x => x.ValidarYRenovarAsync(request.RefreshToken))
+            _refreshTokenServiceMock.Setup(x => x.ValidarYRenovarAsync(refreshTokenCookie))
                 .ReturnsAsync(refreshResult);
 
             // Act
-            var result = await _controller.Refresh(request);
+            var result = await _controller.Refresh();
 
             // Assert
             var okResult = Assert.IsType<OkObjectResult>(result);
             var value = okResult.Value;
 
             var tokenProperty = value.GetType().GetProperty("Token");
-            var refreshTokenProperty = value.GetType().GetProperty("RefreshToken");
-
+            Assert.NotNull(tokenProperty);
             Assert.Equal("nuevo-jwt", tokenProperty.GetValue(value, null));
-            Assert.Equal("nuevo-refresh", refreshTokenProperty.GetValue(value, null));
         }
 
         [Fact]
         public async Task Refresh_TokenInvalido_DebeRetornarUnauthorized()
         {
             // Arrange
-            var request = new RefreshTokenRequest { RefreshToken = "token-invalido" };
+            var refreshTokenCookie = "token-invalido";
+            _controller.ControllerContext.HttpContext.Request.Headers["Cookie"] = $"refreshToken={refreshTokenCookie}";
+            
             var refreshResult = new TokenRefreshResult
             {
                 Exito = false,
                 MensajeError = "Refresh token no válido."
             };
 
-            _refreshTokenServiceMock.Setup(x => x.ValidarYRenovarAsync(request.RefreshToken))
+            _refreshTokenServiceMock.Setup(x => x.ValidarYRenovarAsync(refreshTokenCookie))
                 .ReturnsAsync(refreshResult);
 
             // Act
-            var result = await _controller.Refresh(request);
+            var result = await _controller.Refresh();
 
             // Assert
             var unauthorizedResult = Assert.IsType<UnauthorizedObjectResult>(result);
@@ -142,20 +149,19 @@ namespace Talleres360.Tests.Controllers
         }
 
         [Fact]
-        public async Task Refresh_SinToken_DebeRetornarBadRequest()
+        public async Task Refresh_SinToken_DebeRetornarUnauthorized()
         {
-            // Arrange
-            var request = new RefreshTokenRequest { RefreshToken = "" };
+            // Arrange (no cookie)
 
             // Act
-            var result = await _controller.Refresh(request);
+            var result = await _controller.Refresh();
 
             // Assert
-            var badRequest = Assert.IsType<BadRequestObjectResult>(result);
-            var value = badRequest.Value;
+            var unauthorizedResult = Assert.IsType<UnauthorizedObjectResult>(result);
+            var value = unauthorizedResult.Value;
             var errorProp = value.GetType().GetProperty("Error");
 
-            Assert.Equal("El Refresh Token es obligatorio.", errorProp.GetValue(value, null));
+            Assert.Equal("No hay token de refresco.", errorProp.GetValue(value, null));
             _refreshTokenServiceMock.Verify(x => x.ValidarYRenovarAsync(It.IsAny<string>()), Times.Never);
         }
 
@@ -163,10 +169,11 @@ namespace Talleres360.Tests.Controllers
         public async Task Logout_ConToken_DebeLlamarRevocarYRetornarOk()
         {
             // Arrange
-            var request = new LogoutRequest { RefreshToken = "token-a-revocar" };
-
+            var refreshTokenCookie = "token-a-revocar";
+            _controller.ControllerContext.HttpContext.Request.Headers["Cookie"] = $"refreshToken={refreshTokenCookie}";
+            
             // Act
-            var result = await _controller.Logout(request);
+            var result = await _controller.Logout();
 
             // Assert
             _refreshTokenServiceMock.Verify(x => x.RevocarRefreshTokenAsync("token-a-revocar"), Times.Once);
@@ -180,11 +187,10 @@ namespace Talleres360.Tests.Controllers
         [Fact]
         public async Task Logout_SinToken_NoDebeLlamarRevocarYRetornarOk()
         {
-            // Arrange
-            var request = new LogoutRequest { RefreshToken = "" };
+            // Arrange (no cookie)
 
             // Act
-            var result = await _controller.Logout(request);
+            var result = await _controller.Logout();
 
             // Assert
             _refreshTokenServiceMock.Verify(x => x.RevocarRefreshTokenAsync(It.IsAny<string>()), Times.Never);
