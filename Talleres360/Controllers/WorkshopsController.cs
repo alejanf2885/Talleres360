@@ -27,7 +27,6 @@ namespace Talleres360.API.Controllers
             _userContext = userContext;
         }
 
-        // GET: api/v1/workshops/my-workshop
         [HttpGet("my-workshop")]
         public async Task<IActionResult> GetMyWorkshop()
         {
@@ -51,13 +50,14 @@ namespace Talleres360.API.Controllers
                 Localidad = taller.Localidad,
                 Telefono = taller.Telefono,
                 PerfilConfigurado = taller.PerfilConfigurado,
-                TipoSuscripcion = taller.TipoSuscripcion
+                TipoSuscripcion = taller.TipoSuscripcion,
+                Logo = taller.Logo
+
             };
 
             return Ok(dto);
         }
 
-        // PUT: api/v1/workshops/config
         [HttpPut("config")]
         public async Task<IActionResult> ConfigurarTaller([FromBody] ConfigurarTallerRequest request)
         {
@@ -71,7 +71,8 @@ namespace Talleres360.API.Controllers
                 request.CIF,
                 request.Direccion,
                 request.Localidad,
-                request.Telefono
+                request.Telefono,
+                request.Logo
             );
 
             if (!success)

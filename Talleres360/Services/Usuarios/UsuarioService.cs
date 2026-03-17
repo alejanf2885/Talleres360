@@ -2,6 +2,7 @@
 using Talleres360.Enums;
 using Talleres360.Interfaces.Emails;
 using Talleres360.Interfaces.Password;
+using Talleres360.Interfaces.Seguridad;
 using Talleres360.Interfaces.Usuarios;
 using Talleres360.Models;
 
@@ -12,12 +13,18 @@ namespace Talleres360.Services.Usuarios
         private readonly IUsuarioRepository _userRepo;
         private readonly IPasswordService _passwordService;
         private readonly IEmailService _emailService;
+        private readonly IVerificacionService _verificacionService;
 
-        public UsuarioService(IUsuarioRepository userRepo, IPasswordService passwordService, IEmailService emailService)
+        public UsuarioService(
+            IUsuarioRepository userRepo,
+            IPasswordService passwordService,
+            IEmailService emailService,
+            IVerificacionService verificacionService)
         {
             _userRepo = userRepo;
             _passwordService = passwordService;
             _emailService = emailService;
+            _verificacionService = verificacionService;
         }
 
         public async Task<Usuario> GetByEmailAsync(string email)
@@ -36,7 +43,7 @@ namespace Talleres360.Services.Usuarios
         }
 
         public async Task<(bool Success, string Message, Usuario? Usuario)> CrearUsuarioAdminAsync(
-     int tallerId, string nombre, string email, string password)
+     int tallerId, string nombre, string email, string password, string? rutaImagen = null)
         {
             if (await _userRepo.ExisteEmailAsync(email))
                 return (false, "Ese correo ya está registrado.", null);
@@ -49,7 +56,8 @@ namespace Talleres360.Services.Usuarios
                 Rol = RolesUsuario.ADMIN,
                 FechaCreacion = DateTime.UtcNow,
                 SecurityStamp = Guid.NewGuid().ToString(),
-                Activo = false
+                Activo = false,
+                Imagen = rutaImagen
             };
 
             await _userRepo.AddAsync(usuario);
@@ -65,8 +73,9 @@ namespace Talleres360.Services.Usuarios
             await _userRepo.AddCredencialAsync(credencial);
             await _userRepo.SaveChangesAsync();
 
-            string tokenPrueba = Guid.NewGuid().ToString();
-            string link = $"https://localhost:4200/auth/verify-email?token={tokenPrueba}";
+            string tokenReal = await _verificacionService.GenerarTokenRegistroAsync(usuario.Id);
+
+            string link = $"https://localhost:4200/auth/verify-email?token={tokenReal}";
 
             string filePath = Path.Combine(AppContext.BaseDirectory, "Templates", "EmailBienvenida.html");
 
@@ -81,10 +90,14 @@ namespace Talleres360.Services.Usuarios
                 .Replace("{{Nombre}}", nombre)
                 .Replace("{{Link}}", link);
 
-
-            await _emailService.EnviarEmailAsync("alumno.648000@ies-azarquiel.es", "¡Bienvenido a Talleres360!", cuerpoHtml);
+            await _emailService.EnviarEmailAsync(email, "¡Bienvenido a Talleres360!", cuerpoHtml);
 
             return (true, "¡Todo listo! 🎉 Tu cuenta ha sido creada. Por seguridad, te hemos enviado un enlace de activación a tu email. ¡Nos vemos dentro!", usuario);
+        }
+
+        public async Task ActivarUsuarioAsync(int usuarioId)
+        {
+            await _userRepo.ActivarUsuarioAsync(usuarioId);
         }
     }
 }

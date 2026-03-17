@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using System.Security.Claims;
-using Talleres360.Interfaces;
+using Talleres360.Interfaces.Talleres;
 
 namespace Talleres360.Filters
 {

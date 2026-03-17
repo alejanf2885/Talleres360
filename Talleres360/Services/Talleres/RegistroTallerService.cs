@@ -1,6 +1,7 @@
-using Microsoft.EntityFrameworkCore.Storage;
+Ôªøusing Microsoft.EntityFrameworkCore.Storage;
 using Talleres360.Data;
 using Talleres360.Enums;
+using Talleres360.Interfaces.Imagenes;
 using Talleres360.Interfaces.Planes;
 using Talleres360.Interfaces.Talleres;
 using Talleres360.Interfaces.Usuarios;
@@ -13,22 +14,25 @@ namespace Talleres360.Services.Talleres
         private readonly ITallerRepository _tallerRepo;
         private readonly IPlanRepository _planRepo;
         private readonly IUsuarioService _usuarioService;
+        private readonly IImagenService _imagenService;
         private readonly ApplicationDbContext _context;
 
         public RegistroTallerService(
             ITallerRepository tallerRepo,
             IPlanRepository planRepo,
             IUsuarioService usuarioService,
+                IImagenService imagenService,
             ApplicationDbContext context)
         {
             _tallerRepo = tallerRepo;
             _planRepo = planRepo;
             _usuarioService = usuarioService;
+            _imagenService = imagenService;
             _context = context;
         }
 
         public async Task<(bool Success, string Message)> RegistrarNuevoClienteSaaSAsync(
-            string nombreTaller, string nombreAdmin, string email, string password)
+      string nombreTaller, string nombreAdmin, string email, string password, string? imagenBase64) 
         {
             using IDbContextTransaction transaction = await _context.Database.BeginTransactionAsync();
 
@@ -36,7 +40,7 @@ namespace Talleres360.Services.Talleres
             {
                 Plan? plan = await _planRepo.GetPlanPorNombreAsync(PlanTipo.PRO.ToString());
                 if (plan == null)
-                    return (false, "Error: El plan PRO no est· configurado en la base de datos.");
+                    return (false, "Error: El plan PRO no est√° configurado en la base de datos.");
 
                 string cifTemporal = $"TEMP{DateTime.UtcNow:yyyyMMddHHmmss}{Guid.NewGuid():N}".Substring(0, 20);
 
@@ -45,17 +49,31 @@ namespace Talleres360.Services.Talleres
                     Nombre = nombreTaller,
                     PlanId = plan.Id,
                     CIF = cifTemporal,
-                    TipoSuscripcion = "TRIAL", 
+                    TipoSuscripcion = "TRIAL",
                     Activo = true,
                     PerfilConfigurado = false,
-                    FechaCreacion = DateTime.UtcNow 
+                    FechaCreacion = DateTime.UtcNow
                 };
 
                 await _tallerRepo.AddAsync(taller);
                 await _context.SaveChangesAsync();
 
+                string rutaImagen = null;
+
+                if (!string.IsNullOrWhiteSpace(imagenBase64))
+                {
+                    var resultImagen = await _imagenService.SubirImagenBase64Async(imagenBase64, CarpetaDestino.Usuarios);
+
+                    if (string.IsNullOrEmpty(resultImagen))
+                    {
+                        await transaction.RollbackAsync();
+                        return (false, "Error al guardar la imagen");
+                    }
+                    rutaImagen = resultImagen;
+                }
+
                 var resultUsuario = await _usuarioService.CrearUsuarioAdminAsync(
-                    taller.Id, nombreAdmin, email, password);
+                    taller.Id, nombreAdmin, email, password, rutaImagen);
 
                 if (!resultUsuario.Success)
                 {
@@ -70,7 +88,7 @@ namespace Talleres360.Services.Talleres
             catch (Exception ex)
             {
                 await transaction.RollbackAsync();
-                return (false, "Error crÌtico en el registro: " + ex.Message);
+                return (false, "Error cr√≠tico en el registro: " + ex.Message);
             }
         }
     }

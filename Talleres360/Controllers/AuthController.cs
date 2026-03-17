@@ -2,12 +2,16 @@
 using Microsoft.AspNetCore.RateLimiting;
 using Talleres360.Dtos;
 using Talleres360.Dtos.Auth;
-using Talleres360.Interfaces.Auth; 
+using Talleres360.Dtos.Responses;
+using Talleres360.Enums.Auth;
+using Talleres360.Interfaces.Auth;
 using Talleres360.Interfaces.Seguridad;
-using Talleres360.Interfaces.Talleres; 
+using Talleres360.Interfaces.Talleres;
 using Talleres360.Models;
+using Talleres360.Extensions;
+using Talleres360.Dtos.Seguridad; // ✅ Asegúrate de importar el namespace donde creaste el Helper
 
-namespace Talleres360.API.Controllers
+namespace Talleres360.Controllers
 {
     [Route("api/v1/[controller]")]
     [ApiController]
@@ -38,10 +42,16 @@ namespace Talleres360.API.Controllers
                 request.NombreTaller,
                 request.NombreAdmin,
                 request.Email,
-                request.Password);
+                request.Password,
+                request.Imagen);
 
-            if (!success) return BadRequest(new { Error = message });
-
+            if (!success)
+            {
+                return BadRequest(new ApiErrorResponse(
+                    codigo: AuthErrorCode.REGISTRO_FALLIDO.ToString(),
+                    mensaje: message
+                ));
+            }
             return Ok(new { Mensaje = message });
         }
 
@@ -53,21 +63,25 @@ namespace Talleres360.API.Controllers
 
             if (usuario == null)
             {
-                return Unauthorized(new { Error = "Credenciales incorrectas." });
+                return Unauthorized(new ApiErrorResponse(
+                    codigo: AuthErrorCode.CREDENCIALES_INCORRECTAS.ToString(),
+                    mensaje: "El correo o la contraseña no son correctos."
+                ));
+            }
+
+            if (!usuario.Activo)
+            {
+                return StatusCode(StatusCodes.Status403Forbidden, new ApiErrorResponse(
+                    codigo: AuthErrorCode.CUENTA_INACTIVA.ToString(),
+                    mensaje: "Tu cuenta aún no está verificada. Revisa tu correo electrónico.",
+                    detalles: new { Email = usuario.Email }
+                ));
             }
 
             string jwtToken = _tokenService.GenerarJwtToken(usuario);
             string refreshToken = await _refreshTokenService.CrearRefreshTokenAsync(usuario.Id);
 
-            CookieOptions cookieOptions = new CookieOptions
-            {
-                HttpOnly = true, 
-                Secure = true,   
-                SameSite = SameSiteMode.Strict, 
-                Expires = DateTime.UtcNow.AddDays(7)
-            };
-
-            Response.Cookies.Append("refreshToken", refreshToken, cookieOptions);
+            Response.AppendRefreshTokenCookie(refreshToken);
 
             return Ok(new
             {
@@ -91,24 +105,23 @@ namespace Talleres360.API.Controllers
 
             if (string.IsNullOrWhiteSpace(refreshToken))
             {
-                return Unauthorized(new { Error = "No hay token de refresco." });
+                return Unauthorized(new ApiErrorResponse(
+                    codigo: AuthErrorCode.REFRESH_TOKEN_INVALIDO.ToString(),
+                    mensaje: "No hay token de refresco."
+                ));
             }
 
-            var resultado = await _refreshTokenService.ValidarYRenovarAsync(refreshToken);
+            TokenRefreshResult resultado = await _refreshTokenService.ValidarYRenovarAsync(refreshToken);
 
             if (!resultado.Exito)
             {
-                return Unauthorized(new { Error = resultado.MensajeError });
+                return Unauthorized(new ApiErrorResponse(
+                    codigo: AuthErrorCode.REFRESH_TOKEN_EXPIRADO.ToString(),
+                    mensaje: resultado.MensajeError ?? "La sesión ha expirado."
+                ));
             }
 
-            var cookieOptions = new CookieOptions
-            {
-                HttpOnly = true,
-                Secure = true,
-                SameSite = SameSiteMode.Strict,
-                Expires = DateTime.UtcNow.AddDays(7)
-            };
-            Response.Cookies.Append("refreshToken", resultado.NuevoRefreshToken, cookieOptions);
+            Response.AppendRefreshTokenCookie(resultado.NuevoRefreshToken);
 
             return Ok(new { Token = resultado.NuevoJwtToken });
         }

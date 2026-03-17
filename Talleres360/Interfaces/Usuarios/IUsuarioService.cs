@@ -7,7 +7,8 @@ namespace Talleres360.Interfaces.Usuarios
         Task<Usuario> GetByEmailAsync(string email);
         Task<Usuario?> GetByIdAsync(int id);
         Task ActualizarUltimoAccesoAsync(int usuarioId);
-        Task<(bool Success, string Message, Usuario? Usuario)> CrearUsuarioAdminAsync(int tallerId, string nombre, string email, string password);
+        Task ActivarUsuarioAsync(int usuarioId);
+        Task<(bool Success, string Message, Usuario? Usuario)> CrearUsuarioAdminAsync(int tallerId, string nombre, string email, string password, string? rutaImagen = null);
     }
 }
 

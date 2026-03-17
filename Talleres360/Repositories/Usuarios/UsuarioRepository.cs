@@ -68,5 +68,16 @@ namespace Talleres360.Repositories.Usuarios
         {
             return await _context.Usuarios.FirstOrDefaultAsync(u => u.Id == id);
         }
+
+        public async Task ActivarUsuarioAsync(int usuarioId)
+        {
+            Usuario? usuario = await _context.Usuarios.FirstOrDefaultAsync(u => u.Id == usuarioId);
+
+            if (usuario != null)
+            {
+                usuario.Activo = true;
+                await _context.SaveChangesAsync();
+            }
+        }
     }
 }
