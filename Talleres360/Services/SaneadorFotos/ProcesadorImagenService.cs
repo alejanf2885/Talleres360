@@ -6,39 +6,33 @@ namespace Talleres360.Services.SaneadorFotos
 {
     public class ProcesadorImagenService : IProcesadorImagenService
     {
-        public async Task<Stream> SanearYProcesarAsync(IFormFile archivoImagen, int tamano = 300)
+        public async Task<Stream> SanearYProcesarStreamAsync(Stream inputStream, int tamano = 300)
         {
-            if (archivoImagen == null || archivoImagen.Length == 0)
+            if (inputStream == null || inputStream.Length == 0)
             {
-                throw new ArgumentException("El archivo de imagen no puede estar vacío.", nameof(archivoImagen));
+                throw new ArgumentException("El stream de la imagen no puede estar vacío.");
             }
 
             var outputStream = new MemoryStream();
 
             try
             {
-
-                // Image.LoadAsync intenta interpretar los píxeles 
-                //  Si el archivo es falso o corrupto, lanzará una excepcion
-                using (var inputStream = archivoImagen.OpenReadStream())
+                // Image.LoadAsync lee directamente de la memoria
+                using (var image = await Image.LoadAsync(inputStream))
                 {
-                    using (var image = await Image.LoadAsync(inputStream))
+                    image.Mutate(x => x.Resize(new ResizeOptions
                     {
-                        image.Mutate(x => x.Resize(new ResizeOptions
-                        {
-                            Size = new Size(tamano, tamano),
-                            Mode = ResizeMode.Crop
-                        }));
+                        Size = new Size(tamano, tamano),
+                        Mode = ResizeMode.Crop
+                    }));
 
-                        //Generamos el archivo nuevo y limpio en WEBP
-                        await image.SaveAsWebpAsync(outputStream);
-                    }
+                    // Generamos el archivo nuevo y limpio en WEBP
+                    await image.SaveAsWebpAsync(outputStream);
                 }
             }
-            
             catch (UnknownImageFormatException)
             {
-                throw new InvalidOperationException("El archivo subido no es una imagen válida o está corrupto.");
+                throw new InvalidOperationException("El texto Base64 enviado no es una imagen válida o está corrupto.");
             }
 
             outputStream.Position = 0;

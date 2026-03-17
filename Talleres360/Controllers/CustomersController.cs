@@ -25,7 +25,6 @@ namespace Talleres360.API.Controllers
             _userContext = userContext;
         }
 
-        // POST: api/v1/customers
         [HttpPost]
         [RequiereSuscripcionActiva]
         public async Task<IActionResult> Create([FromBody] CrearClienteRequest request)
@@ -44,7 +43,6 @@ namespace Talleres360.API.Controllers
             return CreatedAtAction(nameof(GetById), new { id = resultado.Cliente?.Id }, resultado.Cliente);
         }
 
-        // GET: api/v1/customers
         [HttpGet]
         public async Task<IActionResult> GetAll([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10, [FromQuery] string? buscar = null)
         {
@@ -61,7 +59,6 @@ namespace Talleres360.API.Controllers
             return Ok(resultado);
         }
 
-        // POST: api/v1/customers/search
         [HttpPost("search")]
         public async Task<IActionResult> Search([FromBody] BusquedaClienteRequest filtros, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {
@@ -78,7 +75,6 @@ namespace Talleres360.API.Controllers
             return Ok(resultado);
         }
 
-        // GET: api/v1/customers/5
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(int id)
         {
@@ -95,7 +91,6 @@ namespace Talleres360.API.Controllers
 
 
 
-        // PUT: api/v1/customers/5
         [HttpPut("{id}")]
         [RequiereSuscripcionActiva]
         public async Task<IActionResult> Update(int id, [FromBody] ActualizarClienteRequest request)
@@ -111,7 +106,6 @@ namespace Talleres360.API.Controllers
             return Ok(new { mensaje = resultado.Message, cliente = resultado.Cliente });
         }
 
-        // DELETE: api/v1/customers/5
         [HttpDelete("{id}")]
         [RequiereSuscripcionActiva]
         public async Task<IActionResult> Delete(int id)
@@ -127,7 +121,6 @@ namespace Talleres360.API.Controllers
             return Ok(new { mensaje = resultado.Message });
         }
 
-        // GET: api/v1/customers/stats
         [HttpGet("stats")]
         public async Task<IActionResult> GetStats()
         {

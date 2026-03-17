@@ -5,7 +5,7 @@ using Talleres360.Interfaces.Emails;
 public class ResendEmailService : IEmailService
 {
     private readonly Resend.IResend _resend;
-        private readonly IConfiguration _config;
+    private readonly IConfiguration _config;
 
     public ResendEmailService(Resend.IResend resend, IConfiguration config)
     {
@@ -20,12 +20,28 @@ public class ResendEmailService : IEmailService
 
         var message = new EmailMessage
         {
-            From = $"{remitente} <{emailTecnico}>",
-            To = destinatario,
+            From = $"{remitente} <{emailTecnico}>", 
+            To = "alumno.648000@ies-azarquiel.es", //Deberia ser destinatario pero Resend no permite dominios no verificados en pruebas
             Subject = asunto,
             HtmlBody = mensajeHtml
         };
 
         await _resend.EmailSendAsync(message);
+    }
+
+    public async Task EnviarEmailBienvenidaAsync(string email, string nombre, string linkVerificacion)
+    {
+        string filePath = Path.Combine(AppContext.BaseDirectory, "Templates", "EmailBienvenida.html");
+
+        if (!File.Exists(filePath))
+            throw new FileNotFoundException("No se encontró la plantilla de email.");
+
+        string template = await File.ReadAllTextAsync(filePath);
+
+        string cuerpoHtml = template
+            .Replace("{{Nombre}}", nombre)
+            .Replace("{{Link}}", linkVerificacion);
+
+        await EnviarEmailAsync(email, "¡Bienvenido a Talleres360!", cuerpoHtml);
     }
 }

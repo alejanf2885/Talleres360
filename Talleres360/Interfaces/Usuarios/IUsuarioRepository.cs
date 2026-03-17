@@ -7,6 +7,7 @@ namespace Talleres360.Interfaces.Usuarios
         Task<Usuario> GetByEmailAsync(string email);
         Task AddAsync(Usuario usuario);
         Task AddCredencialAsync(Credencial credencial);
+        Task ActivarUsuarioAsync(int usuarioId);
         Task SaveChangesAsync();
         Task<bool> ExisteEmailAsync(string email);
         Task<Credencial?> GetCredencialLocalByUsuarioIdAsync(int usuarioId);

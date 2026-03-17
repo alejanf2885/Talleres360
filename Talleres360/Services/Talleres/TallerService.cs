@@ -16,9 +16,8 @@ namespace Talleres360.Services.Talleres
             _imagenService = imagenService;
         }
 
-        public async Task<bool> ConfigurarPerfilAsync(int tallerId, string cif, string direccion, string localidad, string telefono, IFormFile logo)
+        public async Task<bool> ConfigurarPerfilAsync(int tallerId, string cif, string direccion, string localidad, string telefono, string? logoBase64)
         {
-            // 1. Buscamos la entidad original en la DB
             Taller? taller = await _tallerRepo.GetByIdAsync(tallerId);
 
             if (taller == null)
@@ -26,21 +25,19 @@ namespace Talleres360.Services.Talleres
                 return false;
             }
 
-            // 2. Actualizamos los campos con la información de configuración
             taller.CIF = cif;
             taller.Direccion = direccion;
             taller.Localidad = localidad;
             taller.Telefono = telefono;
 
-            // 3. Marcamos el perfil como completado
             taller.PerfilConfigurado = true;
-            taller.FechaActualizacion = DateTime.UtcNow; // Usamos UTC para evitar líos de zonas horarias
+            taller.FechaActualizacion = DateTime.UtcNow;
 
-            if (logo != null)
+            if (!string.IsNullOrWhiteSpace(logoBase64))
             {
-                taller.Logo = await _imagenService.SubirImagenAsync(logo, CarpetaDestino.Talleres);
+                taller.Logo = await _imagenService.SubirImagenBase64Async(logoBase64, CarpetaDestino.Talleres);
             }
-            // 4. Persistimos los cambios en la base de datos
+
             await _tallerRepo.UpdateAsync(taller);
 
             return true;
@@ -54,7 +51,7 @@ namespace Talleres360.Services.Talleres
                 PlanId = planId,
                 Activo = true,
                 PerfilConfigurado = false,
-                FechaCreacion = DateTime.Now 
+                FechaCreacion = DateTime.Now
             };
 
             await _tallerRepo.AddAsync(taller);

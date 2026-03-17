@@ -27,7 +27,6 @@ namespace Talleres360.API.Controllers
             _userContext = userContext;
         }
 
-        // GET: api/v1/workshops/my-workshop
         [HttpGet("my-workshop")]
         public async Task<IActionResult> GetMyWorkshop()
         {
@@ -59,9 +58,8 @@ namespace Talleres360.API.Controllers
             return Ok(dto);
         }
 
-        // PUT: api/v1/workshops/config
         [HttpPut("config")]
-        public async Task<IActionResult> ConfigurarTaller([FromForm] ConfigurarTallerRequest request)
+        public async Task<IActionResult> ConfigurarTaller([FromBody] ConfigurarTallerRequest request)
         {
             int? tallerId = _userContext.GetTallerId();
 

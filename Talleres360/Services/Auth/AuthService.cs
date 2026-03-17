@@ -23,7 +23,6 @@ namespace Talleres360.Services.Auth
             if (usuario == null || !usuario.Activo || usuario.Eliminado)
                 return null;
 
-            // Buscamos la credencial local
             Credencial? credencial = await _userRepo.GetCredencialLocalByUsuarioIdAsync(usuario.Id);
 
             if (credencial != null && _passwordService.VerifyPassword(password, credencial.PasswordHash))

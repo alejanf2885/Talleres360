@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Http;
@@ -9,7 +10,10 @@ using Resend;
 using Scalar.AspNetCore;
 using System.Text;
 using System.Threading.RateLimiting;
+using Talleres360.Configuration;
 using Talleres360.Data;
+using Talleres360.Dtos.Responses;
+using Talleres360.Enums.Auth;
 using Talleres360.Interfaces.Archivos;
 using Talleres360.Interfaces.Auth;
 using Talleres360.Interfaces.Cache;
@@ -27,6 +31,7 @@ using Talleres360.Interfaces.Vehiculos;
 using Talleres360.Repositories;
 using Talleres360.Repositories.Clientes;
 using Talleres360.Repositories.Planes;
+using Talleres360.Repositories.Seguridad;
 using Talleres360.Repositories.Talleres;
 using Talleres360.Repositories.Usuarios;
 using Talleres360.Repositories.Vehiculos;
@@ -85,6 +90,8 @@ builder.Services.AddScoped<IPlanRepository, PlanRepository>();
 builder.Services.AddScoped<ICustomerRepository, CustomerRepository>();
 builder.Services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
 builder.Services.AddScoped<IVehiculoRepository, VehiculoRepository>();
+builder.Services.AddScoped<IVerificacionRepository, VerificacionRepository>();
+
 
 // Servicios Core
 builder.Services.AddSingleton<IPasswordService, BcryptPasswordService>();
@@ -104,7 +111,12 @@ builder.Services.AddScoped<ICustomerService, CustomerService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IUsuarioService, UsuarioService>();
 builder.Services.AddScoped<IRegistroTallerService, RegistroTallerService>();
-builder.Services.AddScoped<IRefreshTokenService, RefreshTokenService>(); // NUEVO
+builder.Services.AddScoped<IRefreshTokenService, RefreshTokenService>();
+builder.Services.AddScoped<IVerificacionService, VerificacionService>();
+
+// Configuracion 
+builder.Services.Configure<UrlSettings>(builder.Configuration.GetSection("AppSettings"));
+
 
 
 
@@ -170,6 +182,27 @@ builder.Services.AddRateLimiter(options =>
             QueueLimit = 0
         });
     });
+    options.AddPolicy("EmailStrict", httpContext =>
+    {
+        var ip = httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown";
+        return RateLimitPartition.GetFixedWindowLimiter(ip, _ => new FixedWindowRateLimiterOptions
+        {
+            PermitLimit = 2,           
+            Window = TimeSpan.FromMinutes(1), 
+            QueueLimit = 0            
+        });
+    });
+
+    options.AddPolicy("VerifyStrict", httpContext =>
+    {
+        var ip = httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown";
+        return RateLimitPartition.GetFixedWindowLimiter(ip, _ => new FixedWindowRateLimiterOptions
+        {
+            PermitLimit = 5,
+            Window = TimeSpan.FromMinutes(1),
+            QueueLimit = 0
+        });
+    });
 
     options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
 });
@@ -177,8 +210,28 @@ builder.Services.AddRateLimiter(options =>
 // ========================================
 // 7. CONTROLADORES Y OPENAPI
 // ========================================
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    .ConfigureApiBehaviorOptions(options =>
+    {
+        options.InvalidModelStateResponseFactory = context =>
+        {
+            var errores = context.ModelState
+                .Where(e => e.Value?.Errors.Count > 0)
+                .Select(e => new
+                {
+                    Campo = e.Key,
+                    Error = e.Value?.Errors.First().ErrorMessage
+                }).ToList();
 
+            var response = new ApiErrorResponse(
+                codigo: AuthErrorCode.DATOS_INVALIDOS.ToString(),
+                mensaje: "Existen errores de validación en los datos enviados.",
+                detalles: errores
+            );
+
+            return new BadRequestObjectResult(response);
+        };
+    });
 builder.Services.AddOpenApi(options =>
 {
     options.AddDocumentTransformer((document, context, cancellationToken) =>

@@ -8,46 +8,56 @@ namespace Talleres360.Services.Imagenes
 {
     public class ImagenService : IImagenService
     {
-        private INombreArchivoService _nombreService;
-        private IProcesadorImagenService _procesador;
-        private IFileStorageService _storage;
+        private readonly INombreArchivoService _nombreService;
+        private readonly IProcesadorImagenService _procesador;
+        private readonly IFileStorageService _storage;
 
-        public ImagenService
-            (INombreArchivoService nombreService,
+        public ImagenService(
+            INombreArchivoService nombreService,
             IProcesadorImagenService procesador,
             IFileStorageService storage)
         {
-            this._nombreService = nombreService;
-            this._procesador = procesador;
-            this._storage = storage;
+            _nombreService = nombreService;
+            _procesador = procesador;
+            _storage = storage;
         }
 
         public async Task BorrarImagenAsync(string rutaRelativa)
         {
-            await this._storage.BorrarArchivoAsync(rutaRelativa);
+            await _storage.BorrarArchivoAsync(rutaRelativa);
         }
 
-        public async Task<string> SubirImagenAsync(IFormFile archivo, CarpetaDestino carpeta, int tamano = 500)
+        public async Task<string> SubirImagenBase64Async(string base64String, CarpetaDestino carpeta, int tamano = 500)
         {
+            if (string.IsNullOrWhiteSpace(base64String))
+                return string.Empty;
 
-            //Quitar la extension del nombre del archivo
-            string nombreSinExtension = Path.GetFileNameWithoutExtension(archivo.FileName);
-
-            // 1 Generar nombre unico 
-            string nombreUnico = this._nombreService.GenerarNombreUnico(
-                nombreOriginal: archivo.FileName,
-                extensionDeseada: ".webp"
-            );
-            // 2 Procesamiento de la foto
-
-            using (var streamLimpio = await this._procesador.SanearYProcesarAsync(archivo, tamano))
+            string cleanBase64 = base64String;
+            if (base64String.Contains(","))
             {
-                // 3 Guardar
-                return await _storage.GuardarArchivoAsync(streamLimpio, nombreUnico, carpeta);
+                cleanBase64 = base64String.Substring(base64String.IndexOf(",") + 1);
             }
 
+            try
+            {
+                byte[] imageBytes = Convert.FromBase64String(cleanBase64);
 
+                using var inputStream = new MemoryStream(imageBytes);
 
+                string nombreUnico = _nombreService.GenerarNombreUnico(
+                    nombreOriginal: "img_upload",
+                    extensionDeseada: ".webp"
+                );
+
+                using (var streamLimpio = await _procesador.SanearYProcesarStreamAsync(inputStream, tamano))
+                {
+                    return await _storage.GuardarArchivoAsync(streamLimpio, nombreUnico, carpeta);
+                }
+            }
+            catch (FormatException)
+            {
+                throw new Exception("El formato Base64 no es válido.");
+            }
         }
     }
 }

@@ -1,4 +1,4 @@
-using Microsoft.EntityFrameworkCore.Storage;
+Ôªøusing Microsoft.EntityFrameworkCore.Storage;
 using Talleres360.Data;
 using Talleres360.Enums;
 using Talleres360.Interfaces.Imagenes;
@@ -32,7 +32,7 @@ namespace Talleres360.Services.Talleres
         }
 
         public async Task<(bool Success, string Message)> RegistrarNuevoClienteSaaSAsync(
-            string nombreTaller, string nombreAdmin, string email, string password, IFormFile? imagen)
+      string nombreTaller, string nombreAdmin, string email, string password, string? imagenBase64) 
         {
             using IDbContextTransaction transaction = await _context.Database.BeginTransactionAsync();
 
@@ -40,7 +40,7 @@ namespace Talleres360.Services.Talleres
             {
                 Plan? plan = await _planRepo.GetPlanPorNombreAsync(PlanTipo.PRO.ToString());
                 if (plan == null)
-                    return (false, "Error: El plan PRO no est· configurado en la base de datos.");
+                    return (false, "Error: El plan PRO no est√° configurado en la base de datos.");
 
                 string cifTemporal = $"TEMP{DateTime.UtcNow:yyyyMMddHHmmss}{Guid.NewGuid():N}".Substring(0, 20);
 
@@ -60,10 +60,11 @@ namespace Talleres360.Services.Talleres
 
                 string rutaImagen = null;
 
-                if (imagen != null)
+                if (!string.IsNullOrWhiteSpace(imagenBase64))
                 {
-                    var resultImagen = await _imagenService.SubirImagenAsync(imagen, CarpetaDestino.Usuarios);
-                    if (resultImagen.Length < 1)
+                    var resultImagen = await _imagenService.SubirImagenBase64Async(imagenBase64, CarpetaDestino.Usuarios);
+
+                    if (string.IsNullOrEmpty(resultImagen))
                     {
                         await transaction.RollbackAsync();
                         return (false, "Error al guardar la imagen");
@@ -87,7 +88,7 @@ namespace Talleres360.Services.Talleres
             catch (Exception ex)
             {
                 await transaction.RollbackAsync();
-                return (false, "Error crÌtico en el registro: " + ex.Message);
+                return (false, "Error cr√≠tico en el registro: " + ex.Message);
             }
         }
     }

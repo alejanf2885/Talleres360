@@ -2,6 +2,6 @@
 {
     public interface IProcesadorImagenService
     {
-        Task<Stream> SanearYProcesarAsync(IFormFile archivoImagen, int tamano = 300);
+        Task<Stream> SanearYProcesarStreamAsync(Stream inputStream, int tamano = 300);
     }
 }
