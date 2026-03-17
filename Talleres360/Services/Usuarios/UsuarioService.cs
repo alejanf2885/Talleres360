@@ -36,7 +36,7 @@ namespace Talleres360.Services.Usuarios
         }
 
         public async Task<(bool Success, string Message, Usuario? Usuario)> CrearUsuarioAdminAsync(
-     int tallerId, string nombre, string email, string password)
+     int tallerId, string nombre, string email, string password, string? rutaImagen = null)
         {
             if (await _userRepo.ExisteEmailAsync(email))
                 return (false, "Ese correo ya está registrado.", null);
@@ -49,7 +49,8 @@ namespace Talleres360.Services.Usuarios
                 Rol = RolesUsuario.ADMIN,
                 FechaCreacion = DateTime.UtcNow,
                 SecurityStamp = Guid.NewGuid().ToString(),
-                Activo = false
+                Activo = false,
+                Imagen = rutaImagen
             };
 
             await _userRepo.AddAsync(usuario);

@@ -38,5 +38,8 @@ namespace Talleres360.Models
 
         [Column("FechaCreacion")]
         public DateTime FechaCreacion { get; set; }
+
+        [Column("Imagen")]
+        public string? Imagen { get; set; }
     }
 }

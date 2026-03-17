@@ -2,7 +2,7 @@
 using Talleres360.Dtos;
 using Talleres360.Dtos.Vehiculos;
 using Talleres360.Models;
-using Talleres360.Interfaces;
+using Talleres360.Interfaces.Talleres;
 
 namespace Talleres360.Interfaces.Vehiculos
 {

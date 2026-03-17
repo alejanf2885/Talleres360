@@ -19,5 +19,8 @@ namespace Talleres360.Dtos.Talleres
         [Required(ErrorMessage = "El teléfono es obligatorio")]
         [MaxLength(20)]
         public string Telefono { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "El logo es obligatorio")]
+        public IFormFile Logo { get; set; }
     }
 }

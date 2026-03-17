@@ -10,5 +10,7 @@
         public string? Telefono { get; set; }
         public bool PerfilConfigurado { get; set; }
         public string? TipoSuscripcion { get; set; }
+
+        public string Logo { get; set; } = string.Empty;
     }
 }

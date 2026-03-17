@@ -51,7 +51,9 @@ namespace Talleres360.API.Controllers
                 Localidad = taller.Localidad,
                 Telefono = taller.Telefono,
                 PerfilConfigurado = taller.PerfilConfigurado,
-                TipoSuscripcion = taller.TipoSuscripcion
+                TipoSuscripcion = taller.TipoSuscripcion,
+                Logo = taller.Logo
+
             };
 
             return Ok(dto);
@@ -59,7 +61,7 @@ namespace Talleres360.API.Controllers
 
         // PUT: api/v1/workshops/config
         [HttpPut("config")]
-        public async Task<IActionResult> ConfigurarTaller([FromBody] ConfigurarTallerRequest request)
+        public async Task<IActionResult> ConfigurarTaller([FromForm] ConfigurarTallerRequest request)
         {
             int? tallerId = _userContext.GetTallerId();
 
@@ -71,7 +73,8 @@ namespace Talleres360.API.Controllers
                 request.CIF,
                 request.Direccion,
                 request.Localidad,
-                request.Telefono
+                request.Telefono,
+                request.Logo
             );
 
             if (!success)

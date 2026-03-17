@@ -1,6 +1,6 @@
-using System.Threading.Tasks;
 
-namespace Talleres360.Interfaces
+
+namespace Talleres360.Interfaces.Talleres
 {
     public interface ITallerRecursoRepository
     {

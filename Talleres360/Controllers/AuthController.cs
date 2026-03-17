@@ -32,13 +32,14 @@ namespace Talleres360.API.Controllers
 
         [HttpPost("register")]
         [EnableRateLimiting("AuthStrict")]
-        public async Task<IActionResult> Register([FromBody] RegistroRequest request)
+        public async Task<IActionResult> Register([FromForm] RegistroRequest request)
         {
             var (success, message) = await _registroTallerService.RegistrarNuevoClienteSaaSAsync(
                 request.NombreTaller,
                 request.NombreAdmin,
                 request.Email,
-                request.Password);
+                request.Password,
+                request.Imagen);
 
             if (!success) return BadRequest(new { Error = message });
 
