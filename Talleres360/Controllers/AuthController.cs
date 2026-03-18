@@ -9,7 +9,7 @@ using Talleres360.Interfaces.Seguridad;
 using Talleres360.Interfaces.Talleres;
 using Talleres360.Models;
 using Talleres360.Extensions;
-using Talleres360.Dtos.Seguridad; // ✅ Asegúrate de importar el namespace donde creaste el Helper
+using Talleres360.Dtos.Seguridad; 
 
 namespace Talleres360.Controllers
 {
@@ -38,45 +38,39 @@ namespace Talleres360.Controllers
         [EnableRateLimiting("AuthStrict")]
         public async Task<IActionResult> Register([FromBody] RegistroRequest request)
         {
-            var (success, message) = await _registroTallerService.RegistrarNuevoClienteSaaSAsync(
-                request.NombreTaller,
-                request.NombreAdmin,
-                request.Email,
-                request.Password,
-                request.Imagen);
+            ServiceResult<bool> resultado = await _registroTallerService.RegistrarNuevoClienteSaaSAsync(request);
 
-            if (!success)
+            if (!resultado.Success)
             {
                 return BadRequest(new ApiErrorResponse(
-                    codigo: AuthErrorCode.REGISTRO_FALLIDO.ToString(),
-                    mensaje: message
+                    codigo: resultado.ErrorCode ?? AuthErrorCode.REGISTRO_FALLIDO.ToString(),
+                    mensaje: resultado.Message ?? "No se pudo completar el registro."
                 ));
             }
-            return Ok(new { Mensaje = message });
+
+            return Ok(new { Mensaje = resultado.Message ?? "Registro completado con éxito." });
         }
 
         [HttpPost("login")]
         [EnableRateLimiting("AuthStrict")]
         public async Task<IActionResult> Login([FromBody] LoginRequest request)
         {
-            Usuario? usuario = await _authService.ValidarLoginAsync(request.Email, request.Password);
 
-            if (usuario == null)
+            ServiceResult<Usuario> resultado = await _authService.ValidarLoginAsync(request.Email, request.Password);
+
+            if (!resultado.Success)
             {
-                return Unauthorized(new ApiErrorResponse(
-                    codigo: AuthErrorCode.CREDENCIALES_INCORRECTAS.ToString(),
-                    mensaje: "El correo o la contraseña no son correctos."
+                int statusCode = resultado.ErrorCode == AuthErrorCode.CUENTA_INACTIVA.ToString()
+                                 ? StatusCodes.Status403Forbidden
+                                 : StatusCodes.Status401Unauthorized;
+
+                return StatusCode(statusCode, new ApiErrorResponse(
+                    codigo: resultado.ErrorCode ?? AuthErrorCode.ERROR_GENERICO.ToString(),
+                    mensaje: resultado.Message ?? "Error de autenticación"
                 ));
             }
 
-            if (!usuario.Activo)
-            {
-                return StatusCode(StatusCodes.Status403Forbidden, new ApiErrorResponse(
-                    codigo: AuthErrorCode.CUENTA_INACTIVA.ToString(),
-                    mensaje: "Tu cuenta aún no está verificada. Revisa tu correo electrónico.",
-                    detalles: new { Email = usuario.Email }
-                ));
-            }
+            Usuario usuario = resultado.Data!;
 
             string jwtToken = _tokenService.GenerarJwtToken(usuario);
             string refreshToken = await _refreshTokenService.CrearRefreshTokenAsync(usuario.Id);

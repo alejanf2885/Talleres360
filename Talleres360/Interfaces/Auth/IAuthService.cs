@@ -1,9 +1,10 @@
+using Talleres360.Dtos.Responses;
 using Talleres360.Models;
 
 namespace Talleres360.Interfaces.Auth
 {
     public interface IAuthService
     {
-        Task<Usuario?> ValidarLoginAsync(string email, string password);
+        Task<ServiceResult<Usuario>> ValidarLoginAsync(string email, string password);
     }
 }

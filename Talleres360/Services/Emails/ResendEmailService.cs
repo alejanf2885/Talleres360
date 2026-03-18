@@ -28,20 +28,4 @@ public class ResendEmailService : IEmailService
 
         await _resend.EmailSendAsync(message);
     }
-
-    public async Task EnviarEmailBienvenidaAsync(string email, string nombre, string linkVerificacion)
-    {
-        string filePath = Path.Combine(AppContext.BaseDirectory, "Templates", "EmailBienvenida.html");
-
-        if (!File.Exists(filePath))
-            throw new FileNotFoundException("No se encontró la plantilla de email.");
-
-        string template = await File.ReadAllTextAsync(filePath);
-
-        string cuerpoHtml = template
-            .Replace("{{Nombre}}", nombre)
-            .Replace("{{Link}}", linkVerificacion);
-
-        await EnviarEmailAsync(email, "¡Bienvenido a Talleres360!", cuerpoHtml);
-    }
 }

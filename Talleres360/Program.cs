@@ -39,6 +39,7 @@ using Talleres360.Services.Archivos;
 using Talleres360.Services.Auth;
 using Talleres360.Services.Cache;
 using Talleres360.Services.Clientes;
+using Talleres360.Services.Emails;
 using Talleres360.Services.FileStorage;
 using Talleres360.Services.Imagenes;
 using Talleres360.Services.Password;
@@ -104,6 +105,9 @@ builder.Services.AddScoped<IImagenService, ImagenService>();
 builder.Services.AddScoped<INombreArchivoService, NombreArchivoService>();
 builder.Services.AddScoped<IProcesadorImagenService, ProcesadorImagenService>();
 builder.Services.AddScoped<IFileStorageService, FileStorageService>();
+builder.Services.AddScoped<IEmailService, ResendEmailService>();
+builder.Services.AddScoped<ITemplateService, TemplateService>();
+builder.Services.AddScoped<INotificacionService, NotificacionService>();
 
 // Seguridad y Gestión
 builder.Services.AddScoped<ISuscripcionGuardService, SuscripcionGuardService>();

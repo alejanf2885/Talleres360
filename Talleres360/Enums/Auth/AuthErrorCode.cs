@@ -11,6 +11,11 @@
         REFRESH_TOKEN_INVALIDO,
         REFRESH_TOKEN_EXPIRADO,
         DATOS_INVALIDOS,
+        PLAN_NO_ENCONTRADO,       
+        EMAIL_YA_REGISTRADO,      
+        ERROR_SUBIDA_IMAGEN,      
+        ERROR_CREACION_USUARIO,  
+        CIF_DUPLICADO,
         ERROR_GENERICO
     }
 }

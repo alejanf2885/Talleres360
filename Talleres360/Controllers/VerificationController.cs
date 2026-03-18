@@ -6,6 +6,7 @@ using Talleres360.Enums.Auth;
 using Talleres360.Interfaces.Emails;
 using Talleres360.Interfaces.Seguridad;
 using Talleres360.Interfaces.Usuarios;
+using Talleres360.Models;
 
 namespace Talleres360.Controllers
 {
@@ -15,70 +16,64 @@ namespace Talleres360.Controllers
     {
         private readonly IUsuarioService _usuarioService;
         private readonly IVerificacionService _verificacionService;
-        private readonly IEmailService _emailService;
+        private readonly INotificacionService _notificacionService; // ✅ Nueva abstracción
 
         public VerificationController(
             IUsuarioService usuarioService,
             IVerificacionService verificacionService,
-            IEmailService emailService)
+            INotificacionService notificacionService)
         {
             _usuarioService = usuarioService;
             _verificacionService = verificacionService;
-            _emailService = emailService;
+            _notificacionService = notificacionService;
         }
-
 
         [HttpGet("verify-email")]
         public async Task<IActionResult> VerifyEmail([FromQuery] string token)
         {
             if (string.IsNullOrWhiteSpace(token))
             {
-                return BadRequest(new ApiErrorResponse(
-                    AuthErrorCode.TOKEN_INVALIDO.ToString(),
-                    "El token es obligatorio."
-                ));
+                return BadRequest(new ApiErrorResponse(AuthErrorCode.TOKEN_INVALIDO.ToString(), "El token es obligatorio."));
             }
 
-            var resultado = await _verificacionService.ValidarYConsumirTokenAsync(token);
-
-            if (!resultado.Exito)
+            var resultadoToken = await _verificacionService.ValidarYConsumirTokenAsync(token);
+            if (!resultadoToken.Exito)
             {
-                return BadRequest(new ApiErrorResponse(
-                    AuthErrorCode.TOKEN_INVALIDO.ToString(),
-                    resultado.Mensaje
-                ));
+                return BadRequest(new ApiErrorResponse(AuthErrorCode.TOKEN_INVALIDO.ToString(), resultadoToken.Mensaje));
             }
 
-            await _usuarioService.ActivarUsuarioAsync(resultado.UsuarioId.Value);
+            await _usuarioService.ActivarUsuarioAsync(resultadoToken.UsuarioId.Value);
 
             return Ok(new { Mensaje = "¡Cuenta verificada! Ya puedes iniciar sesión." });
         }
-
 
         [HttpPost("resend")]
         [EnableRateLimiting("EmailStrict")]
         public async Task<IActionResult> ResendVerification([FromBody] ReenviarCorreoRequest request)
         {
-            // 1. Validaciones de entrada (El escudo)
-            if (request == null || string.IsNullOrWhiteSpace(request.Email))
-            {
-                return BadRequest(new ApiErrorResponse(AuthErrorCode.ERROR_GENERICO.ToString(), "Email requerido."));
-            }
+            ServiceResult<Usuario> resultadoUser = await _usuarioService.GetByEmailAsync(request.Email);
 
-            // 2. Buscar usuario
-            var usuario = await _usuarioService.GetByEmailAsync(request.Email);
-            if (usuario == null) return Ok(new { Mensaje = "Si el correo existe, se ha enviado." });
+            if (!resultadoUser.Success)
+                return Ok(new { Mensaje = "Si el correo existe, se ha enviado un enlace." });
+
+            Usuario usuario = resultadoUser.Data!;
 
             if (usuario.Activo)
             {
-                return BadRequest(new ApiErrorResponse(AuthErrorCode.ERROR_GENERICO.ToString(), "Cuenta ya activa."));
+                return BadRequest(new ApiErrorResponse(AuthErrorCode.ERROR_GENERICO.ToString(), "Esta cuenta ya está activa."));
             }
 
-            // 3. Generar Link (El servicio ya sabe la URL del Frontend por IOptions)
-            string link = await _verificacionService.GenerarLinkVerificacionAsync(usuario.Id);
+            string token = await _verificacionService.GenerarTokenRegistroAsync(usuario.Id);
 
-            // 4. Enviar Email (El servicio ya sabe dónde está el HTML)
-            await _emailService.EnviarEmailBienvenidaAsync(usuario.Email, usuario.Nombre, link);
+            ServiceResult<bool> resultadoEnvio = await _notificacionService.EnviarBienvenidaAsync(usuario, token);
+
+            if (!resultadoEnvio.Success)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new ApiErrorResponse(
+                    resultadoEnvio.ErrorCode ?? AuthErrorCode.ERROR_GENERICO.ToString(),
+                    resultadoEnvio.Message ?? "Error al enviar el correo."
+                ));
+            }
 
             return Ok(new { Mensaje = "Se ha enviado un nuevo enlace de activación." });
         }
