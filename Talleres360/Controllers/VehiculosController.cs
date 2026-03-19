@@ -2,12 +2,13 @@
 using Microsoft.AspNetCore.Mvc;
 using Talleres360.API.Filters;
 using Talleres360.Dtos;
-using Talleres360.Dtos.Vehiculos;
 using Talleres360.Dtos.Responses;
-using Talleres360.Interfaces.Vehiculos;
-using Talleres360.Interfaces.Seguridad;
-using Talleres360.Models;
+using Talleres360.Dtos.Vehiculos;
 using Talleres360.Enums.Errors;
+using Talleres360.Filters;
+using Talleres360.Interfaces.Seguridad;
+using Talleres360.Interfaces.Vehiculos;
+using Talleres360.Models;
 
 namespace Talleres360.API.Controllers
 {
@@ -25,6 +26,7 @@ namespace Talleres360.API.Controllers
             _userContext = userContext;
         }
 
+
         [HttpGet]
         public async Task<IActionResult> GetAll([FromQuery] int page = 1, [FromQuery] int size = 10, [FromQuery] string? matricula = null)
         {
@@ -37,6 +39,7 @@ namespace Talleres360.API.Controllers
             return Ok(response);
         }
 
+        [TallerAuthorize<IVehiculoRepository>]
         [HttpGet("{id:int:min(1)}")]
         public async Task<IActionResult> GetById(int id)
         {
@@ -50,8 +53,8 @@ namespace Talleres360.API.Controllers
             return Ok(resultado.Data);
         }
 
-        [HttpPost]
         [RequiereSuscripcionActiva]
+        [HttpPost]
         public async Task<IActionResult> Create([FromBody] Vehiculo request)
         {
             int? tallerId = _userContext.GetTallerId();
@@ -67,8 +70,10 @@ namespace Talleres360.API.Controllers
             return CreatedAtAction(nameof(GetById), new { id = resultado.Data!.Id }, resultado.Data);
         }
 
-        [HttpPut("{id:int:min(1)}")]
+
+        [TallerAuthorize<IVehiculoRepository>]
         [RequiereSuscripcionActiva]
+        [HttpPut("{id:int:min(1)}")]
         public async Task<IActionResult> Update(int id, [FromBody] Vehiculo request)
         {
             int? tallerId = _userContext.GetTallerId();
