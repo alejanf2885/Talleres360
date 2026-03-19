@@ -1,12 +1,15 @@
 ﻿using Talleres360.Dtos.Seguridad;
 using Talleres360.Interfaces.Seguridad;
 using Talleres360.Interfaces.Talleres;
+using Talleres360.Models;
+using Talleres360.Enums.Errors;
+using System;
+using System.Threading.Tasks;
 
 namespace Talleres360.Services.Talleres
 {
     public class SuscripcionGuardService : ISuscripcionGuardService
     {
-
         private readonly ITallerRepository _tallerRepo;
 
         public SuscripcionGuardService(ITallerRepository tallerRepo)
@@ -14,51 +17,74 @@ namespace Talleres360.Services.Talleres
             _tallerRepo = tallerRepo;
         }
 
-        public async Task<(bool PuedeAcceder, string Mensaje)> ValidarAccesoEscrituraAsync(int tallerId)
+        public async Task<AccesoResult> ValidarAccesoEscrituraAsync(int tallerId)
         {
-            var taller = await _tallerRepo.GetByIdAsync(tallerId);
-            if (taller == null) return (false, "Taller no encontrado.");
+            Taller? taller = await _tallerRepo.GetByIdAsync(tallerId);
+            if (taller == null)
+            {
+                return AccesoResult.Denegado("Taller no encontrado.", ErrorCode.SYS_ENTIDAD_NO_ENCONTRADA.ToString());
+            }
 
-            // 1. Verificar si el Trial ha caducado
             if (taller.TipoSuscripcion == "TRIAL")
             {
-                var fechaExpiracion = taller.FechaCreacion.AddDays(30);
+                DateTime fechaExpiracion = taller.FechaCreacion.AddDays(30);
                 if (DateTime.UtcNow > fechaExpiracion)
                 {
-                    return (false, "Tu periodo de prueba de 30 días ha finalizado. Elige un plan para continuar.");
+                    return AccesoResult.Denegado(
+                        "Tu periodo de prueba de 30 días ha finalizado. Elige un plan para continuar.",
+                        ErrorCode.SUBS_SIN_PLAN_ACTIVO.ToString()
+                    );
                 }
             }
 
-            // 2. Verificar si el taller está activo 
             if (!taller.Activo)
             {
-                return (false, "Tu cuenta de taller está desactivada. Contacta con soporte.");
+                return AccesoResult.Denegado(
+                    "Tu cuenta de taller está desactivada. Contacta con soporte.",
+                    ErrorCode.AUTH_CUENTA_INACTIVA.ToString()
+                );
             }
 
-            return (true, string.Empty);
+            return AccesoResult.Permitido();
         }
 
-        public async Task<(bool PuedeAcceder, string Mensaje)> ValidarAccesoPremiumAsync(int tallerId)
+        public async Task<AccesoResult> ValidarAccesoPremiumAsync(int tallerId)
         {
-            var taller = await _tallerRepo.GetByIdAsync(tallerId);
-            if (taller == null) return (false, "Taller no encontrado.");
+            Taller? taller = await _tallerRepo.GetByIdAsync(tallerId);
+            if (taller == null)
+            {
+                return AccesoResult.Denegado("Taller no encontrado.", ErrorCode.SYS_ENTIDAD_NO_ENCONTRADA.ToString());
+            }
 
             if (!taller.Activo)
-                return (false, "Tu cuenta de taller está desactivada.");
+            {
+                return AccesoResult.Denegado("Tu cuenta de taller está desactivada.", ErrorCode.AUTH_CUENTA_INACTIVA.ToString());
+            }
 
             if (taller.TipoSuscripcion != "PRO" && taller.TipoSuscripcion != "PREMIUM")
-                return (false, "Esta funcionalidad requiere un plan Pro o Premium.");
+            {
+                return AccesoResult.Denegado(
+                    "Esta funcionalidad requiere un plan Pro o Premium.",
+                    ErrorCode.SUBS_LIMITE_ALCANZADO.ToString()
+                );
+            }
 
-            return (true, string.Empty);
+            return AccesoResult.Permitido();
         }
 
         public async Task<EstadoSuscripcionResponse> ObtenerEstadoSuscripcionAsync(int tallerId)
         {
-            var taller = await _tallerRepo.GetByIdAsync(tallerId);
+            Taller? taller = await _tallerRepo.GetByIdAsync(tallerId);
             if (taller == null)
-                return new EstadoSuscripcionResponse { EsActivo = false, Mensaje = "Taller no encontrado." };
+            {
+                return new EstadoSuscripcionResponse
+                {
+                    EsActivo = false,
+                    Mensaje = "Taller no encontrado."
+                };
+            }
 
-            var response = new EstadoSuscripcionResponse
+            EstadoSuscripcionResponse response = new EstadoSuscripcionResponse
             {
                 EsActivo = taller.Activo,
                 TipoSuscripcion = taller.TipoSuscripcion
@@ -66,11 +92,12 @@ namespace Talleres360.Services.Talleres
 
             if (taller.TipoSuscripcion == "TRIAL")
             {
-                var fechaExpiracion = taller.FechaCreacion.AddDays(30);
-                var diasRestantes = (fechaExpiracion - DateTime.UtcNow).Days;
-                
+                DateTime fechaExpiracion = taller.FechaCreacion.AddDays(30);
+                TimeSpan diferencia = fechaExpiracion - DateTime.UtcNow;
+                int diasRestantes = diferencia.Days;
+
                 response.DiasRestantesTrial = diasRestantes > 0 ? diasRestantes : 0;
-                
+
                 if (diasRestantes <= 0)
                 {
                     response.EsActivo = false;

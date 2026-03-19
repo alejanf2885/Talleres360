@@ -37,6 +37,9 @@ namespace Talleres360.Models
         [Column("PROMEDIOKMDIARIOS")]
         public decimal? PromedioKmDiarios { get; set; }
 
+        [Column("FECHACREACION")]
+        public DateTime FechaCreacion { get; set; }
+
         [Column("FECHAULTIMAACTUALIZACIONKM")]
         public DateTime? FechaUltimaActualizacionKm { get; set; }
 
