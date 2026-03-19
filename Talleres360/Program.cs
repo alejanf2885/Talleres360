@@ -1,6 +1,5 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Resend;
@@ -15,6 +14,7 @@ using Talleres360.Interfaces.Archivos;
 using Talleres360.Interfaces.Auth;
 using Talleres360.Interfaces.Cache;
 using Talleres360.Interfaces.Clientes;
+using Talleres360.Interfaces.Data;
 using Talleres360.Interfaces.Emails;
 using Talleres360.Interfaces.FileStorage;
 using Talleres360.Interfaces.Imagenes;
@@ -27,6 +27,7 @@ using Talleres360.Interfaces.Usuarios;
 using Talleres360.Interfaces.Vehiculos;
 using Talleres360.Repositories;
 using Talleres360.Repositories.Clientes;
+using Talleres360.Repositories.Data;
 using Talleres360.Repositories.Planes;
 using Talleres360.Repositories.Seguridad;
 using Talleres360.Repositories.Talleres;
@@ -85,6 +86,7 @@ builder.Services.AddScoped<ICustomerRepository, CustomerRepository>();
 builder.Services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
 builder.Services.AddScoped<IVehiculoRepository, VehiculoRepository>();
 builder.Services.AddScoped<IVerificacionRepository, VerificacionRepository>();
+builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
 // Servicios Core
 builder.Services.AddSingleton<IPasswordService, BcryptPasswordService>();

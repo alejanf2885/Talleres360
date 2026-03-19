@@ -60,6 +60,6 @@ namespace Talleres360.Models
         public bool Activo { get; set; } = true;
 
         [Column("Logo")]
-        public string Logo { get; set; }
+        public string? Logo { get; set; }
     }
 }

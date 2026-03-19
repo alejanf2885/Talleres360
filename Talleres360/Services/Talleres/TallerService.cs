@@ -1,7 +1,10 @@
-﻿using Talleres360.Models;
-using Talleres360.Interfaces.Talleres;
-using Talleres360.Interfaces.Imagenes;
+﻿using Talleres360.Dtos.Responses;
+using Talleres360.Dtos.Talleres;
 using Talleres360.Enums;
+using Talleres360.Enums.Errors;
+using Talleres360.Interfaces.Imagenes;
+using Talleres360.Interfaces.Talleres;
+using Talleres360.Models;
 
 namespace Talleres360.Services.Talleres
 {
@@ -16,34 +19,76 @@ namespace Talleres360.Services.Talleres
             _imagenService = imagenService;
         }
 
-        public async Task<bool> ConfigurarPerfilAsync(int tallerId, string cif, string direccion, string localidad, string telefono, string? logoBase64)
+        public async Task<ServiceResult<WorkshopDto>> ObtenerTallerPorIdAsync(int tallerId)
         {
             Taller? taller = await _tallerRepo.GetByIdAsync(tallerId);
 
             if (taller == null)
             {
-                return false;
+                return ServiceResult<WorkshopDto>.Fail(
+                    ErrorCode.SYS_ENTIDAD_NO_ENCONTRADA.ToString(),
+                    "El taller solicitado no existe."
+                );
             }
 
-            taller.CIF = cif;
-            taller.Direccion = direccion;
-            taller.Localidad = localidad;
-            taller.Telefono = telefono;
+            WorkshopDto dto = new WorkshopDto
+            {
+                Id = taller.Id,
+                Nombre = taller.Nombre,
+                CIF = taller.CIF,
+                Direccion = taller.Direccion,
+                Localidad = taller.Localidad,
+                Telefono = taller.Telefono,
+                PerfilConfigurado = taller.PerfilConfigurado,
+                TipoSuscripcion = taller.TipoSuscripcion,
+                Logo = taller.Logo
+            };
 
+            return ServiceResult<WorkshopDto>.Ok(dto);
+        }
+
+        public async Task<ServiceResult<bool>> ConfigurarPerfilAsync(int tallerId, ConfigurarTallerRequest request)
+        {
+            Taller? taller = await _tallerRepo.GetByIdAsync(tallerId);
+            if (taller == null)
+            {
+                return ServiceResult<bool>.Fail(
+                    ErrorCode.SYS_ENTIDAD_NO_ENCONTRADA.ToString(),
+                    "Taller no encontrado."
+                );
+            }
+
+            Taller? tallerConMismoCif = await _tallerRepo.GetByCifAsync(request.CIF);
+            if (tallerConMismoCif != null && tallerConMismoCif.Id != tallerId)
+            {
+                return ServiceResult<bool>.Fail(
+                    ErrorCode.REG_CIF_DUPLICADO.ToString(),
+                    "El CIF introducido ya está registrado por otro taller."
+                );
+            }
+
+            taller.CIF = request.CIF;
+            taller.Direccion = request.Direccion;
+            taller.Localidad = request.Localidad;
+            taller.Telefono = request.Telefono;
             taller.PerfilConfigurado = true;
             taller.FechaActualizacion = DateTime.UtcNow;
 
-            if (!string.IsNullOrWhiteSpace(logoBase64))
+            if (!string.IsNullOrWhiteSpace(request.Logo))
             {
-                taller.Logo = await _imagenService.SubirImagenBase64Async(logoBase64, CarpetaDestino.Talleres);
+                string? urlLogo = await _imagenService.SubirImagenBase64Async(request.Logo, CarpetaDestino.Talleres);
+                if (!string.IsNullOrEmpty(urlLogo))
+                {
+                    taller.Logo = urlLogo;
+                }
             }
 
             await _tallerRepo.UpdateAsync(taller);
 
-            return true;
+            return ServiceResult<bool>.Ok(true);
         }
 
-        public async Task<Taller> CrearTallerBaseAsync(string nombre, int planId)
+        public async Task<ServiceResult<Taller>> CrearTallerBaseAsync(string nombre, int planId)
         {
             Taller taller = new Taller
             {
@@ -51,11 +96,12 @@ namespace Talleres360.Services.Talleres
                 PlanId = planId,
                 Activo = true,
                 PerfilConfigurado = false,
-                FechaCreacion = DateTime.Now
+                FechaCreacion = DateTime.UtcNow
             };
 
             await _tallerRepo.AddAsync(taller);
-            return taller;
+
+            return ServiceResult<Taller>.Ok(taller);
         }
     }
 }

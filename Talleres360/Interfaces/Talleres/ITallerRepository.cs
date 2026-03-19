@@ -6,6 +6,7 @@ namespace Talleres360.Interfaces.Talleres
     {
         Task AddAsync(Taller taller);
         Task<Taller?> GetByIdAsync(int id);
-        Task UpdateAsync(Taller taller); 
+        Task<Taller?> GetByCifAsync(string cif);
+        Task UpdateAsync(Taller taller);
     }
 }

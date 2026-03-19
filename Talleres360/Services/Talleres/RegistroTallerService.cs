@@ -1,10 +1,8 @@
-﻿using Microsoft.EntityFrameworkCore.Storage;
-using Talleres360.Data;
-using Talleres360.Dtos;
-using Talleres360.Dtos.Auth;
+﻿using Talleres360.Dtos;
 using Talleres360.Dtos.Responses;
 using Talleres360.Enums;
 using Talleres360.Enums.Errors;
+using Talleres360.Interfaces.Data; 
 using Talleres360.Interfaces.Imagenes;
 using Talleres360.Interfaces.Planes;
 using Talleres360.Interfaces.Talleres;
@@ -19,25 +17,25 @@ namespace Talleres360.Services.Talleres
         private readonly IPlanRepository _planRepo;
         private readonly IUsuarioService _usuarioService;
         private readonly IImagenService _imagenService;
-        private readonly ApplicationDbContext _context;
+        private readonly IUnitOfWork _unitOfWork; 
 
         public RegistroTallerService(
             ITallerRepository tallerRepo,
             IPlanRepository planRepo,
             IUsuarioService usuarioService,
             IImagenService imagenService,
-            ApplicationDbContext context)
+            IUnitOfWork unitOfWork)
         {
             _tallerRepo = tallerRepo;
             _planRepo = planRepo;
             _usuarioService = usuarioService;
             _imagenService = imagenService;
-            _context = context;
+            _unitOfWork = unitOfWork;
         }
 
         public async Task<ServiceResult<bool>> RegistrarNuevoClienteSaaSAsync(RegistroRequest request)
         {
-            using IDbContextTransaction transaction = await _context.Database.BeginTransactionAsync();
+            await _unitOfWork.BeginTransactionAsync();
 
             try
             {
@@ -64,7 +62,6 @@ namespace Talleres360.Services.Talleres
                 };
 
                 await _tallerRepo.AddAsync(taller);
-                await _context.SaveChangesAsync();
 
                 string? rutaImagen = null;
                 if (!string.IsNullOrWhiteSpace(request.Imagen))
@@ -73,7 +70,7 @@ namespace Talleres360.Services.Talleres
 
                     if (string.IsNullOrEmpty(resultImagen))
                     {
-                        await transaction.RollbackAsync();
+                        await _unitOfWork.RollbackTransactionAsync(); 
                         return ServiceResult<bool>.Fail(
                             ErrorCode.REG_ERROR_SUBIDA_IMAGEN.ToString(),
                             "Error al procesar la imagen de perfil."
@@ -91,7 +88,7 @@ namespace Talleres360.Services.Talleres
 
                 if (!resultUsuario.Success)
                 {
-                    await transaction.RollbackAsync();
+                    await _unitOfWork.RollbackTransactionAsync(); 
 
                     return ServiceResult<bool>.Fail(
                         resultUsuario.ErrorCode ?? ErrorCode.REG_ERROR_CREACION_USUARIO.ToString(),
@@ -99,13 +96,13 @@ namespace Talleres360.Services.Talleres
                     );
                 }
 
-                await transaction.CommitAsync();
+                await _unitOfWork.CommitTransactionAsync();
 
                 return ServiceResult<bool>.Ok(true);
             }
             catch (Exception ex)
             {
-                await transaction.RollbackAsync();
+                await _unitOfWork.RollbackTransactionAsync(); 
                 return ServiceResult<bool>.Fail(
                     ErrorCode.SYS_ERROR_GENERICO.ToString(),
                     "Ocurrió un error crítico durante el registro: " + ex.Message
