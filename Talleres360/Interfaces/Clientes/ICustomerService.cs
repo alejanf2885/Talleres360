@@ -1,6 +1,9 @@
 ﻿using Talleres360.Dtos;
 using Talleres360.Dtos.Clientes;
+using Talleres360.Dtos.Responses; // <-- Asegúrate de tener tu ServiceResult aquí
 using Talleres360.Models;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Talleres360.Interfaces.Clientes
 {
@@ -11,10 +14,8 @@ namespace Talleres360.Interfaces.Clientes
         Task<Cliente?> ObtenerPorIdAsync(int tallerId, int clienteId);
         Task<ClienteStatsResponse> ObtenerEstadisticasAsync(int tallerId);
 
-        Task<(bool Success, string Message, Cliente? Cliente)> CrearClienteAsync(int tallerId, CrearClienteRequest request);
-        Task<(bool Success, string Message, Cliente? Cliente)> ActualizarClienteAsync(int tallerId, int clienteId, ActualizarClienteRequest request);
-        Task<(bool Success, string Message)> EliminarClienteAsync(int tallerId, int clienteId);
+        Task<ServiceResult<Cliente>> CrearClienteAsync(int tallerId, CrearClienteRequest request);
+        Task<ServiceResult<Cliente>> ActualizarClienteAsync(int tallerId, int clienteId, ActualizarClienteRequest request);
+        Task<ServiceResult<bool>> EliminarClienteAsync(int tallerId, int clienteId);
     }
-
 }
-

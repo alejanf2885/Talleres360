@@ -4,7 +4,6 @@ using Talleres360.Interfaces.Seguridad;
 
 namespace Talleres360.API.Filters
 {
-    // Heredamos de TypeFilterAttribute para poder inyectar dependencias en el filtro
     public class RequiereSuscripcionActivaAttribute : TypeFilterAttribute
     {
         public RequiereSuscripcionActivaAttribute() : base(typeof(RequiereSuscripcionActivaFilter))

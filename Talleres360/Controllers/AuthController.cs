@@ -1,15 +1,16 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
 using Talleres360.Dtos;
 using Talleres360.Dtos.Auth;
 using Talleres360.Dtos.Responses;
+using Talleres360.Dtos.Seguridad;
+using Talleres360.Dtos.Usuarios;
 using Talleres360.Enums.Errors;
+using Talleres360.Extensions;
 using Talleres360.Interfaces.Auth;
 using Talleres360.Interfaces.Seguridad;
 using Talleres360.Interfaces.Talleres;
-using Talleres360.Models;
-using Talleres360.Extensions;
-using Talleres360.Dtos.Seguridad; 
 
 namespace Talleres360.Controllers
 {
@@ -21,17 +22,20 @@ namespace Talleres360.Controllers
         private readonly IRegistroTallerService _registroTallerService;
         private readonly ITokenService _tokenService;
         private readonly IRefreshTokenService _refreshTokenService;
+        private readonly IUserContextService _userContext;
 
         public AuthController(
             IAuthService authService,
             IRegistroTallerService registroTallerService,
             ITokenService tokenService,
-            IRefreshTokenService refreshTokenService)
+            IRefreshTokenService refreshTokenService,
+            IUserContextService userContext)
         {
             _authService = authService;
             _registroTallerService = registroTallerService;
             _tokenService = tokenService;
             _refreshTokenService = refreshTokenService;
+            _userContext = userContext;
         }
 
         [HttpPost("register")]
@@ -56,7 +60,7 @@ namespace Talleres360.Controllers
         public async Task<IActionResult> Login([FromBody] LoginRequest request)
         {
 
-            ServiceResult<Usuario> resultado = await _authService.ValidarLoginAsync(request.Email, request.Password);
+            ServiceResult<UsuarioLoginDto> resultado = await _authService.ValidarLoginAsync(request.Email, request.Password);
 
             if (!resultado.Success)
             {
@@ -70,7 +74,7 @@ namespace Talleres360.Controllers
                 ));
             }
 
-            Usuario usuario = resultado.Data!;
+            UsuarioLoginDto usuario = resultado.Data!;
 
             string jwtToken = _tokenService.GenerarJwtToken(usuario);
             string refreshToken = await _refreshTokenService.CrearRefreshTokenAsync(usuario.Id);
@@ -141,6 +145,36 @@ namespace Talleres360.Controllers
             }
 
             return Ok(new { Mensaje = "Sesión cerrada correctamente." });
+        }
+
+        [HttpPost("logout-all")]
+        [Authorize]
+        [EnableRateLimiting("AuthStrict")]
+        public async Task<IActionResult> LogoutAll()
+        {
+            int? userId = _userContext.GetUsuarioId();
+
+            if (!userId.HasValue)
+            {
+                return Unauthorized(new ApiErrorResponse(
+                    codigo: ErrorCode.AUTH_TOKEN_INVALIDO.ToString(),
+                    mensaje: "No se pudo identificar al usuario desde el token actual."
+                ));
+            }
+
+            ServiceResult<bool> resultado = await _refreshTokenService.RevocarTodosLosTokensAsync(userId.Value);
+
+            if (!resultado.Success)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new ApiErrorResponse(
+                    codigo: resultado.ErrorCode ?? ErrorCode.AUTH_REVOCACION_FALLIDA.ToString(),
+                    mensaje: resultado.Message ?? "Error al revocar accesos."
+                ));
+            }
+
+            Response.Cookies.Delete("refreshToken");
+
+            return Ok(new { Mensaje = "Todas las sesiones han sido finalizadas correctamente." });
         }
     }
 }

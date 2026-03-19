@@ -19,6 +19,27 @@ namespace Talleres360.Models
         [StringLength(300)]
         public string? Apellidos { get; set; }
 
+        // --- NUEVOS CAMPOS FISCALES (Opcionales para Tickets, Obligatorios para Facturas Pro) ---
+
+        [StringLength(20)]
+        public string? NifCif { get; set; } // DNI, NIE o CIF
+
+        public bool EsEmpresa { get; set; } = false;
+
+        [StringLength(500)]
+        public string? Direccion { get; set; }
+
+        [StringLength(15)]
+        public string? CodigoPostal { get; set; }
+
+        [StringLength(150)]
+        public string? Localidad { get; set; }
+
+        [StringLength(150)]
+        public string? Provincia { get; set; }
+
+        // ---------------------------------------------------------------------------------------
+
         [Required]
         [StringLength(40)]
         public string Telefono { get; set; } = string.Empty;
@@ -39,5 +60,6 @@ namespace Talleres360.Models
         public DateTime FechaCreacion { get; set; }
 
         public DateTime? FechaModificacion { get; set; }
+
     }
 }

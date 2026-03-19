@@ -7,6 +7,7 @@ namespace Talleres360.Interfaces.Seguridad
     {
         Task<string> CrearRefreshTokenAsync(int usuarioId);
         Task<ServiceResult<TokenResponseDto>> ValidarYRenovarAsync(string refreshToken);
-        Task<ServiceResult<bool>> RevocarRefreshTokenAsync(string refreshToken); 
+        Task<ServiceResult<bool>> RevocarRefreshTokenAsync(string refreshToken);
+        Task<ServiceResult<bool>> RevocarTodosLosTokensAsync(int usuarioId);
     }
 }

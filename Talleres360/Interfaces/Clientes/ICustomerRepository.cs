@@ -12,5 +12,7 @@ namespace Talleres360.Interfaces.Clientes
         Task<int> CountNuevosEsteMesAsync(int tallerId);
         Task AddAsync(Cliente cliente);
         Task UpdateAsync(Cliente cliente);
+        Task<bool> ExistsByEmailAsync(int tallerId, string email);
+        Task<bool> ExistsByNifAsync(int tallerId, string nif);
     }
 }

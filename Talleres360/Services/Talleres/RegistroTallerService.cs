@@ -2,7 +2,7 @@
 using Talleres360.Dtos.Responses;
 using Talleres360.Enums;
 using Talleres360.Enums.Errors;
-using Talleres360.Interfaces.Data; 
+using Talleres360.Interfaces.Data;
 using Talleres360.Interfaces.Imagenes;
 using Talleres360.Interfaces.Planes;
 using Talleres360.Interfaces.Talleres;
@@ -17,7 +17,7 @@ namespace Talleres360.Services.Talleres
         private readonly IPlanRepository _planRepo;
         private readonly IUsuarioService _usuarioService;
         private readonly IImagenService _imagenService;
-        private readonly IUnitOfWork _unitOfWork; 
+        private readonly IUnitOfWork _unitOfWork;
 
         public RegistroTallerService(
             ITallerRepository tallerRepo,
@@ -70,7 +70,7 @@ namespace Talleres360.Services.Talleres
 
                     if (string.IsNullOrEmpty(resultImagen))
                     {
-                        await _unitOfWork.RollbackTransactionAsync(); 
+                        await _unitOfWork.RollbackTransactionAsync();
                         return ServiceResult<bool>.Fail(
                             ErrorCode.REG_ERROR_SUBIDA_IMAGEN.ToString(),
                             "Error al procesar la imagen de perfil."
@@ -88,7 +88,7 @@ namespace Talleres360.Services.Talleres
 
                 if (!resultUsuario.Success)
                 {
-                    await _unitOfWork.RollbackTransactionAsync(); 
+                    await _unitOfWork.RollbackTransactionAsync();
 
                     return ServiceResult<bool>.Fail(
                         resultUsuario.ErrorCode ?? ErrorCode.REG_ERROR_CREACION_USUARIO.ToString(),
@@ -102,10 +102,10 @@ namespace Talleres360.Services.Talleres
             }
             catch (Exception ex)
             {
-                await _unitOfWork.RollbackTransactionAsync(); 
+                await _unitOfWork.RollbackTransactionAsync();
                 return ServiceResult<bool>.Fail(
                     ErrorCode.SYS_ERROR_GENERICO.ToString(),
-                    "Ocurrió un error crítico durante el registro: " + ex.Message
+                   "Ocurrió un error crítico durante el registro. Por favor, inténtelo de nuevo más tarde."
                 );
             }
         }

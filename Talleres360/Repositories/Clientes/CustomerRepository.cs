@@ -3,7 +3,6 @@ using Talleres360.Data;
 using Talleres360.Dtos;
 using Talleres360.Interfaces.Clientes;
 using Talleres360.Models;
-using System.Linq;
 
 namespace Talleres360.Repositories.Clientes
 {
@@ -54,10 +53,8 @@ namespace Talleres360.Repositories.Clientes
                 );
             }
 
-            // Contar el total antes de paginar
             int totalCount = await query.CountAsync();
 
-            // Aplicar paginación
             var items = await query
                 .OrderByDescending(c => c.FechaCreacion)
                 .Skip((pagination.PageNumber - 1) * pagination.PageSize)
@@ -118,6 +115,20 @@ namespace Talleres360.Repositories.Clientes
                 cliente.Eliminado = true;
                 await _context.SaveChangesAsync();
             }
+        }
+
+        public Task<bool> ExistsByEmailAsync(int tallerId, string email)
+        {
+            return _context.Clientes
+                .AnyAsync(c => c.TallerId == tallerId && !c.Eliminado && c.Email == email);
+        }
+
+        public Task<bool> ExistsByNifAsync(int tallerId, string nif)
+        {
+            string nifNormalizado = nif.Trim().ToUpper();
+
+            return _context.Clientes
+                .AnyAsync(c => c.TallerId == tallerId && !c.Eliminado && c.NifCif == nifNormalizado);
         }
     }
 }

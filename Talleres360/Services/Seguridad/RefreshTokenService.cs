@@ -1,10 +1,12 @@
 ﻿using System.Security.Cryptography;
-using Talleres360.Dtos.Seguridad;
 using Talleres360.Dtos.Responses;
+using Talleres360.Dtos.Seguridad;
+using Talleres360.Dtos.Usuarios;
+using Talleres360.Enums.Errors;
 using Talleres360.Interfaces.Seguridad;
+using Talleres360.Interfaces.Talleres;
 using Talleres360.Interfaces.Usuarios;
 using Talleres360.Models;
-using Talleres360.Enums.Errors;
 
 namespace Talleres360.Services.Seguridad
 {
@@ -13,15 +15,18 @@ namespace Talleres360.Services.Seguridad
         private readonly IRefreshTokenRepository _refreshTokenRepo;
         private readonly IUsuarioRepository _usuarioRepo;
         private readonly ITokenService _tokenService;
+        private readonly ITallerService _tallerService;
 
         public RefreshTokenService(
             IRefreshTokenRepository refreshTokenRepo,
             IUsuarioRepository usuarioRepo,
-            ITokenService tokenService)
+            ITokenService tokenService,
+            ITallerService tallerService) 
         {
             _refreshTokenRepo = refreshTokenRepo;
             _usuarioRepo = usuarioRepo;
             _tokenService = tokenService;
+            _tallerService = tallerService;
         }
 
         public async Task<string> CrearRefreshTokenAsync(int usuarioId)
@@ -74,7 +79,24 @@ namespace Talleres360.Services.Seguridad
             tokenEntity.Usado = true;
             await _refreshTokenRepo.ActualizarAsync(tokenEntity);
 
-            string nuevoJwt = _tokenService.GenerarJwtToken(usuario);
+            bool perfilConfigurado = false;
+            if (usuario.TallerId.HasValue)
+            {
+                perfilConfigurado = await _tallerService.VerificarPerfilConfiguradoAsync(usuario.TallerId.Value);
+            }
+
+            UsuarioLoginDto usuarioDto = new UsuarioLoginDto
+            {
+                Id = usuario.Id,
+                Nombre = usuario.Nombre,
+                Email = usuario.Email,
+                Rol = usuario.Rol.ToString(),
+                TallerId = usuario.TallerId,
+                SecurityStamp = usuario.SecurityStamp ?? "",
+                PerfilConfigurado = perfilConfigurado
+            };
+
+            string nuevoJwt = _tokenService.GenerarJwtToken(usuarioDto);
             string nuevoRefreshToken = await CrearRefreshTokenAsync(usuario.Id);
 
             return ServiceResult<TokenResponseDto>.Ok(new TokenResponseDto
@@ -111,6 +133,22 @@ namespace Talleres360.Services.Seguridad
             {
                 rng.GetBytes(randomBytes);
                 return Convert.ToBase64String(randomBytes);
+            }
+        }
+
+        public async Task<ServiceResult<bool>> RevocarTodosLosTokensAsync(int usuarioId)
+        {
+            try
+            {
+                await _refreshTokenRepo.RevocarTodosLosTokensDelUsuarioAsync(usuarioId);
+                return ServiceResult<bool>.Ok(true);
+            }
+            catch (Exception)
+            {
+                return ServiceResult<bool>.Fail(
+                    ErrorCode.AUTH_REVOCACION_FALLIDA.ToString(),
+                    "No se pudieron revocar las sesiones."
+                );
             }
         }
     }

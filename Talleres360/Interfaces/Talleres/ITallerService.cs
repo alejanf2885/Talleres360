@@ -9,5 +9,9 @@ namespace Talleres360.Interfaces.Talleres
         Task<ServiceResult<Taller>> CrearTallerBaseAsync(string nombreNegocio, int planId);
         Task<ServiceResult<bool>> ConfigurarPerfilAsync(int tallerId, ConfigurarTallerRequest request);
         Task<ServiceResult<WorkshopDto>> ObtenerTallerPorIdAsync(int tallerId);
+
+        Task<bool> VerificarPerfilConfiguradoAsync(int tallerId);
+        Task<bool> ExistsByCifAsync(string cif);
+
     }
 }

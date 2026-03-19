@@ -21,8 +21,6 @@ namespace Talleres360.Controllers
 
         [TallerAuthorize<IVehiculoRepository>]
         [HttpGet]
-        [TallerAuthorize<IVehiculoRepository>]
-        [HttpGet]
         public async Task<ActionResult<PagedResponse<VehiculoDetalle>>> GetAll(
         [FromQuery] int pageNumber = 1,
         [FromQuery] int pageSize = 10,

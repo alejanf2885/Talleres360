@@ -14,7 +14,8 @@
         AUTH_REFRESH_TOKEN_EXPIRADO,
         AUTH_LOGOUT_FALLIDO,
         AUTH_NO_AUTORIZADO,           
-        AUTH_FORBIDDEN,               
+        AUTH_FORBIDDEN,
+        AUTH_REVOCACION_FALLIDA,
 
         // --- REG: Registro de Taller y Onboarding ---
         REG_FALLIDO,
@@ -28,14 +29,23 @@
         // --- SUBS: Suscripciones y Pagos (Crucial para SaaS) ---
         SUBS_SIN_PLAN_ACTIVO,        
         SUBS_LIMITE_ALCANZADO,        
-        SUBS_PAGO_RECHAZADO,         
+        SUBS_PAGO_RECHAZADO,
+
+        // --- SYS: Sistema y Errores Globales ---
+        CUST_NO_ENCONTRADO,         
+        CUST_DNI_DUPLICADO,         
+        CUST_EMAIL_DUPLICADO,        
+        CUST_TELEFONO_INVALIDO,      
+        CUST_SIN_FIRMA_RGPD,         
+        CUST_ERROR_ELIMINACION,     
+        CUST_LIMITE_PLAN_ALCANZADO,  
 
         // --- SYS: Sistema y Errores Globales ---
         SYS_DATOS_INVALIDOS,
         SYS_ERROR_GENERICO,
         SYS_ENTIDAD_NO_ENCONTRADA,
-        SYS_ARCHIVO_DEMASIADO_GRANDE, 
-        SYS_OPERACION_INVALIDA,      
-        SYS_ERROR_BASE_DATOS         
+        SYS_ARCHIVO_DEMASIADO_GRANDE,
+        SYS_OPERACION_INVALIDA,
+        SYS_ERROR_BASE_DATOS
     }
 }

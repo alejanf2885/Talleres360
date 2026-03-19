@@ -8,5 +8,9 @@ namespace Talleres360.Interfaces.Talleres
         Task<Taller?> GetByIdAsync(int id);
         Task<Taller?> GetByCifAsync(string cif);
         Task UpdateAsync(Taller taller);
+
+        Task<bool> ExistsByCifAsync(string cif);
+
+        Task<bool> IsPerfilConfiguradoAsync(int tallerId);
     }
 }

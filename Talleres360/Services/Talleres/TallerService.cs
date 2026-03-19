@@ -103,5 +103,17 @@ namespace Talleres360.Services.Talleres
 
             return ServiceResult<Taller>.Ok(taller);
         }
+
+        public async Task<bool> VerificarPerfilConfiguradoAsync(int tallerId)
+        {
+            return await _tallerRepo.IsPerfilConfiguradoAsync(tallerId);
+        }
+
+        public async Task<bool> ExistsByCifAsync(string cif)
+        {
+            return await _tallerRepo.ExistsByCifAsync(cif);
+        }
+
+
     }
 }

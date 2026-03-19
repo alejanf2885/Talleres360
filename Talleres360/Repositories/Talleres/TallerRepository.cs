@@ -36,5 +36,18 @@ namespace Talleres360.Repositories.Talleres
             _context.Talleres.Update(taller);
             await _context.SaveChangesAsync();
         }
+
+        public async Task<bool> ExistsByCifAsync(string cif)
+        {
+            return await _context.Talleres.AnyAsync(t => t.CIF == cif);
+        }
+
+        public async Task<bool> IsPerfilConfiguradoAsync(int tallerId)
+        {
+            return await _context.Talleres
+                .Where(t => t.Id == tallerId)
+                .Select(t => t.PerfilConfigurado)
+                .FirstOrDefaultAsync();
+        }
     }
 }

@@ -10,7 +10,7 @@ namespace Talleres360.API.Controllers
 {
     [Route("api/v1/[controller]")]
     [ApiController]
-    [Authorize] // 🛡️ Todo el controlador requiere un token JWT válido
+    [Authorize] 
     public class WorkshopsController : ControllerBase
     {
         private readonly ITallerService _tallerService;
@@ -27,7 +27,6 @@ namespace Talleres360.API.Controllers
         [HttpGet("my-workshop")]
         public async Task<IActionResult> GetMyWorkshop()
         {
-            // 1. Identificamos al Taller a partir del JWT
             int? tallerId = _userContext.GetTallerId();
 
             if (tallerId == null)
@@ -38,7 +37,6 @@ namespace Talleres360.API.Controllers
                 ));
             }
 
-            // 2. Pedimos los datos al servicio (que nos devuelve el DTO en un ServiceResult)
             ServiceResult<WorkshopDto> resultado = await _tallerService.ObtenerTallerPorIdAsync(tallerId.Value);
 
             if (!resultado.Success)
@@ -49,14 +47,12 @@ namespace Talleres360.API.Controllers
                 ));
             }
 
-            // 3. Devolvemos los datos limpios
             return Ok(resultado.Data);
         }
 
         [HttpPut("config")]
         public async Task<IActionResult> ConfigurarTaller([FromBody] ConfigurarTallerRequest request)
         {
-            // 1. Identificamos al Taller
             int? tallerId = _userContext.GetTallerId();
 
             if (tallerId == null)
@@ -67,7 +63,6 @@ namespace Talleres360.API.Controllers
                 ));
             }
 
-            // 2. Pasamos el objeto Request completo al servicio
             ServiceResult<bool> resultado = await _tallerService.ConfigurarPerfilAsync(tallerId.Value, request);
 
             if (!resultado.Success)
@@ -78,7 +73,6 @@ namespace Talleres360.API.Controllers
                 ));
             }
 
-            // 3. Confirmación de éxito
             return Ok(new { Mensaje = "Perfil del taller configurado correctamente." });
         }
     }

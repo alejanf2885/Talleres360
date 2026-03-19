@@ -16,7 +16,6 @@ namespace Talleres360.Repositories
 
         public async Task<TokenSeguridad?> ObtenerPorTokenAsync(string token)
         {
-            // Quitamos el .Include() porque ya no tenemos la propiedad de navegación
             return await _context.TokensSeguridad
                 .FirstOrDefaultAsync(t => t.Token == token && t.TipoToken == "REFRESH_TOKEN");
         }
@@ -35,6 +34,20 @@ namespace Talleres360.Repositories
         public async Task ActualizarAsync(TokenSeguridad token)
         {
             _context.TokensSeguridad.Update(token);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task RevocarTodosLosTokensDelUsuarioAsync(int usuarioId)
+        {
+            var tokensActivos = await _context.TokensSeguridad
+                .Where(t => t.UsuarioId == usuarioId && !t.Usado && t.TipoToken == "REFRESH_TOKEN")
+                .ToListAsync();
+
+            foreach (var token in tokensActivos)
+            {
+                token.Usado = true;
+            }
+
             await _context.SaveChangesAsync();
         }
     }
