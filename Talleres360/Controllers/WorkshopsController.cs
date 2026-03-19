@@ -10,7 +10,7 @@ namespace Talleres360.API.Controllers
 {
     [Route("api/v1/[controller]")]
     [ApiController]
-    [Authorize] 
+    [Authorize]
     public class WorkshopsController : ControllerBase
     {
         private readonly ITallerService _tallerService;
@@ -47,7 +47,7 @@ namespace Talleres360.API.Controllers
                 ));
             }
 
-            return Ok(resultado.Data);
+            return Ok(ApiResponse<WorkshopDto>.Ok(resultado.Data!, "Datos del taller recuperados."));
         }
 
         [HttpPut("config")]
@@ -73,7 +73,7 @@ namespace Talleres360.API.Controllers
                 ));
             }
 
-            return Ok(new { Mensaje = "Perfil del taller configurado correctamente." });
+            return Ok(ApiResponse<bool>.Ok(true, "Perfil del taller configurado correctamente."));
         }
     }
 }

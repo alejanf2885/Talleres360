@@ -130,5 +130,11 @@ namespace Talleres360.Repositories.Clientes
             return _context.Clientes
                 .AnyAsync(c => c.TallerId == tallerId && !c.Eliminado && c.NifCif == nifNormalizado);
         }
+
+        public async Task<bool> PerteneceATallerAsync(int recursoId, int tallerId)
+        {
+            return await _context.Clientes
+                .AnyAsync(c => c.Id == recursoId && c.TallerId == tallerId);
+        }
     }
 }

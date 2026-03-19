@@ -26,7 +26,6 @@ namespace Talleres360.API.Controllers
             _userContext = userContext;
         }
 
-
         [HttpGet]
         public async Task<IActionResult> GetAll([FromQuery] int page = 1, [FromQuery] int size = 10, [FromQuery] string? matricula = null)
         {
@@ -36,7 +35,7 @@ namespace Talleres360.API.Controllers
             VehiculoFiltroDto filtro = new VehiculoFiltroDto { Matricula = matricula };
             PagedResponse<VehiculoDetalle> response = await _vehiculoService.GetAllDetalleByTallerPagedAsync(tallerId.Value, page, size, filtro);
 
-            return Ok(response);
+            return Ok(ApiResponse<PagedResponse<VehiculoDetalle>>.Ok(response, "Listado de vehículos recuperado correctamente."));
         }
 
         [TallerAuthorize<IVehiculoRepository>]
@@ -48,9 +47,12 @@ namespace Talleres360.API.Controllers
 
             ServiceResult<VehiculoDetalle> resultado = await _vehiculoService.GetDetalleByIdAsync(tallerId.Value, id);
 
-            if (!resultado.Success) return NotFound(new ApiErrorResponse(resultado.ErrorCode!, resultado.Message!));
+            if (!resultado.Success)
+            {
+                return NotFound(new ApiErrorResponse(resultado.ErrorCode!, resultado.Message!));
+            }
 
-            return Ok(resultado.Data);
+            return Ok(ApiResponse<VehiculoDetalle>.Ok(resultado.Data!, "Datos del vehículo obtenidos."));
         }
 
         [RequiereSuscripcionActiva]
@@ -67,9 +69,10 @@ namespace Talleres360.API.Controllers
                 return BadRequest(new ApiErrorResponse(resultado.ErrorCode!, resultado.Message!));
             }
 
-            return CreatedAtAction(nameof(GetById), new { id = resultado.Data!.Id }, resultado.Data);
+            return CreatedAtAction(nameof(GetById),
+                new { id = resultado.Data!.Id },
+                ApiResponse<VehiculoDetalle>.Ok(resultado.Data!, "¡Vehículo registrado con éxito!"));
         }
-
 
         [TallerAuthorize<IVehiculoRepository>]
         [RequiereSuscripcionActiva]
@@ -86,7 +89,7 @@ namespace Talleres360.API.Controllers
                 return BadRequest(new ApiErrorResponse(resultado.ErrorCode!, resultado.Message!));
             }
 
-            return Ok(resultado.Data);
+            return Ok(ApiResponse<VehiculoDetalle>.Ok(resultado.Data!, "Los datos del vehículo han sido actualizados."));
         }
     }
 }

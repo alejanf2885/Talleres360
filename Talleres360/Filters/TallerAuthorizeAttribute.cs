@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Talleres360.Interfaces.Talleres;
-using Talleres360.Interfaces.Seguridad; // Para IUserContextService
+using Talleres360.Interfaces.Seguridad; 
 using Talleres360.Dtos.Responses;
 using Talleres360.Enums.Errors;
 

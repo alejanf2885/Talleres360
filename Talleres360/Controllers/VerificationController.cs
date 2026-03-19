@@ -60,7 +60,7 @@ namespace Talleres360.Controllers
                 ));
             }
 
-            return Ok(new { Mensaje = "¡Cuenta verificada! Ya puedes iniciar sesión." });
+            return Ok(ApiResponse<bool>.Ok(true, "¡Cuenta verificada! Ya puedes iniciar sesión."));
         }
 
         [HttpPost("resend")]
@@ -70,7 +70,9 @@ namespace Talleres360.Controllers
             ServiceResult<Usuario> resultadoUser = await _usuarioService.GetByEmailAsync(request.Email);
 
             if (!resultadoUser.Success)
-                return Ok(new { Mensaje = "Si el correo existe, se ha enviado un enlace." });
+            {
+                return Ok(ApiResponse<bool>.Ok(true, "Si el correo existe, se ha enviado un enlace."));
+            }
 
             Usuario usuario = resultadoUser.Data!;
 
@@ -83,7 +85,6 @@ namespace Talleres360.Controllers
             }
 
             string token = await _verificacionService.GenerarTokenRegistroAsync(usuario.Id);
-
             ServiceResult<bool> resultadoEnvio = await _notificacionService.EnviarBienvenidaAsync(usuario, token);
 
             if (!resultadoEnvio.Success)
@@ -94,7 +95,7 @@ namespace Talleres360.Controllers
                 ));
             }
 
-            return Ok(new { Mensaje = "Se ha enviado un nuevo enlace de activación." });
+            return Ok(ApiResponse<bool>.Ok(true, "Se ha enviado un nuevo enlace de activación."));
         }
     }
 }

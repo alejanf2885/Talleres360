@@ -48,18 +48,21 @@ namespace Talleres360.Controllers
             {
                 return BadRequest(new ApiErrorResponse(
                     codigo: resultado.ErrorCode ?? ErrorCode.REG_FALLIDO.ToString(),
-                    mensaje: resultado.Message ?? "No se pudo completar el registro."
+                    mensaje: resultado.Message ?? "No se pudo completar el registro del taller."
                 ));
             }
 
-            return Ok(new { Mensaje = resultado.Message ?? "Registro completado con éxito." });
+            // Devolvemos información útil para que el Front muestre la pantalla de "Revisa tu email"
+            return Ok(ApiResponse<object>.Ok(
+                new { Email = request.Email.ToLower().Trim() },
+                "¡Registro casi listo! Te hemos enviado un enlace de activación a tu correo electrónico."
+            ));
         }
-
         [HttpPost("login")]
         [EnableRateLimiting("AuthStrict")]
         public async Task<IActionResult> Login([FromBody] LoginRequest request)
         {
-
+            // 1. Validar credenciales
             ServiceResult<UsuarioLoginDto> resultado = await _authService.ValidarLoginAsync(request.Email, request.Password);
 
             if (!resultado.Success)
@@ -69,8 +72,8 @@ namespace Talleres360.Controllers
                                  : StatusCodes.Status401Unauthorized;
 
                 return StatusCode(statusCode, new ApiErrorResponse(
-                    codigo: resultado.ErrorCode ?? ErrorCode.SYS_ERROR_GENERICO.ToString(),
-                    mensaje: resultado.Message ?? "Error de autenticación"
+                    codigo: resultado.ErrorCode ?? ErrorCode.AUTH_CREDENCIALES_INCORRECTAS.ToString(),
+                    mensaje: resultado.Message ?? "Las credenciales introducidas no son válidas."
                 ));
             }
 
@@ -81,18 +84,13 @@ namespace Talleres360.Controllers
 
             Response.AppendRefreshTokenCookie(refreshToken);
 
-            return Ok(new
+            var authData = new
             {
                 Token = jwtToken,
-                Usuario = new
-                {
-                    usuario.Id,
-                    usuario.Nombre,
-                    usuario.Email,
-                    Rol = usuario.Rol.ToString(),
-                    usuario.TallerId
-                }
-            });
+                Usuario = usuario 
+            };
+
+            return Ok(ApiResponse<object>.Ok(authData, $"¡Bienvenido de nuevo, {usuario.Nombre}!"));
         }
 
         [HttpPost("refresh")]
@@ -105,7 +103,7 @@ namespace Talleres360.Controllers
             {
                 return Unauthorized(new ApiErrorResponse(
                     codigo: ErrorCode.AUTH_REFRESH_TOKEN_INVALIDO.ToString(),
-                    mensaje: "No hay token de refresco."
+                    mensaje: "No se ha encontrado una sesión activa."
                 ));
             }
 
@@ -115,20 +113,22 @@ namespace Talleres360.Controllers
             {
                 return Unauthorized(new ApiErrorResponse(
                     codigo: resultado.ErrorCode ?? ErrorCode.AUTH_REFRESH_TOKEN_INVALIDO.ToString(),
-                    mensaje: resultado.Message ?? "La sesión ha expirado o no es válida."
+                    mensaje: resultado.Message ?? "La sesión ha expirado. Por favor, vuelva a identificarse."
                 ));
             }
 
             Response.AppendRefreshTokenCookie(resultado.Data!.RefreshToken);
 
-            return Ok(new { Token = resultado.Data!.Token });
+            return Ok(ApiResponse<object>.Ok(
+                new { Token = resultado.Data!.Token },
+                "Token renovado con éxito."
+            ));
         }
 
         [HttpPost("logout")]
         public async Task<IActionResult> Logout()
         {
             string? refreshToken = Request.Cookies["refreshToken"];
-
             Response.Cookies.Delete("refreshToken");
 
             if (!string.IsNullOrWhiteSpace(refreshToken))
@@ -138,13 +138,13 @@ namespace Talleres360.Controllers
                 if (!resultado.Success)
                 {
                     return StatusCode(StatusCodes.Status500InternalServerError, new ApiErrorResponse(
-                        codigo: resultado.ErrorCode ?? ErrorCode.AUTH_LOGOUT_FALLIDO.ToString(),
-                        mensaje: resultado.Message ?? "Ocurrió un error al intentar cerrar la sesión en el servidor."
+                        codigo: ErrorCode.AUTH_LOGOUT_FALLIDO.ToString(),
+                        mensaje: "Error interno al finalizar la sesión."
                     ));
                 }
             }
 
-            return Ok(new { Mensaje = "Sesión cerrada correctamente." });
+            return Ok(ApiResponse<bool>.Ok(true, "Has cerrado sesión correctamente. ¡Hasta pronto!"));
         }
 
         [HttpPost("logout-all")]
@@ -158,7 +158,7 @@ namespace Talleres360.Controllers
             {
                 return Unauthorized(new ApiErrorResponse(
                     codigo: ErrorCode.AUTH_TOKEN_INVALIDO.ToString(),
-                    mensaje: "No se pudo identificar al usuario desde el token actual."
+                    mensaje: "No se ha podido identificar al usuario."
                 ));
             }
 
@@ -167,14 +167,14 @@ namespace Talleres360.Controllers
             if (!resultado.Success)
             {
                 return StatusCode(StatusCodes.Status500InternalServerError, new ApiErrorResponse(
-                    codigo: resultado.ErrorCode ?? ErrorCode.AUTH_REVOCACION_FALLIDA.ToString(),
-                    mensaje: resultado.Message ?? "Error al revocar accesos."
+                    codigo: ErrorCode.AUTH_REVOCACION_FALLIDA.ToString(),
+                    mensaje: "Ocurrió un problema al intentar cerrar todas las sesiones."
                 ));
             }
 
             Response.Cookies.Delete("refreshToken");
 
-            return Ok(new { Mensaje = "Todas las sesiones han sido finalizadas correctamente." });
+            return Ok(ApiResponse<bool>.Ok(true, "Se han cerrado todas las sesiones activas en otros dispositivos."));
         }
     }
 }

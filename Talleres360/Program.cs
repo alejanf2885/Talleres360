@@ -25,6 +25,7 @@ using Talleres360.Interfaces.Seguridad;
 using Talleres360.Interfaces.Talleres;
 using Talleres360.Interfaces.Usuarios;
 using Talleres360.Interfaces.Vehiculos;
+using Talleres360.Middlewares;
 using Talleres360.Repositories;
 using Talleres360.Repositories.Clientes;
 using Talleres360.Repositories.Data;
@@ -47,29 +48,19 @@ using Talleres360.Services.Talleres;
 using Talleres360.Services.Usuarios;
 using Talleres360.Services.Vehiculos;
 
-var builder = WebApplication.CreateBuilder(args);
+WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
-// =========================================================
-// 1. BASE DE DATOS
-// =========================================================
 string connectionString = builder.Configuration.GetConnectionString("SqlSaas")
     ?? throw new InvalidOperationException("No se encontró la cadena de conexión 'SqlSaas'.");
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(connectionString));
 
-// =========================================================
-// 2. CACHÉ
-// =========================================================
 builder.Services.AddMemoryCache();
 builder.Services.AddScoped<ICacheService, CacheService>();
 
-// =========================================================
-// 3. INYECCIÓN DE DEPENDENCIAS (IoC)
-// =========================================================
 builder.Services.AddHttpContextAccessor();
 
-// --- CONFIGURACIÓN DE RESEND  ---
 builder.Services.AddOptions();
 builder.Services.AddHttpClient<ResendClient>();
 builder.Services.Configure<ResendClientOptions>(o =>
@@ -78,7 +69,6 @@ builder.Services.Configure<ResendClientOptions>(o =>
 });
 builder.Services.AddTransient<IResend, ResendClient>();
 
-// Repositorios
 builder.Services.AddScoped<IUsuarioRepository, UsuarioRepository>();
 builder.Services.AddScoped<ITallerRepository, TallerRepository>();
 builder.Services.AddScoped<IPlanRepository, PlanRepository>();
@@ -88,7 +78,6 @@ builder.Services.AddScoped<IVehiculoRepository, VehiculoRepository>();
 builder.Services.AddScoped<IVerificacionRepository, VerificacionRepository>();
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
-// Servicios Core
 builder.Services.AddSingleton<IPasswordService, BcryptPasswordService>();
 builder.Services.AddScoped<ITallerService, TallerService>();
 builder.Services.AddScoped<ITokenService, TokenService>();
@@ -102,7 +91,6 @@ builder.Services.AddScoped<IEmailService, ResendEmailService>();
 builder.Services.AddScoped<ITemplateService, TemplateService>();
 builder.Services.AddScoped<INotificacionService, NotificacionService>();
 
-// Seguridad y Gestión
 builder.Services.AddScoped<ISuscripcionGuardService, SuscripcionGuardService>();
 builder.Services.AddScoped<ICustomerService, CustomerService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
@@ -111,14 +99,10 @@ builder.Services.AddScoped<IRegistroTallerService, RegistroTallerService>();
 builder.Services.AddScoped<IRefreshTokenService, RefreshTokenService>();
 builder.Services.AddScoped<IVerificacionService, VerificacionService>();
 
-// Configuracion 
 builder.Services.Configure<UrlSettings>(builder.Configuration.GetSection("AppSettings"));
 
-// =========================================================
-// 4. AUTENTICACIÓN Y AUTORIZACIÓN JWT
-// =========================================================
-var jwtKey = builder.Configuration["Jwt:Key"] ?? "TuSuperClaveSecretaDeDesarrolloMuyLarga123456789!";
-var keyBytes = Encoding.UTF8.GetBytes(jwtKey);
+string jwtKey = builder.Configuration["Jwt:Key"] ?? "TuSuperClaveSecretaDeDesarrolloMuyLarga123456789!";
+byte[] keyBytes = Encoding.UTF8.GetBytes(jwtKey);
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
@@ -137,9 +121,6 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
 builder.Services.AddAuthorization();
 
-// =========================================================
-// 5. CORS
-// =========================================================
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend", policy =>
@@ -151,80 +132,73 @@ builder.Services.AddCors(options =>
     });
 });
 
-// =========================================================
-// 6. RATE LIMITER (Políticas de Seguridad)
-// =========================================================
 builder.Services.AddRateLimiter(options =>
 {
     options.AddPolicy("AuthStrict", httpContext =>
     {
-        var ip = httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown";
+        string ip = httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown";
         return RateLimitPartition.GetFixedWindowLimiter(ip, _ => new FixedWindowRateLimiterOptions
         {
             PermitLimit = 5,
             Window = TimeSpan.FromMinutes(2),
             QueueLimit = 0,
-            AutoReplenishment = true 
+            AutoReplenishment = true
         });
     });
 
     options.AddPolicy("RefreshPolicy", httpContext =>
     {
-        var ip = httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown";
+        string ip = httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown";
         return RateLimitPartition.GetFixedWindowLimiter(ip, _ => new FixedWindowRateLimiterOptions
         {
             PermitLimit = 10,
             Window = TimeSpan.FromMinutes(1),
             QueueLimit = 0,
-            AutoReplenishment = true 
+            AutoReplenishment = true
         });
     });
 
-    // ✅ Dejamos solo UNA política de EmailStrict
     options.AddPolicy("EmailStrict", httpContext =>
     {
-        var ip = httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown";
+        string ip = httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown";
         return RateLimitPartition.GetFixedWindowLimiter(ip, _ => new FixedWindowRateLimiterOptions
         {
             PermitLimit = 2,
             Window = TimeSpan.FromMinutes(1),
             QueueLimit = 0,
-            AutoReplenishment = true 
+            AutoReplenishment = true
         });
     });
 
     options.AddPolicy("VerifyStrict", httpContext =>
     {
-        var ip = httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown";
+        string ip = httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown";
         return RateLimitPartition.GetFixedWindowLimiter(ip, _ => new FixedWindowRateLimiterOptions
         {
             PermitLimit = 5,
             Window = TimeSpan.FromMinutes(1),
             QueueLimit = 0,
-            AutoReplenishment = true 
+            AutoReplenishment = true
         });
     });
 
     options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
 });
 
-// ========================================
-// 7. CONTROLADORES Y OPENAPI
-// ========================================
 builder.Services.AddControllers()
     .ConfigureApiBehaviorOptions(options =>
     {
         options.InvalidModelStateResponseFactory = context =>
         {
-            var errores = context.ModelState
+            List<object> errores = context.ModelState
                 .Where(e => e.Value?.Errors.Count > 0)
-                .Select(e => new
+                .Select(e => (object)new
                 {
                     Campo = e.Key,
                     Error = e.Value?.Errors.First().ErrorMessage
                 }).ToList();
 
-            var response = new ApiErrorResponse(
+            ApiErrorResponse response = new ApiErrorResponse(
                 codigo: ErrorCode.SYS_DATOS_INVALIDOS.ToString(),
                 mensaje: "Existen errores de validación en los datos enviados.",
                 detalles: errores
@@ -244,11 +218,10 @@ builder.Services.AddOpenApi(options =>
     });
 });
 
-var app = builder.Build();
+WebApplication app = builder.Build();
 
-// =========================================================
-// 8. PIPELINE HTTP
-// =========================================================
+app.UseMiddleware<ExceptionMiddleware>();
+
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
@@ -264,10 +237,10 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 
-app.UseCors("AllowFrontend");    
-app.UseRateLimiter();           
-app.UseAuthentication();         
-app.UseAuthorization();         
-app.MapControllers();            
+app.UseCors("AllowFrontend");
+app.UseRateLimiter();
+app.UseAuthentication();
+app.UseAuthorization();
+app.MapControllers();
 
 app.Run();
