@@ -120,5 +120,22 @@ namespace Talleres360.Services.Usuarios
             await _userRepo.ActivarUsuarioAsync(usuarioId);
             return ServiceResult<bool>.Ok(true);
         }
+
+        public async Task<ServiceResult<bool>> ValidarEmailDisponibleAsync(string email)
+        {
+            bool existe = await _userRepo.ExisteEmailAsync(email);
+
+            if (existe)
+            {
+                return ServiceResult<bool>.Fail(
+                    ErrorCode.REG_EMAIL_YA_REGISTRADO.ToString(),
+                    "El correo electrónico ya se encuentra registrado en el sistema."
+                );
+            }
+
+            return ServiceResult<bool>.Ok(true);
+        }
+
+       
     }
 }

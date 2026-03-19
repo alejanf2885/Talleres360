@@ -92,7 +92,6 @@ namespace Talleres360.Services.Seguridad
                 Email = usuario.Email,
                 Rol = usuario.Rol.ToString(),
                 TallerId = usuario.TallerId,
-                SecurityStamp = usuario.SecurityStamp ?? "",
                 PerfilConfigurado = perfilConfigurado
             };
 

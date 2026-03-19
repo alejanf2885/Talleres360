@@ -52,7 +52,6 @@ namespace Talleres360.Controllers
                 ));
             }
 
-            // Devolvemos información útil para que el Front muestre la pantalla de "Revisa tu email"
             return Ok(ApiResponse<object>.Ok(
                 new { Email = request.Email.ToLower().Trim() },
                 "¡Registro casi listo! Te hemos enviado un enlace de activación a tu correo electrónico."
@@ -62,7 +61,6 @@ namespace Talleres360.Controllers
         [EnableRateLimiting("AuthStrict")]
         public async Task<IActionResult> Login([FromBody] LoginRequest request)
         {
-            // 1. Validar credenciales
             ServiceResult<UsuarioLoginDto> resultado = await _authService.ValidarLoginAsync(request.Email, request.Password);
 
             if (!resultado.Success)
@@ -84,13 +82,15 @@ namespace Talleres360.Controllers
 
             Response.AppendRefreshTokenCookie(refreshToken);
 
-            var authData = new
+          
+
+            AuthResponseDto authResponse = new AuthResponseDto
             {
                 Token = jwtToken,
-                Usuario = usuario 
+                Usuario = usuario
             };
 
-            return Ok(ApiResponse<object>.Ok(authData, $"¡Bienvenido de nuevo, {usuario.Nombre}!"));
+            return Ok(ApiResponse<object>.Ok(authResponse, $"¡Bienvenido de nuevo, {usuario.Nombre}!"));
         }
 
         [HttpPost("refresh")]

@@ -26,6 +26,7 @@
         REG_ERROR_SUBIDA_IMAGEN,
         REG_ERROR_CREACION_USUARIO,
         REG_TALLER_YA_EXISTE,
+        REG_EMAIL_DUPLICADO,
 
         // --- SUBS: Suscripciones y Pagos (SaaS) ---
         SUBS_SIN_PLAN_ACTIVO,

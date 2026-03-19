@@ -35,6 +35,15 @@ namespace Talleres360.Services.Talleres
 
         public async Task<ServiceResult<bool>> RegistrarNuevoClienteSaaSAsync(RegistroRequest request)
         {
+
+            ServiceResult<bool> validacionEmail = await _usuarioService.ValidarEmailDisponibleAsync(request.Email);
+
+            if (!validacionEmail.Success)
+            {
+                return ServiceResult<bool>.Fail(validacionEmail.ErrorCode!, validacionEmail.Message!);
+            }
+
+
             await _unitOfWork.BeginTransactionAsync();
 
             try

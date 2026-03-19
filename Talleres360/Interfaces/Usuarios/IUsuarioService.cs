@@ -11,5 +11,7 @@ namespace Talleres360.Interfaces.Usuarios
         Task<ServiceResult<bool>> ActivarUsuarioAsync(int usuarioId);
 
         Task<ServiceResult<Usuario>> CrearUsuarioAdminAsync(int tallerId, string nombre, string email, string password, string? rutaImagen = null);
+
+        Task<ServiceResult<bool>> ValidarEmailDisponibleAsync(string email);
     }
 }
