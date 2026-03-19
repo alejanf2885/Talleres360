@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.RateLimiting;
 using Talleres360.Dtos;
 using Talleres360.Dtos.Auth;
 using Talleres360.Dtos.Responses;
-using Talleres360.Enums.Auth;
+using Talleres360.Enums.Errors;
 using Talleres360.Interfaces.Auth;
 using Talleres360.Interfaces.Seguridad;
 using Talleres360.Interfaces.Talleres;
@@ -43,7 +43,7 @@ namespace Talleres360.Controllers
             if (!resultado.Success)
             {
                 return BadRequest(new ApiErrorResponse(
-                    codigo: resultado.ErrorCode ?? AuthErrorCode.REGISTRO_FALLIDO.ToString(),
+                    codigo: resultado.ErrorCode ?? ErrorCode.REG_FALLIDO.ToString(),
                     mensaje: resultado.Message ?? "No se pudo completar el registro."
                 ));
             }
@@ -60,12 +60,12 @@ namespace Talleres360.Controllers
 
             if (!resultado.Success)
             {
-                int statusCode = resultado.ErrorCode == AuthErrorCode.CUENTA_INACTIVA.ToString()
+                int statusCode = resultado.ErrorCode == ErrorCode.AUTH_CUENTA_INACTIVA.ToString()
                                  ? StatusCodes.Status403Forbidden
                                  : StatusCodes.Status401Unauthorized;
 
                 return StatusCode(statusCode, new ApiErrorResponse(
-                    codigo: resultado.ErrorCode ?? AuthErrorCode.ERROR_GENERICO.ToString(),
+                    codigo: resultado.ErrorCode ?? ErrorCode.SYS_ERROR_GENERICO.ToString(),
                     mensaje: resultado.Message ?? "Error de autenticación"
                 ));
             }
@@ -95,41 +95,50 @@ namespace Talleres360.Controllers
         [EnableRateLimiting("RefreshPolicy")]
         public async Task<IActionResult> Refresh()
         {
-            var refreshToken = Request.Cookies["refreshToken"];
+            string? refreshToken = Request.Cookies["refreshToken"];
 
             if (string.IsNullOrWhiteSpace(refreshToken))
             {
                 return Unauthorized(new ApiErrorResponse(
-                    codigo: AuthErrorCode.REFRESH_TOKEN_INVALIDO.ToString(),
+                    codigo: ErrorCode.AUTH_REFRESH_TOKEN_INVALIDO.ToString(),
                     mensaje: "No hay token de refresco."
                 ));
             }
 
-            TokenRefreshResult resultado = await _refreshTokenService.ValidarYRenovarAsync(refreshToken);
+            ServiceResult<TokenResponseDto> resultado = await _refreshTokenService.ValidarYRenovarAsync(refreshToken);
 
-            if (!resultado.Exito)
+            if (!resultado.Success)
             {
                 return Unauthorized(new ApiErrorResponse(
-                    codigo: AuthErrorCode.REFRESH_TOKEN_EXPIRADO.ToString(),
-                    mensaje: resultado.MensajeError ?? "La sesión ha expirado."
+                    codigo: resultado.ErrorCode ?? ErrorCode.AUTH_REFRESH_TOKEN_INVALIDO.ToString(),
+                    mensaje: resultado.Message ?? "La sesión ha expirado o no es válida."
                 ));
             }
 
-            Response.AppendRefreshTokenCookie(resultado.NuevoRefreshToken);
+            Response.AppendRefreshTokenCookie(resultado.Data!.RefreshToken);
 
-            return Ok(new { Token = resultado.NuevoJwtToken });
+            return Ok(new { Token = resultado.Data!.Token });
         }
 
         [HttpPost("logout")]
         public async Task<IActionResult> Logout()
         {
-            var refreshToken = Request.Cookies["refreshToken"];
-            if (!string.IsNullOrWhiteSpace(refreshToken))
-            {
-                await _refreshTokenService.RevocarRefreshTokenAsync(refreshToken);
-            }
+            string? refreshToken = Request.Cookies["refreshToken"];
 
             Response.Cookies.Delete("refreshToken");
+
+            if (!string.IsNullOrWhiteSpace(refreshToken))
+            {
+                ServiceResult<bool> resultado = await _refreshTokenService.RevocarRefreshTokenAsync(refreshToken);
+
+                if (!resultado.Success)
+                {
+                    return StatusCode(StatusCodes.Status500InternalServerError, new ApiErrorResponse(
+                        codigo: resultado.ErrorCode ?? ErrorCode.AUTH_LOGOUT_FALLIDO.ToString(),
+                        mensaje: resultado.Message ?? "Ocurrió un error al intentar cerrar la sesión en el servidor."
+                    ));
+                }
+            }
 
             return Ok(new { Mensaje = "Sesión cerrada correctamente." });
         }

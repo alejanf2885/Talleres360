@@ -3,7 +3,7 @@ using Talleres360.Interfaces.Password;
 using Talleres360.Interfaces.Usuarios;
 using Talleres360.Models;
 using Talleres360.Dtos.Responses;
-using Talleres360.Enums.Auth;
+using Talleres360.Enums.Errors;
 
 namespace Talleres360.Services.Auth
 {
@@ -26,7 +26,7 @@ namespace Talleres360.Services.Auth
             if (usuario == null || usuario.Eliminado)
             {
                 return ServiceResult<Usuario>.Fail(
-                    AuthErrorCode.CREDENCIALES_INCORRECTAS.ToString(),
+                    ErrorCode.AUTH_CREDENCIALES_INCORRECTAS.ToString(),
                     "El correo o la contraseña no son correctos."
                 );
             }
@@ -34,7 +34,7 @@ namespace Talleres360.Services.Auth
             if (!usuario.Activo)
             {
                 return ServiceResult<Usuario>.Fail(
-                    AuthErrorCode.CUENTA_INACTIVA.ToString(),
+                    ErrorCode.AUTH_CUENTA_INACTIVA.ToString(),
                     "Tu cuenta aún no está verificada. Revisa tu correo electrónico."
                 );
             }
@@ -44,7 +44,7 @@ namespace Talleres360.Services.Auth
             if (credencial == null || !_passwordService.VerifyPassword(password, credencial.PasswordHash))
             {
                 return ServiceResult<Usuario>.Fail(
-                    AuthErrorCode.CREDENCIALES_INCORRECTAS.ToString(),
+                    ErrorCode.AUTH_CREDENCIALES_INCORRECTAS.ToString(),
                     "El correo o la contraseña no son correctos."
                 );
             }

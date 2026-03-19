@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.RateLimiting;
 using Talleres360.Dtos.Emails;
 using Talleres360.Dtos.Responses;
-using Talleres360.Enums.Auth;
+using Talleres360.Enums.Errors;
 using Talleres360.Interfaces.Emails;
 using Talleres360.Interfaces.Seguridad;
 using Talleres360.Interfaces.Usuarios;
@@ -16,7 +16,7 @@ namespace Talleres360.Controllers
     {
         private readonly IUsuarioService _usuarioService;
         private readonly IVerificacionService _verificacionService;
-        private readonly INotificacionService _notificacionService; // ✅ Nueva abstracción
+        private readonly INotificacionService _notificacionService;
 
         public VerificationController(
             IUsuarioService usuarioService,
@@ -29,20 +29,36 @@ namespace Talleres360.Controllers
         }
 
         [HttpGet("verify-email")]
+        [EnableRateLimiting("VerifyStrict")]
         public async Task<IActionResult> VerifyEmail([FromQuery] string token)
         {
             if (string.IsNullOrWhiteSpace(token))
             {
-                return BadRequest(new ApiErrorResponse(AuthErrorCode.TOKEN_INVALIDO.ToString(), "El token es obligatorio."));
+                return BadRequest(new ApiErrorResponse(
+                    ErrorCode.AUTH_TOKEN_INVALIDO.ToString(),
+                    "El token es obligatorio."
+                ));
             }
 
-            var resultadoToken = await _verificacionService.ValidarYConsumirTokenAsync(token);
-            if (!resultadoToken.Exito)
+            ServiceResult<int> resultadoToken = await _verificacionService.ValidarYConsumirTokenAsync(token);
+
+            if (!resultadoToken.Success)
             {
-                return BadRequest(new ApiErrorResponse(AuthErrorCode.TOKEN_INVALIDO.ToString(), resultadoToken.Mensaje));
+                return BadRequest(new ApiErrorResponse(
+                    codigo: resultadoToken.ErrorCode ?? ErrorCode.AUTH_TOKEN_INVALIDO.ToString(),
+                    mensaje: resultadoToken.Message ?? "Error al validar el token."
+                ));
             }
 
-            await _usuarioService.ActivarUsuarioAsync(resultadoToken.UsuarioId.Value);
+            ServiceResult<bool> resultadoActivacion = await _usuarioService.ActivarUsuarioAsync(resultadoToken.Data);
+
+            if (!resultadoActivacion.Success)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new ApiErrorResponse(
+                    codigo: resultadoActivacion.ErrorCode ?? ErrorCode.SYS_ERROR_GENERICO.ToString(),
+                    mensaje: resultadoActivacion.Message ?? "Ocurrió un problema al activar la cuenta."
+                ));
+            }
 
             return Ok(new { Mensaje = "¡Cuenta verificada! Ya puedes iniciar sesión." });
         }
@@ -60,7 +76,10 @@ namespace Talleres360.Controllers
 
             if (usuario.Activo)
             {
-                return BadRequest(new ApiErrorResponse(AuthErrorCode.ERROR_GENERICO.ToString(), "Esta cuenta ya está activa."));
+                return BadRequest(new ApiErrorResponse(
+                    ErrorCode.AUTH_CUENTA_YA_ACTIVA.ToString(),
+                    "Esta cuenta ya está activa."
+                ));
             }
 
             string token = await _verificacionService.GenerarTokenRegistroAsync(usuario.Id);
@@ -70,7 +89,7 @@ namespace Talleres360.Controllers
             if (!resultadoEnvio.Success)
             {
                 return StatusCode(StatusCodes.Status500InternalServerError, new ApiErrorResponse(
-                    resultadoEnvio.ErrorCode ?? AuthErrorCode.ERROR_GENERICO.ToString(),
+                    resultadoEnvio.ErrorCode ?? ErrorCode.SYS_ERROR_GENERICO.ToString(),
                     resultadoEnvio.Message ?? "Error al enviar el correo."
                 ));
             }

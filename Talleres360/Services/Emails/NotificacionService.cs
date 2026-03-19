@@ -1,5 +1,5 @@
 ﻿using Talleres360.Dtos.Responses;
-using Talleres360.Enums.Auth;
+using Talleres360.Enums.Errors;
 using Talleres360.Interfaces.Emails;
 using Talleres360.Models;
 
@@ -38,7 +38,7 @@ namespace Talleres360.Services.Emails
             }
             catch (Exception ex)
             {
-                return ServiceResult<bool>.Fail(AuthErrorCode.ERROR_GENERICO.ToString(), "No se pudo enviar el email de bienvenida.");
+                return ServiceResult<bool>.Fail(ErrorCode.SYS_ERROR_GENERICO.ToString(), "No se pudo enviar el email de bienvenida.");
             }
         }
     }

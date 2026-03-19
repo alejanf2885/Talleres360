@@ -1,20 +1,22 @@
-using System.Security.Cryptography;
+﻿using System.Security.Cryptography;
 using Talleres360.Dtos.Seguridad;
+using Talleres360.Dtos.Responses;
 using Talleres360.Interfaces.Seguridad;
-using Talleres360.Interfaces.Usuarios; 
+using Talleres360.Interfaces.Usuarios;
 using Talleres360.Models;
+using Talleres360.Enums.Errors;
 
 namespace Talleres360.Services.Seguridad
 {
     public class RefreshTokenService : IRefreshTokenService
     {
         private readonly IRefreshTokenRepository _refreshTokenRepo;
-        private readonly IUsuarioRepository _usuarioRepo; 
+        private readonly IUsuarioRepository _usuarioRepo;
         private readonly ITokenService _tokenService;
 
         public RefreshTokenService(
             IRefreshTokenRepository refreshTokenRepo,
-            IUsuarioRepository usuarioRepo, 
+            IUsuarioRepository usuarioRepo,
             ITokenService tokenService)
         {
             _refreshTokenRepo = refreshTokenRepo;
@@ -40,31 +42,33 @@ namespace Talleres360.Services.Seguridad
             return refreshToken;
         }
 
-        public async Task<TokenRefreshResult> ValidarYRenovarAsync(string refreshToken)
+        public async Task<ServiceResult<TokenResponseDto>> ValidarYRenovarAsync(string refreshToken)
         {
-            TokenRefreshResult result = new TokenRefreshResult();
             TokenSeguridad tokenEntity = await _refreshTokenRepo.ObtenerPorTokenAsync(refreshToken);
 
             if (tokenEntity == null)
             {
-                result.Exito = false; result.MensajeError = "Refresh token no v�lido."; return result;
+                return ServiceResult<TokenResponseDto>.Fail(
+                    ErrorCode.AUTH_TOKEN_INVALIDO.ToString(), "El token de refresco no es válido.");
             }
 
             if (tokenEntity.Usado)
             {
-                result.Exito = false; result.MensajeError = "Este token ya fue utilizado."; return result;
+                return ServiceResult<TokenResponseDto>.Fail(
+                    ErrorCode.AUTH_TOKEN_INVALIDO.ToString(), "Este token ya ha sido utilizado.");
             }
 
             if (tokenEntity.FechaExpiracion < DateTime.UtcNow)
             {
-                result.Exito = false; result.MensajeError = "El refresh token ha expirado."; return result;
+                return ServiceResult<TokenResponseDto>.Fail(
+                    ErrorCode.AUTH_REFRESH_TOKEN_EXPIRADO.ToString(), "La sesión ha expirado.");
             }
 
-            var usuario = await _usuarioRepo.GetByIdAsync(tokenEntity.UsuarioId);
-
-            if (usuario == null || !usuario.Activo || usuario.Eliminado)
+            Usuario usuario = await _usuarioRepo.GetByIdAsync(tokenEntity.UsuarioId);
+            if (usuario == null || !usuario.Activo)
             {
-                result.Exito = false; result.MensajeError = "Usuario no v�lido."; return result;
+                return ServiceResult<TokenResponseDto>.Fail(
+                    ErrorCode.AUTH_CUENTA_INACTIVA.ToString(), "El usuario ya no está activo o no existe.");
             }
 
             tokenEntity.Usado = true;
@@ -73,21 +77,30 @@ namespace Talleres360.Services.Seguridad
             string nuevoJwt = _tokenService.GenerarJwtToken(usuario);
             string nuevoRefreshToken = await CrearRefreshTokenAsync(usuario.Id);
 
-            result.Exito = true;
-            result.NuevoJwtToken = nuevoJwt;
-            result.NuevoRefreshToken = nuevoRefreshToken;
-
-            return result;
+            return ServiceResult<TokenResponseDto>.Ok(new TokenResponseDto
+            {
+                Token = nuevoJwt,
+                RefreshToken = nuevoRefreshToken
+            });
         }
 
-        public async Task RevocarRefreshTokenAsync(string refreshToken)
+        public async Task<ServiceResult<bool>> RevocarRefreshTokenAsync(string refreshToken)
         {
-            TokenSeguridad tokenEntity = await _refreshTokenRepo.ObtenerPorTokenAsync(refreshToken);
-
-            if (tokenEntity != null && !tokenEntity.Usado)
+            try
             {
-                tokenEntity.Usado = true;
-                await _refreshTokenRepo.ActualizarAsync(tokenEntity);
+                TokenSeguridad tokenEntity = await _refreshTokenRepo.ObtenerPorTokenAsync(refreshToken);
+
+                if (tokenEntity != null && !tokenEntity.Usado)
+                {
+                    tokenEntity.Usado = true;
+                    await _refreshTokenRepo.ActualizarAsync(tokenEntity);
+                }
+                return ServiceResult<bool>.Ok(true);
+            }
+            catch (Exception)
+            {
+                return ServiceResult<bool>.Fail(
+                    ErrorCode.AUTH_LOGOUT_FALLIDO.ToString(), "No se pudo invalidar la sesión en el servidor.");
             }
         }
 

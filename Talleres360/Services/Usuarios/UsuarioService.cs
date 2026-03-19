@@ -1,7 +1,7 @@
 ﻿using Talleres360.Dtos.Responses;
 using Talleres360.Enum;
 using Talleres360.Enums;
-using Talleres360.Enums.Auth;
+using Talleres360.Enums.Errors;
 using Talleres360.Interfaces.Emails;
 using Talleres360.Interfaces.Password;
 using Talleres360.Interfaces.Seguridad;
@@ -33,7 +33,7 @@ namespace Talleres360.Services.Usuarios
         {
             Usuario? usuario = await _userRepo.GetByEmailAsync(email);
             if (usuario == null)
-                return ServiceResult<Usuario>.Fail(AuthErrorCode.CREDENCIALES_INCORRECTAS.ToString(), "Usuario no encontrado.");
+                return ServiceResult<Usuario>.Fail(ErrorCode.SYS_ENTIDAD_NO_ENCONTRADA.ToString(), "Usuario no encontrado.");
 
             return ServiceResult<Usuario>.Ok(usuario);
         }
@@ -42,7 +42,7 @@ namespace Talleres360.Services.Usuarios
         {
             Usuario? usuario = await _userRepo.GetByIdAsync(id);
             if (usuario == null)
-                return ServiceResult<Usuario>.Fail(AuthErrorCode.ERROR_GENERICO.ToString(), "Usuario no encontrado.");
+                return ServiceResult<Usuario>.Fail(ErrorCode.SYS_ENTIDAD_NO_ENCONTRADA.ToString(), "Usuario no encontrado.");
 
             return ServiceResult<Usuario>.Ok(usuario);
         }
@@ -58,7 +58,7 @@ namespace Talleres360.Services.Usuarios
         {
             if (await _userRepo.ExisteEmailAsync(email))
             {
-                return ServiceResult<Usuario>.Fail(AuthErrorCode.EMAIL_YA_REGISTRADO.ToString(), "El email ya existe.");
+                return ServiceResult<Usuario>.Fail(ErrorCode.REG_EMAIL_YA_REGISTRADO.ToString(), "El email ya existe.");
             }
 
             try
@@ -80,7 +80,7 @@ namespace Talleres360.Services.Usuarios
 
                 if (filasAfectadasUser == 0 || usuario.Id == 0)
                 {
-                    return ServiceResult<Usuario>.Fail(AuthErrorCode.ERROR_CREACION_USUARIO.ToString(), "No se pudo guardar el perfil de usuario.");
+                    return ServiceResult<Usuario>.Fail(ErrorCode.REG_ERROR_CREACION_USUARIO.ToString(), "No se pudo guardar el perfil de usuario.");
                 }
 
                 Credencial credencial = new Credencial
@@ -95,7 +95,7 @@ namespace Talleres360.Services.Usuarios
 
                 if (filasAfectadasCred == 0)
                 {
-                    return ServiceResult<Usuario>.Fail(AuthErrorCode.ERROR_CREACION_USUARIO.ToString(), "Error al generar las credenciales.");
+                    return ServiceResult<Usuario>.Fail(ErrorCode.REG_ERROR_CREACION_USUARIO.ToString(), "Error al generar las credenciales.");
                 }
 
                 try
@@ -111,7 +111,7 @@ namespace Talleres360.Services.Usuarios
             }
             catch (Exception ex)
             {
-                return ServiceResult<Usuario>.Fail(AuthErrorCode.ERROR_GENERICO.ToString(), "Fallo crítico en la base de datos.");
+                return ServiceResult<Usuario>.Fail(ErrorCode.SYS_ERROR_GENERICO.ToString(), "Fallo crítico en la base de datos.");
             }
         }
 

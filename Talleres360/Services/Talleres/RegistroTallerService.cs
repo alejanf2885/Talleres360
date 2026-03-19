@@ -4,7 +4,7 @@ using Talleres360.Dtos;
 using Talleres360.Dtos.Auth;
 using Talleres360.Dtos.Responses;
 using Talleres360.Enums;
-using Talleres360.Enums.Auth;
+using Talleres360.Enums.Errors;
 using Talleres360.Interfaces.Imagenes;
 using Talleres360.Interfaces.Planes;
 using Talleres360.Interfaces.Talleres;
@@ -45,7 +45,7 @@ namespace Talleres360.Services.Talleres
                 if (plan == null)
                 {
                     return ServiceResult<bool>.Fail(
-                        AuthErrorCode.PLAN_NO_ENCONTRADO.ToString(),
+                        ErrorCode.REG_PLAN_NO_ENCONTRADO.ToString(),
                         "El plan de suscripción no está configurado en el sistema."
                     );
                 }
@@ -75,7 +75,7 @@ namespace Talleres360.Services.Talleres
                     {
                         await transaction.RollbackAsync();
                         return ServiceResult<bool>.Fail(
-                            AuthErrorCode.ERROR_SUBIDA_IMAGEN.ToString(),
+                            ErrorCode.REG_ERROR_SUBIDA_IMAGEN.ToString(),
                             "Error al procesar la imagen de perfil."
                         );
                     }
@@ -94,7 +94,7 @@ namespace Talleres360.Services.Talleres
                     await transaction.RollbackAsync();
 
                     return ServiceResult<bool>.Fail(
-                        resultUsuario.ErrorCode ?? AuthErrorCode.ERROR_CREACION_USUARIO.ToString(),
+                        resultUsuario.ErrorCode ?? ErrorCode.REG_ERROR_CREACION_USUARIO.ToString(),
                         resultUsuario.Message ?? "Error al crear el usuario administrador."
                     );
                 }
@@ -107,7 +107,7 @@ namespace Talleres360.Services.Talleres
             {
                 await transaction.RollbackAsync();
                 return ServiceResult<bool>.Fail(
-                    AuthErrorCode.ERROR_GENERICO.ToString(),
+                    ErrorCode.SYS_ERROR_GENERICO.ToString(),
                     "Ocurrió un error crítico durante el registro: " + ex.Message
                 );
             }

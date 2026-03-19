@@ -1,11 +1,8 @@
-using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Http;
 using Microsoft.IdentityModel.Tokens;
-using Resend;
 using Resend;
 using Scalar.AspNetCore;
 using System.Text;
@@ -13,7 +10,7 @@ using System.Threading.RateLimiting;
 using Talleres360.Configuration;
 using Talleres360.Data;
 using Talleres360.Dtos.Responses;
-using Talleres360.Enums.Auth;
+using Talleres360.Enums.Errors;
 using Talleres360.Interfaces.Archivos;
 using Talleres360.Interfaces.Auth;
 using Talleres360.Interfaces.Cache;
@@ -71,9 +68,7 @@ builder.Services.AddScoped<ICacheService, CacheService>();
 // =========================================================
 builder.Services.AddHttpContextAccessor();
 
-
 // --- CONFIGURACIÓN DE RESEND  ---
-
 builder.Services.AddOptions();
 builder.Services.AddHttpClient<ResendClient>();
 builder.Services.Configure<ResendClientOptions>(o =>
@@ -81,8 +76,6 @@ builder.Services.Configure<ResendClientOptions>(o =>
     o.ApiToken = builder.Configuration["ResendSettings:ApiKey"] ?? "";
 });
 builder.Services.AddTransient<IResend, ResendClient>();
-builder.Services.AddScoped<IEmailService, ResendEmailService>();
-
 
 // Repositorios
 builder.Services.AddScoped<IUsuarioRepository, UsuarioRepository>();
@@ -93,7 +86,6 @@ builder.Services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
 builder.Services.AddScoped<IVehiculoRepository, VehiculoRepository>();
 builder.Services.AddScoped<IVerificacionRepository, VerificacionRepository>();
 
-
 // Servicios Core
 builder.Services.AddSingleton<IPasswordService, BcryptPasswordService>();
 builder.Services.AddScoped<ITallerService, TallerService>();
@@ -103,7 +95,6 @@ builder.Services.AddScoped<IVehiculoService, VehiculoService>();
 builder.Services.AddScoped<IProcesadorImagenService, ProcesadorImagenService>();
 builder.Services.AddScoped<IImagenService, ImagenService>();
 builder.Services.AddScoped<INombreArchivoService, NombreArchivoService>();
-builder.Services.AddScoped<IProcesadorImagenService, ProcesadorImagenService>();
 builder.Services.AddScoped<IFileStorageService, FileStorageService>();
 builder.Services.AddScoped<IEmailService, ResendEmailService>();
 builder.Services.AddScoped<ITemplateService, TemplateService>();
@@ -121,12 +112,8 @@ builder.Services.AddScoped<IVerificacionService, VerificacionService>();
 // Configuracion 
 builder.Services.Configure<UrlSettings>(builder.Configuration.GetSection("AppSettings"));
 
-
-
-
-
 // =========================================================
-// 4. AUTENTICACIÓN JWT
+// 4. AUTENTICACIÓN Y AUTORIZACIÓN JWT
 // =========================================================
 var jwtKey = builder.Configuration["Jwt:Key"] ?? "TuSuperClaveSecretaDeDesarrolloMuyLarga123456789!";
 var keyBytes = Encoding.UTF8.GetBytes(jwtKey);
@@ -146,6 +133,8 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         };
     });
 
+builder.Services.AddAuthorization();
+
 // =========================================================
 // 5. CORS
 // =========================================================
@@ -153,10 +142,10 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend", policy =>
     {
-        policy.WithOrigins("http://localhost:4200") 
+        policy.WithOrigins("http://localhost:4200")
               .AllowAnyHeader()
               .AllowAnyMethod()
-              .AllowCredentials(); 
+              .AllowCredentials();
     });
 });
 
@@ -172,7 +161,8 @@ builder.Services.AddRateLimiter(options =>
         {
             PermitLimit = 5,
             Window = TimeSpan.FromMinutes(2),
-            QueueLimit = 0
+            QueueLimit = 0,
+            AutoReplenishment = true 
         });
     });
 
@@ -183,17 +173,21 @@ builder.Services.AddRateLimiter(options =>
         {
             PermitLimit = 10,
             Window = TimeSpan.FromMinutes(1),
-            QueueLimit = 0
+            QueueLimit = 0,
+            AutoReplenishment = true 
         });
     });
+
+    // ✅ Dejamos solo UNA política de EmailStrict
     options.AddPolicy("EmailStrict", httpContext =>
     {
         var ip = httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown";
         return RateLimitPartition.GetFixedWindowLimiter(ip, _ => new FixedWindowRateLimiterOptions
         {
-            PermitLimit = 2,           
-            Window = TimeSpan.FromMinutes(1), 
-            QueueLimit = 0            
+            PermitLimit = 2,
+            Window = TimeSpan.FromMinutes(1),
+            QueueLimit = 0,
+            AutoReplenishment = true 
         });
     });
 
@@ -204,7 +198,8 @@ builder.Services.AddRateLimiter(options =>
         {
             PermitLimit = 5,
             Window = TimeSpan.FromMinutes(1),
-            QueueLimit = 0
+            QueueLimit = 0,
+            AutoReplenishment = true 
         });
     });
 
@@ -228,7 +223,7 @@ builder.Services.AddControllers()
                 }).ToList();
 
             var response = new ApiErrorResponse(
-                codigo: AuthErrorCode.DATOS_INVALIDOS.ToString(),
+                codigo: ErrorCode.SYS_DATOS_INVALIDOS.ToString(),
                 mensaje: "Existen errores de validación en los datos enviados.",
                 detalles: errores
             );
@@ -236,6 +231,7 @@ builder.Services.AddControllers()
             return new BadRequestObjectResult(response);
         };
     });
+
 builder.Services.AddOpenApi(options =>
 {
     options.AddDocumentTransformer((document, context, cancellationToken) =>
@@ -265,10 +261,11 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
-app.UseCors("AllowFrontend");
-app.UseRateLimiter();
-app.UseAuthentication();
-app.UseAuthorization();
-app.MapControllers();
+
+app.UseCors("AllowFrontend");    
+app.UseRateLimiter();           
+app.UseAuthentication();         
+app.UseAuthorization();         
+app.MapControllers();            
 
 app.Run();

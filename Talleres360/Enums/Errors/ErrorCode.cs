@@ -1,0 +1,41 @@
+﻿namespace Talleres360.Enums.Errors
+{
+    public enum ErrorCode
+    {
+        // --- AUTH: Sesión, Acceso y Seguridad ---
+        AUTH_CREDENCIALES_INCORRECTAS,
+        AUTH_CUENTA_INACTIVA,
+        AUTH_CUENTA_BLOQUEADA,
+        AUTH_CUENTA_YA_ACTIVA,
+        AUTH_TOKEN_INVALIDO,
+        AUTH_TOKEN_EXPIRADO,        
+        AUTH_EMAIL_NO_VERIFICADO,
+        AUTH_REFRESH_TOKEN_INVALIDO,
+        AUTH_REFRESH_TOKEN_EXPIRADO,
+        AUTH_LOGOUT_FALLIDO,
+        AUTH_NO_AUTORIZADO,           
+        AUTH_FORBIDDEN,               
+
+        // --- REG: Registro de Taller y Onboarding ---
+        REG_FALLIDO,
+        REG_PLAN_NO_ENCONTRADO,
+        REG_EMAIL_YA_REGISTRADO,
+        REG_CIF_DUPLICADO,
+        REG_ERROR_SUBIDA_IMAGEN,
+        REG_ERROR_CREACION_USUARIO,
+        REG_TALLER_YA_EXISTE,         
+
+        // --- SUBS: Suscripciones y Pagos (Crucial para SaaS) ---
+        SUBS_SIN_PLAN_ACTIVO,        
+        SUBS_LIMITE_ALCANZADO,        
+        SUBS_PAGO_RECHAZADO,         
+
+        // --- SYS: Sistema y Errores Globales ---
+        SYS_DATOS_INVALIDOS,
+        SYS_ERROR_GENERICO,
+        SYS_ENTIDAD_NO_ENCONTRADA,
+        SYS_ARCHIVO_DEMASIADO_GRANDE, 
+        SYS_OPERACION_INVALIDA,      
+        SYS_ERROR_BASE_DATOS         
+    }
+}

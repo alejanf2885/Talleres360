@@ -1,9 +1,11 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
-using Talleres360.API.Controllers;
+using Talleres360.Controllers;
 using Talleres360.Dtos.Auth;
 using Talleres360.Dtos.Seguridad;
+using Talleres360.Dtos.Responses;
+using Talleres360.Enums.Errors;
 using Talleres360.Interfaces.Auth;
 using Talleres360.Interfaces.Seguridad;
 using Talleres360.Interfaces.Talleres;
@@ -42,20 +44,29 @@ namespace Talleres360.Tests.Controllers
             };
         }
 
+        private void SetRefreshTokenCookie(string? value)
+        {
+            _controller.ControllerContext.HttpContext.Request.Headers["Cookie"] =
+                value == null ? string.Empty : $"refreshToken={value}";
+        }
+
         [Fact]
         public async Task Login_CredencialesValidas_DebeRetornarOkConTokens()
         {
             // Arrange
             var loginRequest = new LoginRequest { Email = "test@test.com", Password = "Password123!" };
             var usuario = new Usuario { Id = 1, Nombre = "Admin", Email = "test@test.com", Rol = Enum.RolesUsuario.ADMIN, TallerId = 1 };
-            
-            _authServiceMock.Setup(x => x.ValidarLoginAsync(loginRequest.Email, loginRequest.Password))
-                .ReturnsAsync(usuario);
 
-            _tokenServiceMock.Setup(x => x.GenerarJwtToken(usuario))
+            _authServiceMock
+                .Setup(x => x.ValidarLoginAsync(loginRequest.Email, loginRequest.Password))
+                .ReturnsAsync(ServiceResult<Usuario>.Ok(usuario));
+
+            _tokenServiceMock
+                .Setup(x => x.GenerarJwtToken(usuario))
                 .Returns("jwt-token-valido");
 
-            _refreshTokenServiceMock.Setup(x => x.CrearRefreshTokenAsync(usuario.Id))
+            _refreshTokenServiceMock
+                .Setup(x => x.CrearRefreshTokenAsync(usuario.Id))
                 .ReturnsAsync("refresh-token-generado");
 
             // Act
@@ -64,13 +75,10 @@ namespace Talleres360.Tests.Controllers
             // Assert
             var okResult = Assert.IsType<OkObjectResult>(result);
             var value = okResult.Value;
-            
-            // Usando reflection o dinámico para obtener las propiedades del objeto anónimo
-            var tokenProperty = value.GetType().GetProperty("Token");
 
+            var tokenProperty = value!.GetType().GetProperty("Token");
             Assert.NotNull(tokenProperty);
-
-            Assert.Equal("jwt-token-valido", tokenProperty.GetValue(value, null));
+            Assert.Equal("jwt-token-valido", tokenProperty!.GetValue(value, null));
         }
 
         [Fact]
@@ -78,18 +86,65 @@ namespace Talleres360.Tests.Controllers
         {
             // Arrange
             var loginRequest = new LoginRequest { Email = "test@test.com", Password = "MalPassword!" };
-            
-            _authServiceMock.Setup(x => x.ValidarLoginAsync(loginRequest.Email, loginRequest.Password))
-                .ReturnsAsync((Usuario?)null);
+
+            _authServiceMock
+                .Setup(x => x.ValidarLoginAsync(loginRequest.Email, loginRequest.Password))
+                .ReturnsAsync(ServiceResult<Usuario>.Fail(ErrorCode.AUTH_CREDENCIALES_INCORRECTAS.ToString(), "Credenciales incorrectas."));
 
             // Act
             var result = await _controller.Login(loginRequest);
 
             // Assert
-            var unauthorizedResult = Assert.IsType<UnauthorizedObjectResult>(result);
-            var value = unauthorizedResult.Value;
-            var errorProp = value.GetType().GetProperty("Error");
-            Assert.Equal("Credenciales incorrectas.", errorProp.GetValue(value, null));
+            var statusResult = Assert.IsType<ObjectResult>(result);
+            Assert.Equal(StatusCodes.Status401Unauthorized, statusResult.StatusCode);
+
+            var error = Assert.IsType<ApiErrorResponse>(statusResult.Value);
+            Assert.Equal(ErrorCode.AUTH_CREDENCIALES_INCORRECTAS.ToString(), error.Codigo);
+            Assert.Equal("Credenciales incorrectas.", error.Mensaje);
+        }
+
+        [Fact]
+        public async Task Login_CuentaInactiva_DebeRetornarForbidden()
+        {
+            // Arrange
+            var loginRequest = new LoginRequest { Email = "test@test.com", Password = "Password123!" };
+
+            _authServiceMock
+                .Setup(x => x.ValidarLoginAsync(loginRequest.Email, loginRequest.Password))
+                .ReturnsAsync(ServiceResult<Usuario>.Fail(ErrorCode.AUTH_CUENTA_INACTIVA.ToString(), "Cuenta inactiva."));
+
+            // Act
+            var result = await _controller.Login(loginRequest);
+
+            // Assert
+            var statusResult = Assert.IsType<ObjectResult>(result);
+            Assert.Equal(StatusCodes.Status403Forbidden, statusResult.StatusCode);
+
+            var error = Assert.IsType<ApiErrorResponse>(statusResult.Value);
+            Assert.Equal(ErrorCode.AUTH_CUENTA_INACTIVA.ToString(), error.Codigo);
+            Assert.Equal("Cuenta inactiva.", error.Mensaje);
+        }
+
+        [Fact]
+        public async Task Login_ServiceDevuelveSuccessFalseSinErrorCode_UsaErrorGenerico()
+        {
+            // Arrange
+            var loginRequest = new LoginRequest { Email = "test@test.com", Password = "x" };
+
+            _authServiceMock
+                .Setup(x => x.ValidarLoginAsync(loginRequest.Email, loginRequest.Password))
+                .ReturnsAsync(ServiceResult<Usuario>.Fail(null, null));
+
+            // Act
+            var result = await _controller.Login(loginRequest);
+
+            // Assert
+            var statusResult = Assert.IsType<ObjectResult>(result);
+            Assert.Equal(StatusCodes.Status401Unauthorized, statusResult.StatusCode);
+
+            var error = Assert.IsType<ApiErrorResponse>(statusResult.Value);
+            Assert.Equal(ErrorCode.SYS_ERROR_GENERICO.ToString(), error.Codigo);
+            Assert.Equal("Error de autenticación", error.Mensaje);
         }
 
         [Fact]
@@ -97,8 +152,8 @@ namespace Talleres360.Tests.Controllers
         {
             // Arrange
             var refreshTokenCookie = "token-valido";
-            _controller.ControllerContext.HttpContext.Request.Headers["Cookie"] = $"refreshToken={refreshTokenCookie}";
-            
+            SetRefreshTokenCookie(refreshTokenCookie);
+
             var refreshResult = new TokenRefreshResult
             {
                 Exito = true,
@@ -106,7 +161,8 @@ namespace Talleres360.Tests.Controllers
                 NuevoRefreshToken = "nuevo-refresh"
             };
 
-            _refreshTokenServiceMock.Setup(x => x.ValidarYRenovarAsync(refreshTokenCookie))
+            _refreshTokenServiceMock
+                .Setup(x => x.ValidarYRenovarAsync(refreshTokenCookie))
                 .ReturnsAsync(refreshResult);
 
             // Act
@@ -116,25 +172,26 @@ namespace Talleres360.Tests.Controllers
             var okResult = Assert.IsType<OkObjectResult>(result);
             var value = okResult.Value;
 
-            var tokenProperty = value.GetType().GetProperty("Token");
+            var tokenProperty = value!.GetType().GetProperty("Token");
             Assert.NotNull(tokenProperty);
-            Assert.Equal("nuevo-jwt", tokenProperty.GetValue(value, null));
+            Assert.Equal("nuevo-jwt", tokenProperty!.GetValue(value, null));
         }
 
         [Fact]
-        public async Task Refresh_TokenInvalido_DebeRetornarUnauthorized()
+        public async Task Refresh_TokenInvalido_DebeRetornarUnauthorizedConCodigoCorrecto()
         {
             // Arrange
             var refreshTokenCookie = "token-invalido";
-            _controller.ControllerContext.HttpContext.Request.Headers["Cookie"] = $"refreshToken={refreshTokenCookie}";
-            
+            SetRefreshTokenCookie(refreshTokenCookie);
+
             var refreshResult = new TokenRefreshResult
             {
                 Exito = false,
                 MensajeError = "Refresh token no válido."
             };
 
-            _refreshTokenServiceMock.Setup(x => x.ValidarYRenovarAsync(refreshTokenCookie))
+            _refreshTokenServiceMock
+                .Setup(x => x.ValidarYRenovarAsync(refreshTokenCookie))
                 .ReturnsAsync(refreshResult);
 
             // Act
@@ -142,26 +199,47 @@ namespace Talleres360.Tests.Controllers
 
             // Assert
             var unauthorizedResult = Assert.IsType<UnauthorizedObjectResult>(result);
-            var value = unauthorizedResult.Value;
-            var errorProp = value.GetType().GetProperty("Error");
-            
-            Assert.Equal("Refresh token no válido.", errorProp.GetValue(value, null));
+            var error = Assert.IsType<ApiErrorResponse>(unauthorizedResult.Value);
+
+            Assert.Equal(ErrorCode.AUTH_REFRESH_TOKEN_EXPIRADO.ToString(), error.Codigo);
+            Assert.Equal("Refresh token no válido.", error.Mensaje);
         }
 
-        [Fact]
-        public async Task Refresh_SinToken_DebeRetornarUnauthorized()
+        [Theory]
+        [InlineData("")]
+        [InlineData("   ")]
+        public async Task Refresh_TokenVacioODeblanco_DebeRetornarUnauthorizedSinLlamarServicio(string token)
         {
-            // Arrange (no cookie)
+            // Arrange
+            SetRefreshTokenCookie(token);
 
             // Act
             var result = await _controller.Refresh();
 
             // Assert
             var unauthorizedResult = Assert.IsType<UnauthorizedObjectResult>(result);
-            var value = unauthorizedResult.Value;
-            var errorProp = value.GetType().GetProperty("Error");
+            var error = Assert.IsType<ApiErrorResponse>(unauthorizedResult.Value);
 
-            Assert.Equal("No hay token de refresco.", errorProp.GetValue(value, null));
+            Assert.Equal(ErrorCode.AUTH_REFRESH_TOKEN_INVALIDO.ToString(), error.Codigo);
+            Assert.Equal("No hay token de refresco.", error.Mensaje);
+            _refreshTokenServiceMock.Verify(x => x.ValidarYRenovarAsync(It.IsAny<string>()), Times.Never);
+        }
+
+        [Fact]
+        public async Task Refresh_SinCookie_DebeRetornarUnauthorized()
+        {
+            // Arrange
+            SetRefreshTokenCookie(null);
+
+            // Act
+            var result = await _controller.Refresh();
+
+            // Assert
+            var unauthorizedResult = Assert.IsType<UnauthorizedObjectResult>(result);
+            var error = Assert.IsType<ApiErrorResponse>(unauthorizedResult.Value);
+
+            Assert.Equal(ErrorCode.AUTH_REFRESH_TOKEN_INVALIDO.ToString(), error.Codigo);
+            Assert.Equal("No hay token de refresco.", error.Mensaje);
             _refreshTokenServiceMock.Verify(x => x.ValidarYRenovarAsync(It.IsAny<string>()), Times.Never);
         }
 
@@ -170,24 +248,25 @@ namespace Talleres360.Tests.Controllers
         {
             // Arrange
             var refreshTokenCookie = "token-a-revocar";
-            _controller.ControllerContext.HttpContext.Request.Headers["Cookie"] = $"refreshToken={refreshTokenCookie}";
-            
+            SetRefreshTokenCookie(refreshTokenCookie);
+
             // Act
             var result = await _controller.Logout();
 
             // Assert
-            _refreshTokenServiceMock.Verify(x => x.RevocarRefreshTokenAsync("token-a-revocar"), Times.Once);
-            
+            _refreshTokenServiceMock.Verify(x => x.RevocarRefreshTokenAsync(refreshTokenCookie), Times.Once);
+
             var okResult = Assert.IsType<OkObjectResult>(result);
             var value = okResult.Value;
-            var mensajeProp = value.GetType().GetProperty("Mensaje");
-            Assert.Equal("Sesión cerrada correctamente.", mensajeProp.GetValue(value, null));
+            var mensajeProp = value!.GetType().GetProperty("Mensaje");
+            Assert.Equal("Sesión cerrada correctamente.", mensajeProp!.GetValue(value, null));
         }
 
         [Fact]
         public async Task Logout_SinToken_NoDebeLlamarRevocarYRetornarOk()
         {
-            // Arrange (no cookie)
+            // Arrange
+            SetRefreshTokenCookie(null);
 
             // Act
             var result = await _controller.Logout();
@@ -197,8 +276,8 @@ namespace Talleres360.Tests.Controllers
 
             var okResult = Assert.IsType<OkObjectResult>(result);
             var value = okResult.Value;
-            var mensajeProp = value.GetType().GetProperty("Mensaje");
-            Assert.Equal("Sesión cerrada correctamente.", mensajeProp.GetValue(value, null));
+            var mensajeProp = value!.GetType().GetProperty("Mensaje");
+            Assert.Equal("Sesión cerrada correctamente.", mensajeProp!.GetValue(value, null));
         }
     }
 }
