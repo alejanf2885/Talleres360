@@ -1,10 +1,12 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Talleres360.Interfaces.Seguridad;
+using Talleres360.Dtos.Responses;
+using Talleres360.Dtos.Seguridad; 
+using Talleres360.Enums.Errors;
 
 namespace Talleres360.API.Filters
 {
-    // Heredamos de TypeFilterAttribute para poder inyectar dependencias en el filtro
     public class RequiereSuscripcionActivaAttribute : TypeFilterAttribute
     {
         public RequiereSuscripcionActivaAttribute() : base(typeof(RequiereSuscripcionActivaFilter))
@@ -27,18 +29,23 @@ namespace Talleres360.API.Filters
             public async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
             {
                 int? tallerId = _userContext.GetTallerId();
-                if (tallerId == null)
+
+                if (!tallerId.HasValue)
                 {
                     context.Result = new UnauthorizedResult();
-                    return; 
+                    return;
                 }
 
-                var guard = await _suscripcionGuard.ValidarAccesoEscrituraAsync(tallerId.Value);
-                
+                AccesoResult resultado = await _suscripcionGuard.ValidarAccesoEscrituraAsync(tallerId.Value);
 
-                if (!guard.PuedeAcceder)
+                if (!resultado.PuedeAcceder)
                 {
-                    context.Result = new ObjectResult(new { mensaje = guard.Mensaje })
+                    ApiErrorResponse error = new ApiErrorResponse(
+                        codigo: resultado.ErrorCode ?? ErrorCode.SUBS_SIN_PLAN_ACTIVO.ToString(),
+                        mensaje: resultado.Mensaje ?? "Su suscripción no permite realizar esta operación."
+                    );
+
+                    context.Result = new ObjectResult(error)
                     {
                         StatusCode = StatusCodes.Status402PaymentRequired
                     };

@@ -1,10 +1,10 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Talleres360.Dtos;
+using Talleres360.Dtos.Responses;
 using Talleres360.Dtos.Talleres;
+using Talleres360.Enums.Errors;
 using Talleres360.Interfaces.Seguridad;
 using Talleres360.Interfaces.Talleres;
-using Talleres360.Models; 
 
 namespace Talleres360.API.Controllers
 {
@@ -14,16 +14,13 @@ namespace Talleres360.API.Controllers
     public class WorkshopsController : ControllerBase
     {
         private readonly ITallerService _tallerService;
-        private readonly ITallerRepository _tallerRepo;
         private readonly IUserContextService _userContext;
 
         public WorkshopsController(
             ITallerService tallerService,
-            ITallerRepository tallerRepo,
             IUserContextService userContext)
         {
             _tallerService = tallerService;
-            _tallerRepo = tallerRepo;
             _userContext = userContext;
         }
 
@@ -33,29 +30,24 @@ namespace Talleres360.API.Controllers
             int? tallerId = _userContext.GetTallerId();
 
             if (tallerId == null)
-                return Unauthorized();
-
-            Taller? taller = await _tallerRepo.GetByIdAsync(tallerId.Value);
-
-            if (taller == null)
-                return NotFound(new { Message = "Taller no encontrado." });
-
-            // MAPEAMOS A DTO 
-            WorkshopDto dto = new WorkshopDto
             {
-                Id = taller.Id,
-                Nombre = taller.Nombre,
-                CIF = taller.CIF,
-                Direccion = taller.Direccion,
-                Localidad = taller.Localidad,
-                Telefono = taller.Telefono,
-                PerfilConfigurado = taller.PerfilConfigurado,
-                TipoSuscripcion = taller.TipoSuscripcion,
-                Logo = taller.Logo
+                return Unauthorized(new ApiErrorResponse(
+                    codigo: ErrorCode.AUTH_NO_AUTORIZADO.ToString(),
+                    mensaje: "No se pudo identificar el taller desde el token de acceso."
+                ));
+            }
 
-            };
+            ServiceResult<WorkshopDto> resultado = await _tallerService.ObtenerTallerPorIdAsync(tallerId.Value);
 
-            return Ok(dto);
+            if (!resultado.Success)
+            {
+                return NotFound(new ApiErrorResponse(
+                    codigo: resultado.ErrorCode ?? ErrorCode.SYS_ENTIDAD_NO_ENCONTRADA.ToString(),
+                    mensaje: resultado.Message ?? "Taller no encontrado."
+                ));
+            }
+
+            return Ok(ApiResponse<WorkshopDto>.Ok(resultado.Data!, "Datos del taller recuperados."));
         }
 
         [HttpPut("config")]
@@ -64,21 +56,24 @@ namespace Talleres360.API.Controllers
             int? tallerId = _userContext.GetTallerId();
 
             if (tallerId == null)
-                return Unauthorized(new { Error = "No se pudo identificar el taller desde el token." });
+            {
+                return Unauthorized(new ApiErrorResponse(
+                    codigo: ErrorCode.AUTH_NO_AUTORIZADO.ToString(),
+                    mensaje: "No se pudo identificar el taller desde el token de acceso."
+                ));
+            }
 
-            bool success = await _tallerService.ConfigurarPerfilAsync(
-                tallerId.Value,
-                request.CIF,
-                request.Direccion,
-                request.Localidad,
-                request.Telefono,
-                request.Logo
-            );
+            ServiceResult<bool> resultado = await _tallerService.ConfigurarPerfilAsync(tallerId.Value, request);
 
-            if (!success)
-                return BadRequest(new { Error = "Error al actualizar los datos. Verifica que el taller existe." });
+            if (!resultado.Success)
+            {
+                return BadRequest(new ApiErrorResponse(
+                    codigo: resultado.ErrorCode ?? ErrorCode.SYS_DATOS_INVALIDOS.ToString(),
+                    mensaje: resultado.Message ?? "Error al actualizar los datos del taller."
+                ));
+            }
 
-            return Ok(new { Mensaje = "Perfil del taller configurado correctamente." });
+            return Ok(ApiResponse<bool>.Ok(true, "Perfil del taller configurado correctamente."));
         }
     }
 }

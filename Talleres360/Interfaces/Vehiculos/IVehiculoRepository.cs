@@ -8,20 +8,25 @@ namespace Talleres360.Interfaces.Vehiculos
 {
     public interface IVehiculoRepository : ITallerRecursoRepository
     {
-    
+
         Task<Vehiculo?> GetByIdAsync(int id);
-        Task<Vehiculo?> GetByMatriculaAsync(string matricula);
+
         Task AddAsync(Vehiculo vehiculo);
+
         Task UpdateAsync(Vehiculo vehiculo);
+
         Task<bool> ExistsAsync(string matricula);
+
+
+
+        Task<VehiculoDetalle?> GetDetalleByIdAsync(int id);
+
+        Task<VehiculoDetalle?> GetDetalleByMatriculaAsync(string matricula);
 
         Task<PagedResponse<VehiculoDetalle>> GetAllDetalleByTallerAsync(
             int tallerId,
             int pageNumber,
             int pageSize,
             VehiculoFiltroDto? filtro = null);
-
-        Task<VehiculoDetalle?> GetDetalleByIdAsync(int id);
-        Task<VehiculoDetalle?> GetDetalleByMatriculaAsync(string matricula);
     }
 }

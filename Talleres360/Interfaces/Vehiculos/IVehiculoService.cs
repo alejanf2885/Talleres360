@@ -1,24 +1,21 @@
 ﻿using Talleres360.Dtos;
 using Talleres360.Dtos.Vehiculos;
+using Talleres360.Dtos.Responses;
 using Talleres360.Models;
 
 namespace Talleres360.Interfaces.Vehiculos
 {
     public interface IVehiculoService
     {
-        Task<Vehiculo?> GetByIdAsync(int id);
-        Task<Vehiculo?> GetByMatriculaAsync(string matricula);
-        Task AddAsync(Vehiculo vehiculo);
-        Task UpdateAsync(Vehiculo vehiculo);
-        Task<bool> ExistsAsync(string matricula);
+        Task<ServiceResult<VehiculoDetalle>> RegistrarVehiculoAsync(int tallerId, Vehiculo vehiculo);
+        Task<ServiceResult<VehiculoDetalle>> ActualizarVehiculoAsync(int tallerId, int id, Vehiculo vehiculo);
+        Task<ServiceResult<VehiculoDetalle>> GetDetalleByIdAsync(int tallerId, int id);
+        Task<ServiceResult<VehiculoDetalle>> GetDetalleByMatriculaAsync(int tallerId, string matricula);
 
-        Task<PagedResponse<VehiculoDetalle>> GetAllDetalleByTallerAsync(
+        Task<PagedResponse<VehiculoDetalle>> GetAllDetalleByTallerPagedAsync(
             int tallerId,
             int pageNumber,
             int pageSize,
             VehiculoFiltroDto? filtro = null);
-
-        Task<VehiculoDetalle?> GetDetalleByIdAsync(int id);
-        Task<VehiculoDetalle?> GetDetalleByMatriculaAsync(string matricula);
     }
 }

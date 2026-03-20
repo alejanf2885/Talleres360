@@ -1,7 +1,11 @@
-using System.Security.Cryptography;
+﻿using System.Security.Cryptography;
+using Talleres360.Dtos.Responses;
 using Talleres360.Dtos.Seguridad;
+using Talleres360.Dtos.Usuarios;
+using Talleres360.Enums.Errors;
 using Talleres360.Interfaces.Seguridad;
-using Talleres360.Interfaces.Usuarios; 
+using Talleres360.Interfaces.Talleres;
+using Talleres360.Interfaces.Usuarios;
 using Talleres360.Models;
 
 namespace Talleres360.Services.Seguridad
@@ -9,17 +13,20 @@ namespace Talleres360.Services.Seguridad
     public class RefreshTokenService : IRefreshTokenService
     {
         private readonly IRefreshTokenRepository _refreshTokenRepo;
-        private readonly IUsuarioRepository _usuarioRepo; 
+        private readonly IUsuarioRepository _usuarioRepo;
         private readonly ITokenService _tokenService;
+        private readonly ITallerService _tallerService;
 
         public RefreshTokenService(
             IRefreshTokenRepository refreshTokenRepo,
-            IUsuarioRepository usuarioRepo, 
-            ITokenService tokenService)
+            IUsuarioRepository usuarioRepo,
+            ITokenService tokenService,
+            ITallerService tallerService) 
         {
             _refreshTokenRepo = refreshTokenRepo;
             _usuarioRepo = usuarioRepo;
             _tokenService = tokenService;
+            _tallerService = tallerService;
         }
 
         public async Task<string> CrearRefreshTokenAsync(int usuarioId)
@@ -40,54 +47,81 @@ namespace Talleres360.Services.Seguridad
             return refreshToken;
         }
 
-        public async Task<TokenRefreshResult> ValidarYRenovarAsync(string refreshToken)
+        public async Task<ServiceResult<TokenResponseDto>> ValidarYRenovarAsync(string refreshToken)
         {
-            TokenRefreshResult result = new TokenRefreshResult();
             TokenSeguridad tokenEntity = await _refreshTokenRepo.ObtenerPorTokenAsync(refreshToken);
 
             if (tokenEntity == null)
             {
-                result.Exito = false; result.MensajeError = "Refresh token no v�lido."; return result;
+                return ServiceResult<TokenResponseDto>.Fail(
+                    ErrorCode.AUTH_TOKEN_INVALIDO.ToString(), "El token de refresco no es válido.");
             }
 
             if (tokenEntity.Usado)
             {
-                result.Exito = false; result.MensajeError = "Este token ya fue utilizado."; return result;
+                return ServiceResult<TokenResponseDto>.Fail(
+                    ErrorCode.AUTH_TOKEN_INVALIDO.ToString(), "Este token ya ha sido utilizado.");
             }
 
             if (tokenEntity.FechaExpiracion < DateTime.UtcNow)
             {
-                result.Exito = false; result.MensajeError = "El refresh token ha expirado."; return result;
+                return ServiceResult<TokenResponseDto>.Fail(
+                    ErrorCode.AUTH_REFRESH_TOKEN_EXPIRADO.ToString(), "La sesión ha expirado.");
             }
 
-            var usuario = await _usuarioRepo.GetByIdAsync(tokenEntity.UsuarioId);
-
-            if (usuario == null || !usuario.Activo || usuario.Eliminado)
+            Usuario usuario = await _usuarioRepo.GetByIdAsync(tokenEntity.UsuarioId);
+            if (usuario == null || !usuario.Activo)
             {
-                result.Exito = false; result.MensajeError = "Usuario no v�lido."; return result;
+                return ServiceResult<TokenResponseDto>.Fail(
+                    ErrorCode.AUTH_CUENTA_INACTIVA.ToString(), "El usuario ya no está activo o no existe.");
             }
 
             tokenEntity.Usado = true;
             await _refreshTokenRepo.ActualizarAsync(tokenEntity);
 
-            string nuevoJwt = _tokenService.GenerarJwtToken(usuario);
+            bool perfilConfigurado = false;
+            if (usuario.TallerId.HasValue)
+            {
+                perfilConfigurado = await _tallerService.VerificarPerfilConfiguradoAsync(usuario.TallerId.Value);
+            }
+
+            UsuarioLoginDto usuarioDto = new UsuarioLoginDto
+            {
+                Id = usuario.Id,
+                Nombre = usuario.Nombre,
+                Email = usuario.Email,
+                Rol = usuario.Rol.ToString(),
+                TallerId = usuario.TallerId,
+                PerfilConfigurado = perfilConfigurado
+            };
+
+            string nuevoJwt = _tokenService.GenerarJwtToken(usuarioDto);
             string nuevoRefreshToken = await CrearRefreshTokenAsync(usuario.Id);
 
-            result.Exito = true;
-            result.NuevoJwtToken = nuevoJwt;
-            result.NuevoRefreshToken = nuevoRefreshToken;
-
-            return result;
+            return ServiceResult<TokenResponseDto>.Ok(new TokenResponseDto
+            {
+                Token = nuevoJwt,
+                RefreshToken = nuevoRefreshToken
+            });
         }
 
-        public async Task RevocarRefreshTokenAsync(string refreshToken)
+        public async Task<ServiceResult<bool>> RevocarRefreshTokenAsync(string refreshToken)
         {
-            TokenSeguridad tokenEntity = await _refreshTokenRepo.ObtenerPorTokenAsync(refreshToken);
-
-            if (tokenEntity != null && !tokenEntity.Usado)
+            try
             {
-                tokenEntity.Usado = true;
-                await _refreshTokenRepo.ActualizarAsync(tokenEntity);
+                TokenSeguridad tokenEntity = await _refreshTokenRepo.ObtenerPorTokenAsync(refreshToken);
+
+                if (tokenEntity != null && !tokenEntity.Usado)
+                {
+                    tokenEntity.Usado = true;
+                    await _refreshTokenRepo.ActualizarAsync(tokenEntity);
+                }
+                return ServiceResult<bool>.Ok(true);
+            }
+            catch (Exception)
+            {
+                return ServiceResult<bool>.Fail(
+                    ErrorCode.AUTH_LOGOUT_FALLIDO.ToString(), "No se pudo invalidar la sesión en el servidor.");
             }
         }
 
@@ -98,6 +132,22 @@ namespace Talleres360.Services.Seguridad
             {
                 rng.GetBytes(randomBytes);
                 return Convert.ToBase64String(randomBytes);
+            }
+        }
+
+        public async Task<ServiceResult<bool>> RevocarTodosLosTokensAsync(int usuarioId)
+        {
+            try
+            {
+                await _refreshTokenRepo.RevocarTodosLosTokensDelUsuarioAsync(usuarioId);
+                return ServiceResult<bool>.Ok(true);
+            }
+            catch (Exception)
+            {
+                return ServiceResult<bool>.Fail(
+                    ErrorCode.AUTH_REVOCACION_FALLIDA.ToString(),
+                    "No se pudieron revocar las sesiones."
+                );
             }
         }
     }

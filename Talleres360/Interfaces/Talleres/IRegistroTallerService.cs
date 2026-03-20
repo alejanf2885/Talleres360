@@ -1,7 +1,10 @@
+using Talleres360.Dtos;
+using Talleres360.Dtos.Responses;
+
 namespace Talleres360.Interfaces.Talleres
 {
     public interface IRegistroTallerService
     {
-        Task<(bool Success, string Message)> RegistrarNuevoClienteSaaSAsync(string nombreTaller, string nombreAdmin, string email, string password, string? imagenBase64);
+        Task<ServiceResult<bool>> RegistrarNuevoClienteSaaSAsync(RegistroRequest request);
     }
 }

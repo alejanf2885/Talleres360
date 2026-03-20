@@ -1,128 +1,95 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Talleres360.API.Filters;
 using Talleres360.Dtos;
+using Talleres360.Dtos.Responses;
 using Talleres360.Dtos.Vehiculos;
+using Talleres360.Enums.Errors;
 using Talleres360.Filters;
+using Talleres360.Interfaces.Seguridad;
 using Talleres360.Interfaces.Vehiculos;
 using Talleres360.Models;
-using Talleres360.Extensions;
 
-namespace Talleres360.Controllers
+namespace Talleres360.API.Controllers
 {
     [Route("api/v1/[controller]")]
     [ApiController]
+    [Authorize]
     public class VehiculosController : ControllerBase
     {
         private readonly IVehiculoService _vehiculoService;
+        private readonly IUserContextService _userContext;
 
-        public VehiculosController(IVehiculoService vehiculoService)
+        public VehiculosController(IVehiculoService vehiculoService, IUserContextService userContext)
         {
             _vehiculoService = vehiculoService;
+            _userContext = userContext;
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetAll([FromQuery] int page = 1, [FromQuery] int size = 10, [FromQuery] string? matricula = null)
+        {
+            int? tallerId = _userContext.GetTallerId();
+            if (!tallerId.HasValue) return Unauthorized();
+
+            VehiculoFiltroDto filtro = new VehiculoFiltroDto { Matricula = matricula };
+            PagedResponse<VehiculoDetalle> response = await _vehiculoService.GetAllDetalleByTallerPagedAsync(tallerId.Value, page, size, filtro);
+
+            return Ok(ApiResponse<PagedResponse<VehiculoDetalle>>.Ok(response, "Listado de vehículos recuperado correctamente."));
         }
 
         [TallerAuthorize<IVehiculoRepository>]
-        [HttpGet]
-        [TallerAuthorize<IVehiculoRepository>]
-        [HttpGet]
-        public async Task<ActionResult<PagedResponse<VehiculoDetalle>>> GetAll(
-        [FromQuery] int pageNumber = 1,
-        [FromQuery] int pageSize = 10,
-        [FromQuery] VehiculoFiltroDto? filtro = null)
+        [HttpGet("{id:int:min(1)}")]
+        public async Task<IActionResult> GetById(int id)
         {
-            int? tallerId = User.GetTallerId();
+            int? tallerId = _userContext.GetTallerId();
+            if (!tallerId.HasValue) return Unauthorized();
 
-            if (!tallerId.HasValue)
+            ServiceResult<VehiculoDetalle> resultado = await _vehiculoService.GetDetalleByIdAsync(tallerId.Value, id);
+
+            if (!resultado.Success)
             {
-                return Unauthorized("No se pudo identificar el taller del usuario.");
+                return NotFound(new ApiErrorResponse(resultado.ErrorCode!, resultado.Message!));
             }
 
-            var response = await _vehiculoService.GetAllDetalleByTallerAsync(
-                tallerId.Value,
-                pageNumber,
-                pageSize,
-                filtro);
-
-            return Ok(response);
-        }
-        [TallerAuthorize<IVehiculoRepository>]
-        [HttpGet("{id:int}")]
-        public async Task<ActionResult<VehiculoDetalle?>> GetById(int id)
-        {
-            var detalle = await _vehiculoService.GetDetalleByIdAsync(id);
-            if (detalle == null) return NotFound();
-
-            return Ok(detalle);
+            return Ok(ApiResponse<VehiculoDetalle>.Ok(resultado.Data!, "Datos del vehículo obtenidos."));
         }
 
-        [TallerAuthorize<IVehiculoRepository>]
-        [HttpGet("matricula/{matricula}")]
-        public async Task<ActionResult<VehiculoDetalle?>> GetByMatricula(string matricula)
-        {
-            if (string.IsNullOrWhiteSpace(matricula)) return BadRequest("La matrícula es requerida.");
-
-            int? tallerId = User.GetTallerId();
-            var detalle = await _vehiculoService.GetDetalleByMatriculaAsync(matricula);
-
-            if (detalle == null || detalle.TallerId != tallerId)
-            {
-                return NotFound();
-            }
-
-            return Ok(detalle);
-        }
-
-        [TallerAuthorize<IVehiculoRepository>]
+        [RequiereSuscripcionActiva]
         [HttpPost]
-        public async Task<ActionResult<VehiculoDetalle>> Add([FromBody] Vehiculo? vehiculo)
+        public async Task<IActionResult> Create([FromBody] Vehiculo request)
         {
-            if (vehiculo == null) return BadRequest("El cuerpo de la petición no puede estar vacío.");
+            int? tallerId = _userContext.GetTallerId();
+            if (!tallerId.HasValue) return Unauthorized();
 
-            int? tId = User.GetTallerId();
-            if (!tId.HasValue)
+            ServiceResult<VehiculoDetalle> resultado = await _vehiculoService.RegistrarVehiculoAsync(tallerId.Value, request);
+
+            if (!resultado.Success)
             {
-                return Unauthorized();
+                return BadRequest(new ApiErrorResponse(resultado.ErrorCode!, resultado.Message!));
             }
 
-            vehiculo.TallerId = tId.Value;
-
-            if (await _vehiculoService.ExistsAsync(vehiculo.Matricula))
-            {
-                return Conflict($"Ya existe un vehículo con matrícula {vehiculo.Matricula}");
-            }
-
-            await _vehiculoService.AddAsync(vehiculo);
-
-            VehiculoDetalle? vehiculoActualizado = await _vehiculoService.GetDetalleByIdAsync(vehiculo.Id);
-
-            if (vehiculoActualizado == null)
-            {
-                return StatusCode(500, "El vehículo se guardó correctamente, pero hubo un error al recuperar sus detalles.");
-            }
-            return CreatedAtAction(nameof(GetById), new { id = vehiculo.Id }, vehiculoActualizado);
+            return CreatedAtAction(nameof(GetById),
+                new { id = resultado.Data!.Id },
+                ApiResponse<VehiculoDetalle>.Ok(resultado.Data!, "¡Vehículo registrado con éxito!"));
         }
 
         [TallerAuthorize<IVehiculoRepository>]
-        [HttpPut("{id:int}")]
-        public async Task<ActionResult<VehiculoDetalle>> Update(int id, [FromBody] Vehiculo? vehiculo)
+        [RequiereSuscripcionActiva]
+        [HttpPut("{id:int:min(1)}")]
+        public async Task<IActionResult> Update(int id, [FromBody] Vehiculo request)
         {
-            if (vehiculo == null) return BadRequest("Los datos son requeridos.");
+            int? tallerId = _userContext.GetTallerId();
+            if (!tallerId.HasValue) return Unauthorized();
 
-            if (id != vehiculo.Id) return BadRequest("El Id de la ruta no coincide con el del objeto.");
+            ServiceResult<VehiculoDetalle> resultado = await _vehiculoService.ActualizarVehiculoAsync(tallerId.Value, id, request);
 
-            int? tallerId = User.GetTallerId();
-            if (tallerId == null)
-                return Unauthorized();
-
-            vehiculo.TallerId = tallerId.Value;
-
-            await _vehiculoService.UpdateAsync(vehiculo);
-
-            VehiculoDetalle? vehiculoActualizado = await _vehiculoService.GetDetalleByIdAsync(vehiculo.Id);
-
-            if (vehiculoActualizado == null)
+            if (!resultado.Success)
             {
-                return StatusCode(500, "El vehículo se guardó correctamente, pero hubo un error al recuperar sus detalles.");
+                return BadRequest(new ApiErrorResponse(resultado.ErrorCode!, resultado.Message!));
             }
-            return Ok(vehiculoActualizado);
+
+            return Ok(ApiResponse<VehiculoDetalle>.Ok(resultado.Data!, "Los datos del vehículo han sido actualizados."));
         }
     }
 }

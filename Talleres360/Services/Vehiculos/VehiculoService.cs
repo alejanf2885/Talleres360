@@ -1,6 +1,7 @@
-﻿using System.Threading.Tasks;
-using Talleres360.Dtos;
+﻿using Talleres360.Dtos;
 using Talleres360.Dtos.Vehiculos;
+using Talleres360.Dtos.Responses;
+using Talleres360.Enums.Errors;
 using Talleres360.Interfaces.Vehiculos;
 using Talleres360.Models;
 
@@ -15,56 +16,103 @@ namespace Talleres360.Services.Vehiculos
             _vehiculoRepository = vehiculoRepository;
         }
 
-  
-        public async Task<PagedResponse<VehiculoDetalle>> GetAllDetalleByTallerAsync(
-            int tallerId,
-            int pageNumber,
-            int pageSize,
-            VehiculoFiltroDto? filtro = null)
+        public async Task<ServiceResult<VehiculoDetalle>> RegistrarVehiculoAsync(int tallerId, Vehiculo request)
         {
-            return await _vehiculoRepository.GetAllDetalleByTallerAsync(
-                tallerId,
-                pageNumber,
-                pageSize,
-                filtro);
+            string matriculaLimpia = request.Matricula.Trim().ToUpper().Replace("-", "").Replace(" ", "");
+
+            bool existe = await _vehiculoRepository.ExistsAsync(matriculaLimpia);
+            if (existe)
+            {
+                return ServiceResult<VehiculoDetalle>.Fail(
+                    ErrorCode.SYS_OPERACION_INVALIDA.ToString(),
+                    $"La matrícula {matriculaLimpia} ya está registrada en el sistema.");
+            }
+
+            Vehiculo nuevoVehiculo = new Vehiculo
+            {
+                TallerId = tallerId,
+                ClienteId = request.ClienteId,
+                TipoVehiculoId = request.TipoVehiculoId,
+                MarcaId = request.MarcaId,
+                ModeloId = request.ModeloId,
+                Matricula = matriculaLimpia,
+                Anio = request.Anio,
+                KmActuales = request.KmActuales,
+                PromedioKmDiarios = request.PromedioKmDiarios,
+                FechaCreacion = DateTime.UtcNow,
+                Eliminado = false
+            };
+
+            if (nuevoVehiculo.KmActuales.HasValue)
+            {
+                nuevoVehiculo.FechaUltimaActualizacionKm = DateTime.UtcNow;
+            }
+
+            await _vehiculoRepository.AddAsync(nuevoVehiculo);
+
+            VehiculoDetalle? detalle = await _vehiculoRepository.GetDetalleByIdAsync(nuevoVehiculo.Id);
+
+            return detalle != null
+                ? ServiceResult<VehiculoDetalle>.Ok(detalle)
+                : ServiceResult<VehiculoDetalle>.Fail(ErrorCode.SYS_ERROR_GENERICO.ToString(), "Vehículo guardado, pero error al recuperar vista de detalles.");
         }
 
-     
-        public async Task<VehiculoDetalle?> GetDetalleByIdAsync(int id)
+        public async Task<ServiceResult<VehiculoDetalle>> ActualizarVehiculoAsync(int tallerId, int id, Vehiculo request)
         {
-            return await _vehiculoRepository.GetDetalleByIdAsync(id);
+            Vehiculo? existente = await _vehiculoRepository.GetByIdAsync(id);
+
+            if (existente == null || existente.TallerId != tallerId)
+            {
+                return ServiceResult<VehiculoDetalle>.Fail(ErrorCode.SYS_ENTIDAD_NO_ENCONTRADA.ToString(), "Vehículo no encontrado.");
+            }
+
+            existente.Matricula = request.Matricula.Trim().ToUpper().Replace("-", "").Replace(" ", "");
+            existente.MarcaId = request.MarcaId;
+            existente.ModeloId = request.ModeloId;
+            existente.TipoVehiculoId = request.TipoVehiculoId;
+            existente.Anio = request.Anio;
+            existente.ClienteId = request.ClienteId;
+
+            if (request.KmActuales.HasValue)
+            {
+                existente.KmActuales = request.KmActuales;
+                existente.FechaUltimaActualizacionKm = DateTime.UtcNow;
+            }
+
+            await _vehiculoRepository.UpdateAsync(existente);
+
+            VehiculoDetalle? detalle = await _vehiculoRepository.GetDetalleByIdAsync(id);
+            return ServiceResult<VehiculoDetalle>.Ok(detalle!);
         }
 
-      
-        public async Task<VehiculoDetalle?> GetDetalleByMatriculaAsync(string matricula)
+        public async Task<ServiceResult<VehiculoDetalle>> GetDetalleByIdAsync(int tallerId, int id)
         {
-            return await _vehiculoRepository.GetDetalleByMatriculaAsync(matricula);
+            VehiculoDetalle? detalle = await _vehiculoRepository.GetDetalleByIdAsync(id);
+
+            if (detalle == null || detalle.TallerId != tallerId)
+            {
+                return ServiceResult<VehiculoDetalle>.Fail(ErrorCode.SYS_ENTIDAD_NO_ENCONTRADA.ToString(), "Vehículo no encontrado.");
+            }
+
+            return ServiceResult<VehiculoDetalle>.Ok(detalle);
         }
 
-       
-        public async Task<Vehiculo?> GetByIdAsync(int id)
+        public async Task<PagedResponse<VehiculoDetalle>> GetAllDetalleByTallerPagedAsync(int tallerId, int pageNumber, int pageSize, VehiculoFiltroDto? filtro = null)
         {
-            return await _vehiculoRepository.GetByIdAsync(id);
+            return await _vehiculoRepository.GetAllDetalleByTallerAsync(tallerId, pageNumber, pageSize, filtro);
         }
 
-        public async Task<Vehiculo?> GetByMatriculaAsync(string matricula)
+        public async Task<ServiceResult<VehiculoDetalle>> GetDetalleByMatriculaAsync(int tallerId, string matricula)
         {
-            return await _vehiculoRepository.GetByMatriculaAsync(matricula);
-        }
+            string m = matricula.Trim().ToUpper();
+            VehiculoDetalle? detalle = await _vehiculoRepository.GetDetalleByMatriculaAsync(m);
 
-        public async Task AddAsync(Vehiculo vehiculo)
-        {
-            await _vehiculoRepository.AddAsync(vehiculo);
-        }
+            if (detalle == null || detalle.TallerId != tallerId)
+            {
+                return ServiceResult<VehiculoDetalle>.Fail(ErrorCode.SYS_ENTIDAD_NO_ENCONTRADA.ToString(), "Vehículo no encontrado.");
+            }
 
-        public async Task UpdateAsync(Vehiculo vehiculo)
-        {
-            await _vehiculoRepository.UpdateAsync(vehiculo);
-        }
-
-        public async Task<bool> ExistsAsync(string matricula)
-        {
-            return await _vehiculoRepository.ExistsAsync(matricula);
+            return ServiceResult<VehiculoDetalle>.Ok(detalle);
         }
     }
 }

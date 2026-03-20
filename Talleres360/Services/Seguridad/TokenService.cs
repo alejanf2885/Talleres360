@@ -2,8 +2,8 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using Talleres360.Dtos.Usuarios;
 using Talleres360.Interfaces.Seguridad;
-using Talleres360.Models;
 
 namespace Talleres360.Services.Seguridad
 {
@@ -16,7 +16,7 @@ namespace Talleres360.Services.Seguridad
             _config = config;
         }
 
-        public string GenerarJwtToken(Usuario usuario)
+        public string GenerarJwtToken(UsuarioLoginDto usuario)
         {
             var jwtKey = _config["Jwt:Key"] ?? "TuSuperClaveSecretaDeDesarrolloMuyLarga123456789!";
             var keyBytes = Encoding.UTF8.GetBytes(jwtKey);
@@ -33,7 +33,7 @@ namespace Talleres360.Services.Seguridad
             var tokenDescriptor = new SecurityTokenDescriptor
             {
                 Subject = new ClaimsIdentity(claims),
-                Expires = DateTime.UtcNow.AddMinutes(30),
+                Expires = DateTime.UtcNow.AddMinutes(15),
                 SigningCredentials = new SigningCredentials(
                     new SymmetricSecurityKey(keyBytes),
                     SecurityAlgorithms.HmacSha256Signature),
