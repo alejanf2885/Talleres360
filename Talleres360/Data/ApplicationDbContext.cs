@@ -19,6 +19,10 @@ namespace Talleres360.Data
         public DbSet<Vehiculo> Vehiculos { get; set; }
         public DbSet<VehiculoDetalle> VehiculosDetalle { get; set; }
         public DbSet<UsuarioVerificacion> UsuarioVerificaciones { get; set; }
+        public DbSet<VehiculoTipo> VehiculoTipos { get; set; }
+        public DbSet<Trabajo> Trabajos { get; set; }
+        public DbSet<DetalleTrabajo> DetallesTrabajo { get; set; }
+        public DbSet<NotaVehiculo> NotasVehiculo { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -32,6 +36,9 @@ namespace Talleres360.Data
             modelBuilder.Entity<Credencial>().HasQueryFilter(c => !c.Eliminado);
             modelBuilder.Entity<Cliente>().HasQueryFilter(c => !c.Eliminado);
             modelBuilder.Entity<Vehiculo>().HasQueryFilter(v => !v.Eliminado);
+            modelBuilder.Entity<Trabajo>().HasQueryFilter(t => !t.Eliminado);
+            modelBuilder.Entity<DetalleTrabajo>().HasQueryFilter(d => !d.Eliminado);
+            modelBuilder.Entity<NotaVehiculo>().HasQueryFilter(n => !n.Eliminado);
 
             modelBuilder.Entity<Plan>()
                 .Property(p => p.PrecioMensual)
@@ -44,6 +51,34 @@ namespace Talleres360.Data
             modelBuilder.Entity<Vehiculo>()
                 .Property(v => v.PromedioKmDiarios)
                 .HasPrecision(8, 2);
+
+            modelBuilder.Entity<Trabajo>()
+                .Property(t => t.Subtotal)
+                .HasPrecision(10, 2);
+
+            modelBuilder.Entity<Trabajo>()
+                .Property(t => t.ImporteImpuestos)
+                .HasPrecision(10, 2);
+
+            modelBuilder.Entity<Trabajo>()
+                .Property(t => t.Total)
+                .HasPrecision(10, 2);
+
+            modelBuilder.Entity<DetalleTrabajo>()
+                .Property(d => d.Cantidad)
+                .HasPrecision(8, 2);
+
+            modelBuilder.Entity<DetalleTrabajo>()
+                .Property(d => d.PrecioUnitario)
+                .HasPrecision(10, 2);
+
+            modelBuilder.Entity<DetalleTrabajo>()
+                .Property(d => d.DescuentoPorcentaje)
+                .HasPrecision(5, 2);
+
+            modelBuilder.Entity<DetalleTrabajo>()
+                .Property(d => d.ImpuestoPorcentaje)
+                .HasPrecision(5, 2);
 
             modelBuilder.Entity<VehiculoDetalle>()
                 .ToView("VW_VehiculoDetalles")

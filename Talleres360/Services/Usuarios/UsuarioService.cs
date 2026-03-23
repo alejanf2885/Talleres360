@@ -14,26 +14,31 @@ namespace Talleres360.Services.Usuarios
     {
         private readonly IUsuarioRepository _userRepo;
         private readonly IPasswordService _passwordService;
-        private readonly INotificacionService _notificacionService; 
+        private readonly INotificacionService _notificacionService;
         private readonly IVerificacionService _verificacionService;
+        private readonly ILogger<UsuarioService> _logger;
 
         public UsuarioService(
             IUsuarioRepository userRepo,
             IPasswordService passwordService,
             INotificacionService notificacionService,
-            IVerificacionService verificacionService)
+            IVerificacionService verificacionService,
+            ILogger<UsuarioService> logger)
         {
             _userRepo = userRepo;
             _passwordService = passwordService;
             _notificacionService = notificacionService;
             _verificacionService = verificacionService;
+            _logger = logger;
         }
 
         public async Task<ServiceResult<Usuario>> GetByEmailAsync(string email)
         {
-            Usuario? usuario = await _userRepo.GetByEmailAsync(email);
+            Usuario? usuario = await _userRepo.GetByEmailAsync(email.Trim().ToLower());
             if (usuario == null)
-                return ServiceResult<Usuario>.Fail(ErrorCode.SYS_ENTIDAD_NO_ENCONTRADA.ToString(), "Usuario no encontrado.");
+                return ServiceResult<Usuario>.Fail(
+                    ErrorCode.SYS_ENTIDAD_NO_ENCONTRADA.ToString(),
+                    "Usuario no encontrado.");
 
             return ServiceResult<Usuario>.Ok(usuario);
         }
@@ -42,7 +47,9 @@ namespace Talleres360.Services.Usuarios
         {
             Usuario? usuario = await _userRepo.GetByIdAsync(id);
             if (usuario == null)
-                return ServiceResult<Usuario>.Fail(ErrorCode.SYS_ENTIDAD_NO_ENCONTRADA.ToString(), "Usuario no encontrado.");
+                return ServiceResult<Usuario>.Fail(
+                    ErrorCode.SYS_ENTIDAD_NO_ENCONTRADA.ToString(),
+                    "Usuario no encontrado.");
 
             return ServiceResult<Usuario>.Ok(usuario);
         }
@@ -54,20 +61,23 @@ namespace Talleres360.Services.Usuarios
         }
 
         public async Task<ServiceResult<Usuario>> CrearUsuarioAdminAsync(
-      int tallerId, string nombre, string email, string password, string? rutaImagen = null)
+            int tallerId, string nombre, string email, string password, string? rutaImagen = null)
         {
-            if (await _userRepo.ExisteEmailAsync(email))
-            {
-                return ServiceResult<Usuario>.Fail(ErrorCode.REG_EMAIL_YA_REGISTRADO.ToString(), "El email ya existe.");
-            }
+            // Bug 2 — normalizar email antes de cualquier operación
+            string emailNormalizado = email.Trim().ToLower();
+
+            if (await _userRepo.ExisteEmailAsync(emailNormalizado))
+                return ServiceResult<Usuario>.Fail(
+                    ErrorCode.REG_EMAIL_YA_REGISTRADO.ToString(),
+                    "El email ya existe.");
 
             try
             {
                 Usuario usuario = new Usuario
                 {
                     TallerId = tallerId,
-                    Nombre = nombre,
-                    Email = email,
+                    Nombre = nombre.Trim(),
+                    Email = emailNormalizado,  // Bug 2 — guardar normalizado
                     Rol = RolesUsuario.ADMIN,
                     FechaCreacion = DateTime.UtcNow,
                     SecurityStamp = Guid.NewGuid().ToString(),
@@ -79,9 +89,9 @@ namespace Talleres360.Services.Usuarios
                 int filasAfectadasUser = await _userRepo.SaveChangesAsync();
 
                 if (filasAfectadasUser == 0 || usuario.Id == 0)
-                {
-                    return ServiceResult<Usuario>.Fail(ErrorCode.REG_ERROR_CREACION_USUARIO.ToString(), "No se pudo guardar el perfil de usuario.");
-                }
+                    return ServiceResult<Usuario>.Fail(
+                        ErrorCode.REG_ERROR_CREACION_USUARIO.ToString(),
+                        "No se pudo guardar el perfil de usuario.");
 
                 Credencial credencial = new Credencial
                 {
@@ -94,9 +104,9 @@ namespace Talleres360.Services.Usuarios
                 int filasAfectadasCred = await _userRepo.SaveChangesAsync();
 
                 if (filasAfectadasCred == 0)
-                {
-                    return ServiceResult<Usuario>.Fail(ErrorCode.REG_ERROR_CREACION_USUARIO.ToString(), "Error al generar las credenciales.");
-                }
+                    return ServiceResult<Usuario>.Fail(
+                        ErrorCode.REG_ERROR_CREACION_USUARIO.ToString(),
+                        "Error al generar las credenciales.");
 
                 try
                 {
@@ -105,13 +115,22 @@ namespace Talleres360.Services.Usuarios
                 }
                 catch (Exception ex)
                 {
+                    _logger.LogError(ex,
+                        "Error enviando email de bienvenida al usuario {UsuarioId}",
+                        usuario.Id);
                 }
 
                 return ServiceResult<Usuario>.Ok(usuario);
             }
             catch (Exception ex)
             {
-                return ServiceResult<Usuario>.Fail(ErrorCode.SYS_ERROR_GENERICO.ToString(), "Fallo crítico en la base de datos.");
+                _logger.LogError(ex,
+                    "Error crítico creando usuario admin para taller {TallerId}",
+                    tallerId);
+
+                return ServiceResult<Usuario>.Fail(
+                    ErrorCode.SYS_ERROR_GENERICO.ToString(),
+                    "Fallo crítico en la base de datos.");
             }
         }
 
@@ -123,19 +142,14 @@ namespace Talleres360.Services.Usuarios
 
         public async Task<ServiceResult<bool>> ValidarEmailDisponibleAsync(string email)
         {
-            bool existe = await _userRepo.ExisteEmailAsync(email);
+            bool existe = await _userRepo.ExisteEmailAsync(email.Trim().ToLower());
 
             if (existe)
-            {
                 return ServiceResult<bool>.Fail(
                     ErrorCode.REG_EMAIL_YA_REGISTRADO.ToString(),
-                    "El correo electrónico ya se encuentra registrado en el sistema."
-                );
-            }
+                    "El correo electrónico ya se encuentra registrado en el sistema.");
 
             return ServiceResult<bool>.Ok(true);
         }
-
-       
     }
 }

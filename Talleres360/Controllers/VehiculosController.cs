@@ -20,22 +20,40 @@ namespace Talleres360.API.Controllers
         private readonly IVehiculoService _vehiculoService;
         private readonly IUserContextService _userContext;
 
-        public VehiculosController(IVehiculoService vehiculoService, IUserContextService userContext)
+        public VehiculosController(
+            IVehiculoService vehiculoService,
+            IUserContextService userContext)
         {
             _vehiculoService = vehiculoService;
             _userContext = userContext;
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAll([FromQuery] int page = 1, [FromQuery] int size = 10, [FromQuery] string? matricula = null)
+        public async Task<IActionResult> GetAll(
+            [FromQuery] PaginationParams pagination,
+            [FromQuery] string? matricula = null,
+            [FromQuery] int? marcaId = null,
+            [FromQuery] int? modeloId = null)
         {
             int? tallerId = _userContext.GetTallerId();
             if (!tallerId.HasValue) return Unauthorized();
 
-            VehiculoFiltroDto filtro = new VehiculoFiltroDto { Matricula = matricula };
-            PagedResponse<VehiculoDetalle> response = await _vehiculoService.GetAllDetalleByTallerPagedAsync(tallerId.Value, page, size, filtro);
+            VehiculoFiltroDto filtro = new VehiculoFiltroDto
+            {
+                Matricula = matricula,
+                MarcaId = marcaId,
+                ModeloId = modeloId
+            };
 
-            return Ok(ApiResponse<PagedResponse<VehiculoDetalle>>.Ok(response, "Listado de vehículos recuperado correctamente."));
+            PagedResponse<VehiculoDetalle> response = await _vehiculoService
+                .GetAllDetalleByTallerPagedAsync(
+                    tallerId.Value,
+                    pagination.PageNumber,
+                    pagination.PageSize,
+                    filtro);
+
+            return Ok(ApiResponse<PagedResponse<VehiculoDetalle>>
+                .Ok(response, "Listado de vehículos recuperado correctamente."));
         }
 
         [TallerAuthorize<IVehiculoRepository>]
@@ -45,14 +63,28 @@ namespace Talleres360.API.Controllers
             int? tallerId = _userContext.GetTallerId();
             if (!tallerId.HasValue) return Unauthorized();
 
-            ServiceResult<VehiculoDetalle> resultado = await _vehiculoService.GetDetalleByIdAsync(tallerId.Value, id);
+            ServiceResult<VehiculoDetalle> resultado = await _vehiculoService
+                .GetDetalleByIdAsync(tallerId.Value, id);
 
             if (!resultado.Success)
-            {
                 return NotFound(new ApiErrorResponse(resultado.ErrorCode!, resultado.Message!));
-            }
 
             return Ok(ApiResponse<VehiculoDetalle>.Ok(resultado.Data!, "Datos del vehículo obtenidos."));
+        }
+
+        [HttpGet("matricula/{matricula}")]
+        public async Task<IActionResult> GetByMatricula(string matricula)
+        {
+            int? tallerId = _userContext.GetTallerId();
+            if (!tallerId.HasValue) return Unauthorized();
+
+            ServiceResult<VehiculoDetalle> resultado = await _vehiculoService
+                .GetDetalleByMatriculaAsync(tallerId.Value, matricula);
+
+            if (!resultado.Success)
+                return NotFound(new ApiErrorResponse(resultado.ErrorCode!, resultado.Message!));
+
+            return Ok(ApiResponse<VehiculoDetalle>.Ok(resultado.Data!, "Vehículo encontrado."));
         }
 
         [RequiereSuscripcionActiva]
@@ -62,12 +94,11 @@ namespace Talleres360.API.Controllers
             int? tallerId = _userContext.GetTallerId();
             if (!tallerId.HasValue) return Unauthorized();
 
-            ServiceResult<VehiculoDetalle> resultado = await _vehiculoService.RegistrarVehiculoAsync(tallerId.Value, request);
+            ServiceResult<VehiculoDetalle> resultado = await _vehiculoService
+                .RegistrarVehiculoAsync(tallerId.Value, request);
 
             if (!resultado.Success)
-            {
                 return BadRequest(new ApiErrorResponse(resultado.ErrorCode!, resultado.Message!));
-            }
 
             return CreatedAtAction(nameof(GetById),
                 new { id = resultado.Data!.Id },
@@ -82,14 +113,13 @@ namespace Talleres360.API.Controllers
             int? tallerId = _userContext.GetTallerId();
             if (!tallerId.HasValue) return Unauthorized();
 
-            ServiceResult<VehiculoDetalle> resultado = await _vehiculoService.ActualizarVehiculoAsync(tallerId.Value, id, request);
+            ServiceResult<VehiculoDetalle> resultado = await _vehiculoService
+                .ActualizarVehiculoAsync(tallerId.Value, id, request);
 
             if (!resultado.Success)
-            {
                 return BadRequest(new ApiErrorResponse(resultado.ErrorCode!, resultado.Message!));
-            }
 
-            return Ok(ApiResponse<VehiculoDetalle>.Ok(resultado.Data!, "Los datos del vehículo han sido actualizados."));
+            return Ok(ApiResponse<VehiculoDetalle>.Ok(resultado.Data!, "Vehículo actualizado correctamente."));
         }
     }
 }

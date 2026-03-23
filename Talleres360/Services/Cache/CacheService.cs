@@ -20,18 +20,37 @@ namespace Talleres360.Services.Cache
 
         public void Set<T>(string key, T value, TimeSpan expiration)
         {
-            var cacheOptions = new MemoryCacheEntryOptions
+            MemoryCacheEntryOptions cacheOptions = new MemoryCacheEntryOptions
             {
                 AbsoluteExpirationRelativeToNow = expiration,
                 Priority = CacheItemPriority.High
             };
-
             _memoryCache.Set(key, value, cacheOptions);
         }
 
         public void Remove(string key)
         {
             _memoryCache.Remove(key);
+        }
+
+        public async Task<T> GetOrSetAsync<T>(
+            string key,
+            Func<Task<T>> factory,
+            TimeSpan expiration)
+        {
+            if (_memoryCache.TryGetValue(key, out T? cached) && cached != null)
+                return cached;
+
+            T data = await factory();
+
+            MemoryCacheEntryOptions cacheOptions = new MemoryCacheEntryOptions
+            {
+                AbsoluteExpirationRelativeToNow = expiration,
+                Priority = CacheItemPriority.High
+            };
+
+            _memoryCache.Set(key, data, cacheOptions);
+            return data;
         }
     }
 }
