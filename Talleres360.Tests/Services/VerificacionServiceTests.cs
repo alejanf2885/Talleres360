@@ -76,7 +76,7 @@ namespace Talleres360.Tests.Services
             {
                 UsuarioId       = 1,
                 Token           = "expirado",
-                Tipo            = "REGISTRO",
+                Tipo            = "EMAIL",
                 FechaCreacion   = DateTime.UtcNow.AddHours(-2),
                 FechaExpiracion = DateTime.UtcNow.AddMinutes(-10)
             };
@@ -102,7 +102,7 @@ namespace Talleres360.Tests.Services
             {
                 UsuarioId       = 5,
                 Token           = "valido",
-                Tipo            = "REGISTRO",
+                Tipo            = "EMAIL",
                 FechaCreacion   = DateTime.UtcNow,
                 FechaExpiracion = DateTime.UtcNow.AddHours(1)
             };

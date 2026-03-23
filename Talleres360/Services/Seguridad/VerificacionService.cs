@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Options;
 using Talleres360.Configuration;
 using Talleres360.Dtos.Responses;
+using Talleres360.Enums;
 using Talleres360.Enums.Errors; 
 using Talleres360.Interfaces.Seguridad;
 using Talleres360.Interfaces.Usuarios;
@@ -39,9 +40,9 @@ namespace Talleres360.Services.Seguridad
             {
                 UsuarioId = usuarioId,
                 Token = token,
-                Tipo = "REGISTRO",
+                Tipo = TipoVerificacion.Email.ToDbValue(),
                 FechaCreacion = DateTime.UtcNow,
-                FechaExpiracion = DateTime.UtcNow.AddHours(24) 
+                FechaExpiracion = DateTime.UtcNow.AddHours(24)
             };
 
             await _verificacionRepo.AddAsync(verificacion);

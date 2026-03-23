@@ -2,6 +2,7 @@
 using Talleres360.Dtos.Responses;
 using Talleres360.Dtos.Seguridad;
 using Talleres360.Dtos.Usuarios;
+using Talleres360.Enums;
 using Talleres360.Enums.Errors;
 using Talleres360.Interfaces.Seguridad;
 using Talleres360.Interfaces.Talleres;
@@ -37,7 +38,7 @@ namespace Talleres360.Services.Seguridad
             {
                 UsuarioId = usuarioId,
                 Token = refreshToken,
-                TipoToken = "REFRESH_TOKEN",
+                TipoToken = TipoTokenSeguridad.RefreshToken.ToDbValue(),
                 FechaCreacion = DateTime.UtcNow,
                 FechaExpiracion = DateTime.UtcNow.AddDays(7),
                 Usado = false

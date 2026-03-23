@@ -2,8 +2,8 @@
 {
     public enum PlanTipo
     {
-        FREE = 1,
-        BASICO = 2,
-        PRO = 3
+        Basico = 1,
+        Profesional = 2,
+        Empresa = 3
     }
 }

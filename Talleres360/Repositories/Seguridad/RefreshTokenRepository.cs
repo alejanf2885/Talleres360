@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Talleres360.Data;
+using Talleres360.Enums;
 using Talleres360.Interfaces.Seguridad;
 using Talleres360.Models;
 
@@ -17,7 +18,9 @@ namespace Talleres360.Repositories
         public async Task<TokenSeguridad?> ObtenerPorTokenAsync(string token)
         {
             return await _context.TokensSeguridad
-                .FirstOrDefaultAsync(t => t.Token == token && t.TipoToken == "REFRESH_TOKEN");
+                .FirstOrDefaultAsync(t =>
+                    t.Token == token &&
+                    t.TipoToken == TipoTokenSeguridad.RefreshToken.ToDbValue());
         }
 
         public async Task<Usuario?> ObtenerUsuarioPorIdAsync(int usuarioId)
@@ -40,7 +43,10 @@ namespace Talleres360.Repositories
         public async Task RevocarTodosLosTokensDelUsuarioAsync(int usuarioId)
         {
             var tokensActivos = await _context.TokensSeguridad
-                .Where(t => t.UsuarioId == usuarioId && !t.Usado && t.TipoToken == "REFRESH_TOKEN")
+                .Where(t =>
+                    t.UsuarioId == usuarioId &&
+                    !t.Usado &&
+                    t.TipoToken == TipoTokenSeguridad.RefreshToken.ToDbValue())
                 .ToListAsync();
 
             foreach (var token in tokensActivos)

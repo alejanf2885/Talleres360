@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Talleres360.Enums;
 
 namespace Talleres360.Models
 {
@@ -19,7 +20,7 @@ namespace Talleres360.Models
 
         [Column("TipoToken")]  
         [Required, StringLength(50)]
-        public string TipoToken { get; set; } = "RESET_PASSWORD";
+        public string TipoToken { get; set; } = TipoTokenSeguridad.ResetPassword.ToDbValue();
 
         [Column("FechaCreacion")] 
         public DateTime FechaCreacion { get; set; }

@@ -37,7 +37,14 @@ El Controller debe mapear el `ServiceResult` a un formato JSON estándar:
 
 ## 5. Seguridad y Multi-tenancy
 - Protección de Recursos: Aplica `TallerAuthorizeAttribute` en los métodos del Controller para verificar la pertenencia del recurso.
-- Suscripción: Aplica `RequiereSuscripcionActivaAttribute` para bloquear acceso si el taller no tiene un plan activo.
+- Suscripción: Aplica `RequiereSuscripcionActivaAttribute` para bloquear acceso si el taller no tiene un plan activo. Se debe separar el nivel de plan (`PlanId` con `PlanTipo` Basico/Profesional/Empresa) del estado de facturación (`TipoSuscripcion` TRIAL/MENSUAL/ANUAL); el acceso premium debe evaluarse por `PlanId >= Profesional` y evitar strings mágicos de plan como PRO/PREMIUM.
 - Segundo Plano: Para tareas pesadas como el envío de emails con Resend, usa `IBackgroundTaskQueue` para encolar el trabajo sin bloquear la respuesta de la API.
+
+## 6. Estructura de Servicios y Repositorios de Vehículos
+- Se debe mantener una separación fina de responsabilidades en el catálogo de vehículos:
+  - `VehiculoTipoService` y `VehiculoTipoRepository` para gestionar tipos de vehículos.
+  - `MarcaService` y `MarcaRepository` para gestionar marcas de vehículos.
+  - `ModeloService` y `ModeloRepository` para gestionar modelos de vehículos.
+- Implementar caché por dominio: tipos de vehículos con un tiempo de expiración de 24 horas, y marcas por taller con un tiempo de expiración de 30 minutos.
 
 Esperando instrucciones del Director de Proyecto para iniciar la implementación del Módulo de Trabajos.

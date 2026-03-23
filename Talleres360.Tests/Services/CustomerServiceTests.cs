@@ -51,12 +51,12 @@ namespace Talleres360.Tests.Services
         public async Task CrearClienteAsync_LimitePlanAlcanzado_DebeRetornarFail()
         {
             // Arrange
-            var taller = new Taller { Id = 1, TipoSuscripcion = "FREE", PlanId = (int?)PlanTipo.FREE };
+            var taller = new Taller { Id = 1, TipoSuscripcion = "MENSUAL", PlanId = (int?)PlanTipo.Basico };
             var plan = new Plan { Id = 1, LimiteClientes = 10, Nombre = "FREE plan" };
             
             _tallerRepoMock.Setup(x => x.GetByIdAsync(1)).ReturnsAsync(taller);
             _customerRepoMock.Setup(x => x.CountByTallerIdAsync(1)).ReturnsAsync(10);
-            _planRepoMock.Setup(x => x.GetPlanPorIdAsync((int)PlanTipo.FREE)).ReturnsAsync(plan);
+            _planRepoMock.Setup(x => x.GetPlanPorIdAsync((int)PlanTipo.Basico)).ReturnsAsync(plan);
 
             // Act
             var result = await _sut.CrearClienteAsync(1, new CrearClienteRequest { Email = "test@test.com", Telefono = "123" });
@@ -70,7 +70,7 @@ namespace Talleres360.Tests.Services
         public async Task CrearClienteAsync_TrialNoCompruebaLimite()
         {
             // Arrange
-            var taller = new Taller { Id = 1, TipoSuscripcion = "TRIAL", PlanId = (int?)PlanTipo.FREE };
+            var taller = new Taller { Id = 1, TipoSuscripcion = "TRIAL", PlanId = (int?)PlanTipo.Basico };
             
             _tallerRepoMock.Setup(x => x.GetByIdAsync(1)).ReturnsAsync(taller);
             _customerRepoMock.Setup(x => x.ExistsByEmailAsync(1, "test@test.com")).ReturnsAsync(false);
