@@ -77,6 +77,7 @@ builder.Services.AddScoped<IPlanRepository, PlanRepository>();
 builder.Services.AddScoped<ICustomerRepository, CustomerRepository>();
 builder.Services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
 builder.Services.AddScoped<IVehiculoRepository, VehiculoRepository>();
+builder.Services.AddScoped<IVehiculoMaestroRepository, VehiculoMaestroRepository>();
 builder.Services.AddScoped<IVerificacionRepository, VerificacionRepository>();
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
@@ -85,6 +86,7 @@ builder.Services.AddScoped<ITallerService, TallerService>();
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IUserContextService, UserContextService>();
 builder.Services.AddScoped<IVehiculoService, VehiculoService>();
+builder.Services.AddScoped<IVehiculoMaestroService, VehiculoMaestroService>();
 builder.Services.AddScoped<IProcesadorImagenService, ProcesadorImagenService>();
 builder.Services.AddScoped<IImagenService, ImagenService>();
 builder.Services.AddScoped<INombreArchivoService, NombreArchivoService>();

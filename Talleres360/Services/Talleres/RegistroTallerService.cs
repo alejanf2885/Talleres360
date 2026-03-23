@@ -1,4 +1,4 @@
-﻿using Talleres360.Dtos;
+﻿using Talleres360.Dtos.Auth;
 using Talleres360.Dtos.Responses;
 using Talleres360.Enums;
 using Talleres360.Enums.Errors;
@@ -35,14 +35,16 @@ namespace Talleres360.Services.Talleres
 
         public async Task<ServiceResult<bool>> RegistrarNuevoClienteSaaSAsync(RegistroRequest request)
         {
+            string emailLimpio = request.Email.Trim().ToLower();
+            string nombreTallerLimpio = request.NombreTaller.Trim();
+            string nombreAdminLimpio = request.NombreAdmin.Trim();
 
-            ServiceResult<bool> validacionEmail = await _usuarioService.ValidarEmailDisponibleAsync(request.Email);
+            ServiceResult<bool> validacionEmail = await _usuarioService.ValidarEmailDisponibleAsync(emailLimpio);
 
             if (!validacionEmail.Success)
             {
                 return ServiceResult<bool>.Fail(validacionEmail.ErrorCode!, validacionEmail.Message!);
             }
-
 
             await _unitOfWork.BeginTransactionAsync();
 
@@ -53,15 +55,14 @@ namespace Talleres360.Services.Talleres
                 {
                     return ServiceResult<bool>.Fail(
                         ErrorCode.REG_PLAN_NO_ENCONTRADO.ToString(),
-                        "El plan de suscripción no está configurado en el sistema."
-                    );
+                        "El plan de suscripción no está configurado en el sistema.");
                 }
 
                 string cifTemporal = $"TEMP{DateTime.UtcNow:yyyyMMddHHmmss}{Guid.NewGuid():N}".Substring(0, 20);
 
                 Taller taller = new Taller
                 {
-                    Nombre = request.NombreTaller,
+                    Nombre = nombreTallerLimpio,
                     PlanId = plan.Id,
                     Cif = cifTemporal,
                     TipoSuscripcion = "TRIAL",
@@ -82,31 +83,27 @@ namespace Talleres360.Services.Talleres
                         await _unitOfWork.RollbackTransactionAsync();
                         return ServiceResult<bool>.Fail(
                             ErrorCode.REG_ERROR_SUBIDA_IMAGEN.ToString(),
-                            "Error al procesar la imagen de perfil."
-                        );
+                            "Error al procesar la imagen de perfil.");
                     }
                     rutaImagen = resultImagen;
                 }
 
                 ServiceResult<Usuario> resultUsuario = await _usuarioService.CrearUsuarioAdminAsync(
                     taller.Id,
-                    request.NombreAdmin,
-                    request.Email,
+                    nombreAdminLimpio,
+                    emailLimpio,
                     request.Password,
                     rutaImagen);
 
                 if (!resultUsuario.Success)
                 {
                     await _unitOfWork.RollbackTransactionAsync();
-
                     return ServiceResult<bool>.Fail(
                         resultUsuario.ErrorCode ?? ErrorCode.REG_ERROR_CREACION_USUARIO.ToString(),
-                        resultUsuario.Message ?? "Error al crear el usuario administrador."
-                    );
+                        resultUsuario.Message ?? "Error al crear el usuario administrador.");
                 }
 
                 await _unitOfWork.CommitTransactionAsync();
-
                 return ServiceResult<bool>.Ok(true);
             }
             catch (Exception ex)
@@ -114,8 +111,7 @@ namespace Talleres360.Services.Talleres
                 await _unitOfWork.RollbackTransactionAsync();
                 return ServiceResult<bool>.Fail(
                     ErrorCode.SYS_ERROR_GENERICO.ToString(),
-                   "Ocurrió un error crítico durante el registro. Por favor, inténtelo de nuevo más tarde."
-                );
+                    "Ocurrió un error crítico durante el registro.");
             }
         }
     }

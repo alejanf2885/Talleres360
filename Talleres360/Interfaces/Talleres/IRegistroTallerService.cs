@@ -1,4 +1,4 @@
-using Talleres360.Dtos;
+using Talleres360.Dtos.Auth;
 using Talleres360.Dtos.Responses;
 
 namespace Talleres360.Interfaces.Talleres
