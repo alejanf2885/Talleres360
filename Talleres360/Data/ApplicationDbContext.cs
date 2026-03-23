@@ -19,33 +19,87 @@ namespace Talleres360.Data
         public DbSet<Vehiculo> Vehiculos { get; set; }
         public DbSet<VehiculoDetalle> VehiculosDetalle { get; set; }
         public DbSet<UsuarioVerificacion> UsuarioVerificaciones { get; set; }
+        public DbSet<VehiculoTipo> VehiculoTipos { get; set; }
+        public DbSet<Trabajo> Trabajos { get; set; }
+        public DbSet<DetalleTrabajo> DetallesTrabajo { get; set; }
+        public DbSet<NotaVehiculo> NotasVehiculo { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
 
-            // --- CONVERSIÓN DE ENUM A STRING ---
             modelBuilder.Entity<Usuario>()
                 .Property(u => u.Rol)
                 .HasConversion<string>();
 
-            // --- FILTRO GLOBAL (SOFT DELETE) ---
             modelBuilder.Entity<Usuario>().HasQueryFilter(u => !u.Eliminado);
             modelBuilder.Entity<Credencial>().HasQueryFilter(c => !c.Eliminado);
+            modelBuilder.Entity<Cliente>().HasQueryFilter(c => !c.Eliminado);
+            modelBuilder.Entity<Vehiculo>().HasQueryFilter(v => !v.Eliminado);
+            modelBuilder.Entity<Trabajo>().HasQueryFilter(t => !t.Eliminado);
+            modelBuilder.Entity<DetalleTrabajo>().HasQueryFilter(d => !d.Eliminado);
+            modelBuilder.Entity<NotaVehiculo>().HasQueryFilter(n => !n.Eliminado);
 
-            // --- CONFIGURACIÓN DE PRECISIÓN PARA DECIMAL ---
             modelBuilder.Entity<Plan>()
                 .Property(p => p.PrecioMensual)
-                .HasPrecision(18, 2); // 18 dígitos totales, 2 decimales
+                .HasPrecision(18, 2);
 
-            // --- ÍNDICES PARA VELOCIDAD ---
+            modelBuilder.Entity<Plan>()
+                .Property(p => p.PrecioAnual)
+                .HasPrecision(18, 2);
+
+            modelBuilder.Entity<Vehiculo>()
+                .Property(v => v.PromedioKmDiarios)
+                .HasPrecision(8, 2);
+
+            modelBuilder.Entity<Trabajo>()
+                .Property(t => t.Subtotal)
+                .HasPrecision(10, 2);
+
+            modelBuilder.Entity<Trabajo>()
+                .Property(t => t.ImporteImpuestos)
+                .HasPrecision(10, 2);
+
+            modelBuilder.Entity<Trabajo>()
+                .Property(t => t.Total)
+                .HasPrecision(10, 2);
+
+            modelBuilder.Entity<DetalleTrabajo>()
+                .Property(d => d.Cantidad)
+                .HasPrecision(8, 2);
+
+            modelBuilder.Entity<DetalleTrabajo>()
+                .Property(d => d.PrecioUnitario)
+                .HasPrecision(10, 2);
+
+            modelBuilder.Entity<DetalleTrabajo>()
+                .Property(d => d.DescuentoPorcentaje)
+                .HasPrecision(5, 2);
+
+            modelBuilder.Entity<DetalleTrabajo>()
+                .Property(d => d.ImpuestoPorcentaje)
+                .HasPrecision(5, 2);
+
+            modelBuilder.Entity<VehiculoDetalle>()
+                .ToView("VW_VehiculoDetalles")
+                .HasNoKey();
+
             modelBuilder.Entity<Usuario>()
                 .HasIndex(u => u.Email)
                 .IsUnique();
 
-            // Índice en UsuarioId de Credenciales para mejorar rendimiento de consultas
             modelBuilder.Entity<Credencial>()
                 .HasIndex(c => c.UsuarioId);
+
+            modelBuilder.Entity<Marca>()
+                .HasIndex(m => new { m.Nombre, m.TallerId })
+                .HasFilter("[EsOficial] = 0")
+                .IsUnique();
+
+            modelBuilder.Entity<Marca>()
+                .HasIndex(m => m.Nombre)
+                .HasFilter("[EsOficial] = 1")
+                .IsUnique();
         }
     }
 }

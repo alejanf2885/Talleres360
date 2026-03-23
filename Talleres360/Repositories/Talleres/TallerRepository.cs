@@ -28,7 +28,7 @@ namespace Talleres360.Repositories.Talleres
         public async Task<Taller?> GetByCifAsync(string cif)
         {
             return await _context.Talleres
-                .FirstOrDefaultAsync(t => t.CIF == cif);
+                .FirstOrDefaultAsync(t => t.Cif == cif);
         }
 
         public async Task UpdateAsync(Taller taller)
@@ -39,7 +39,7 @@ namespace Talleres360.Repositories.Talleres
 
         public async Task<bool> ExistsByCifAsync(string cif)
         {
-            return await _context.Talleres.AnyAsync(t => t.CIF == cif);
+            return await _context.Talleres.AnyAsync(t => t.Cif == cif);
         }
 
         public async Task<bool> IsPerfilConfiguradoAsync(int tallerId)

@@ -8,7 +8,6 @@ using Talleres360.Interfaces.Planes;
 using Talleres360.Interfaces.Talleres;
 using Talleres360.Models;
 
-
 namespace Talleres360.Services.Clientes
 {
     public class CustomerService : ICustomerService
@@ -27,24 +26,31 @@ namespace Talleres360.Services.Clientes
             _planRepo = planRepo;
         }
 
-        public async Task<ServiceResult<Cliente>> CrearClienteAsync(int tallerId, CrearClienteRequest request)
+        public async Task<ServiceResult<Cliente>> CrearClienteAsync(
+            int tallerId, CrearClienteRequest request)
         {
             Taller? taller = await _tallerRepo.GetByIdAsync(tallerId);
             if (taller == null)
-            {
-                return ServiceResult<Cliente>.Fail(ErrorCode.SYS_ENTIDAD_NO_ENCONTRADA.ToString(), "Error: Taller no identificado.");
-            }
+                return ServiceResult<Cliente>.Fail(
+                    ErrorCode.SYS_ENTIDAD_NO_ENCONTRADA.ToString(),
+                    "Error: Taller no identificado.");
 
             if (taller.TipoSuscripcion != "TRIAL")
             {
                 int totalClientes = await _customerRepo.CountByTallerIdAsync(tallerId);
-                Plan? planActual = await _planRepo.GetPlanPorIdAsync(taller.PlanId ?? (int)PlanTipo.FREE);
+                Plan? planActual = await _planRepo.GetPlanPorIdAsync(
+                    taller.PlanId ?? (int)PlanTipo.FREE);
 
-                if (planActual != null && planActual.LimiteClientes.HasValue && totalClientes >= planActual.LimiteClientes.Value)
+                // CAMBIO: LimiteClientes ya es int no nullable
+                // Convenio: 0 = sin límite
+                if (planActual != null
+                    && planActual.LimiteClientes > 0
+                    && totalClientes >= planActual.LimiteClientes)
                 {
                     return ServiceResult<Cliente>.Fail(
                         ErrorCode.CUST_LIMITE_PLAN_ALCANZADO.ToString(),
-                        $"Límite de {planActual.LimiteClientes.Value} clientes alcanzado en tu plan {planActual.Nombre}. ¡Sube a un plan superior!"
+                        $"Límite de {planActual.LimiteClientes} clientes alcanzado " +
+                        $"en tu plan {planActual.Nombre}. ¡Sube a un plan superior!"
                     );
                 }
             }
@@ -52,19 +58,20 @@ namespace Talleres360.Services.Clientes
             string emailLimpio = request.Email.Trim().ToLower();
             bool existeEmail = await _customerRepo.ExistsByEmailAsync(tallerId, emailLimpio);
             if (existeEmail)
-            {
-                return ServiceResult<Cliente>.Fail(ErrorCode.CUST_EMAIL_DUPLICADO.ToString(), "Ya existe un cliente con ese correo electrónico en tu taller.");
-            }
+                return ServiceResult<Cliente>.Fail(
+                    ErrorCode.CUST_EMAIL_DUPLICADO.ToString(),
+                    "Ya existe un cliente con ese correo electrónico en tu taller.");
 
             string? nifNormalizado = null;
             if (!string.IsNullOrWhiteSpace(request.NifCif))
             {
-                nifNormalizado = request.NifCif.Trim().ToUpper().Replace("-", "").Replace(" ", "");
+                nifNormalizado = request.NifCif.Trim().ToUpper()
+                    .Replace("-", "").Replace(" ", "");
                 bool existeNif = await _customerRepo.ExistsByNifAsync(tallerId, nifNormalizado);
                 if (existeNif)
-                {
-                    return ServiceResult<Cliente>.Fail(ErrorCode.CUST_DNI_DUPLICADO.ToString(), "Ya existe un cliente con este DNI/CIF registrado en tu taller.");
-                }
+                    return ServiceResult<Cliente>.Fail(
+                        ErrorCode.CUST_DNI_DUPLICADO.ToString(),
+                        "Ya existe un cliente con este DNI/CIF registrado en tu taller.");
             }
 
             Cliente nuevoCliente = new Cliente
@@ -83,20 +90,21 @@ namespace Talleres360.Services.Clientes
                 AceptaComunicaciones = request.AceptaComunicaciones,
                 Eliminado = false,
                 FechaCreacion = DateTime.UtcNow,
-                FechaFirmaRGPD = DateTime.UtcNow
+                FechaFirmaRgpd = DateTime.UtcNow
             };
 
             await _customerRepo.AddAsync(nuevoCliente);
-
             return ServiceResult<Cliente>.Ok(nuevoCliente);
         }
 
-        public async Task<IEnumerable<Cliente>> ObtenerTodosAsync(int tallerId, string? buscar = null)
+        public async Task<IEnumerable<Cliente>> ObtenerTodosAsync(
+            int tallerId, string? buscar = null)
         {
             return await _customerRepo.GetAllByTallerIdAsync(tallerId, buscar);
         }
 
-        public async Task<PagedResponse<Cliente>> ObtenerTodosPagedAsync(int tallerId, PaginationParams pagination, string? buscar = null)
+        public async Task<PagedResponse<Cliente>> ObtenerTodosPagedAsync(
+            int tallerId, PaginationParams pagination, string? buscar = null)
         {
             return await _customerRepo.GetAllByTallerIdPagedAsync(tallerId, pagination, buscar);
         }
@@ -106,43 +114,42 @@ namespace Talleres360.Services.Clientes
             Cliente? cliente = await _customerRepo.GetByIdAsync(clienteId);
 
             if (cliente == null || cliente.TallerId != tallerId || cliente.Eliminado)
-            {
                 return null;
-            }
 
             return cliente;
         }
 
-        public async Task<ServiceResult<Cliente>> ActualizarClienteAsync(int tallerId, int clienteId, ActualizarClienteRequest request)
+        public async Task<ServiceResult<Cliente>> ActualizarClienteAsync(
+            int tallerId, int clienteId, ActualizarClienteRequest request)
         {
             Cliente? clienteExistente = await ObtenerPorIdAsync(tallerId, clienteId);
-
             if (clienteExistente == null)
-            {
-                return ServiceResult<Cliente>.Fail(ErrorCode.CUST_NO_ENCONTRADO.ToString(), "Cliente no encontrado o no pertenece a su taller.");
-            }
+                return ServiceResult<Cliente>.Fail(
+                    ErrorCode.CUST_NO_ENCONTRADO.ToString(),
+                    "Cliente no encontrado o no pertenece a su taller.");
 
             string emailLimpio = request.Email.Trim().ToLower();
             if (emailLimpio != clienteExistente.Email)
             {
                 bool existeEmail = await _customerRepo.ExistsByEmailAsync(tallerId, emailLimpio);
                 if (existeEmail)
-                {
-                    return ServiceResult<Cliente>.Fail(ErrorCode.CUST_EMAIL_DUPLICADO.ToString(), "El correo electrónico ya está en uso por otro cliente.");
-                }
+                    return ServiceResult<Cliente>.Fail(
+                        ErrorCode.CUST_EMAIL_DUPLICADO.ToString(),
+                        "El correo electrónico ya está en uso por otro cliente.");
             }
 
             string? nifNormalizado = null;
             if (!string.IsNullOrWhiteSpace(request.NifCif))
             {
-                nifNormalizado = request.NifCif.Trim().ToUpper().Replace("-", "").Replace(" ", "");
+                nifNormalizado = request.NifCif.Trim().ToUpper()
+                    .Replace("-", "").Replace(" ", "");
                 if (nifNormalizado != clienteExistente.NifCif)
                 {
                     bool existeNif = await _customerRepo.ExistsByNifAsync(tallerId, nifNormalizado);
                     if (existeNif)
-                    {
-                        return ServiceResult<Cliente>.Fail(ErrorCode.CUST_DNI_DUPLICADO.ToString(), "El DNI/CIF ya está registrado en otro cliente.");
-                    }
+                        return ServiceResult<Cliente>.Fail(
+                            ErrorCode.CUST_DNI_DUPLICADO.ToString(),
+                            "El DNI/CIF ya está registrado en otro cliente.");
                 }
             }
 
@@ -160,25 +167,22 @@ namespace Talleres360.Services.Clientes
             clienteExistente.FechaModificacion = DateTime.UtcNow;
 
             await _customerRepo.UpdateAsync(clienteExistente);
-
             return ServiceResult<Cliente>.Ok(clienteExistente);
         }
 
-        public async Task<ServiceResult<bool>> EliminarClienteAsync(int tallerId, int clienteId)
+        public async Task<ServiceResult<bool>> EliminarClienteAsync(
+            int tallerId, int clienteId)
         {
             Cliente? clienteExistente = await ObtenerPorIdAsync(tallerId, clienteId);
-
             if (clienteExistente == null)
-            {
-                return ServiceResult<bool>.Fail(ErrorCode.CUST_NO_ENCONTRADO.ToString(), "Cliente no encontrado o no pertenece a su taller.");
-            }
+                return ServiceResult<bool>.Fail(
+                    ErrorCode.CUST_NO_ENCONTRADO.ToString(),
+                    "Cliente no encontrado o no pertenece a su taller.");
 
-            // Soft Delete por integridad referencial
             clienteExistente.Eliminado = true;
             clienteExistente.FechaModificacion = DateTime.UtcNow;
 
             await _customerRepo.UpdateAsync(clienteExistente);
-
             return ServiceResult<bool>.Ok(true);
         }
 
@@ -187,20 +191,19 @@ namespace Talleres360.Services.Clientes
             Taller? taller = await _tallerRepo.GetByIdAsync(tallerId);
             if (taller == null) throw new Exception("Taller no encontrado.");
 
-            Plan? plan = await _planRepo.GetPlanPorIdAsync(taller.PlanId ?? (int)PlanTipo.FREE);
+            Plan? plan = await _planRepo.GetPlanPorIdAsync(
+                taller.PlanId ?? (int)PlanTipo.FREE);
 
             int total = await _customerRepo.CountByTallerIdAsync(tallerId);
             int nuevosEsteMes = await _customerRepo.CountNuevosEsteMesAsync(tallerId);
 
-            ClienteStatsResponse stats = new ClienteStatsResponse
+            return new ClienteStatsResponse
             {
                 TotalClientes = total,
                 ClientesNuevosEsteMes = nuevosEsteMes,
-                LimitePlan = plan?.LimiteClientes,
+                LimitePlan = plan?.LimiteClientes == 0 ? null : plan?.LimiteClientes,
                 NombrePlan = plan?.Nombre ?? "Desconocido"
             };
-
-            return stats;
         }
     }
 }

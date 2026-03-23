@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Talleres360.Models
 {
-    [Table("TALLERES")]
+    [Table("Talleres")]
     public class Taller
     {
         [Key]
@@ -11,15 +11,16 @@ namespace Talleres360.Models
         public int Id { get; set; }
 
         [Column("PlanId")]
-        public int? PlanId { get; set; } 
+        public int? PlanId { get; set; }
 
-        [Column("Nombre")] 
+        [Column("Nombre")]
         [Required, StringLength(150)]
-        public string Nombre { get; set; }
+        public string Nombre { get; set; } = string.Empty;
 
-        [Column("CIF")]
+        // CAMBIO: CIF -> Cif
+        [Column("Cif")]
         [StringLength(20)]
-        public string? CIF { get; set; }
+        public string? Cif { get; set; }
 
         [Column("Direccion")]
         [StringLength(255)]
@@ -33,7 +34,10 @@ namespace Talleres360.Models
         [StringLength(20)]
         public string? Telefono { get; set; }
 
-        // --- CAMPOS DE STRIPE ---
+        [Column("Logo")]
+        public string? Logo { get; set; }
+
+        // --- STRIPE ---
         [Column("StripeCustomerId")]
         public string? StripeCustomerId { get; set; }
 
@@ -42,6 +46,11 @@ namespace Talleres360.Models
 
         [Column("TipoSuscripcion")]
         public string? TipoSuscripcion { get; set; }
+
+        // NUEVO: campo añadido en la BD nueva
+        [Column("EstadoSuscripcion")]
+        [Required, StringLength(20)]
+        public string EstadoSuscripcion { get; set; } = "ACTIVO";
 
         [Column("ProximoCobro")]
         public DateTime? ProximoCobro { get; set; }
@@ -58,8 +67,5 @@ namespace Talleres360.Models
 
         [Column("Activo")]
         public bool Activo { get; set; } = true;
-
-        [Column("Logo")]
-        public string? Logo { get; set; }
     }
 }

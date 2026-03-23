@@ -3,63 +3,73 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Talleres360.Models
 {
-    [Table("CLIENTES")]
+    [Table("Clientes")]  
     public class Cliente
     {
         [Key]
+        [Column("Id")]
         public int Id { get; set; }
 
-        [Required]
-        public int TallerId { get; set; }
+        [Column("TallerId")]
+        public int? TallerId { get; set; }  
 
-        [Required]
-        [StringLength(200)]
+        [Column("Nombre")]
+        [Required, StringLength(100)]  
         public string Nombre { get; set; } = string.Empty;
 
-        [StringLength(300)]
+        [Column("Apellidos")]
+        [StringLength(150)]  
         public string? Apellidos { get; set; }
 
-        // --- NUEVOS CAMPOS FISCALES (Opcionales para Tickets, Obligatorios para Facturas Pro) ---
-
+        [Column("NifCif")]
         [StringLength(20)]
-        public string? NifCif { get; set; } // DNI, NIE o CIF
+        public string? NifCif { get; set; }
 
+        [Column("EsEmpresa")]
         public bool EsEmpresa { get; set; } = false;
 
+        [Column("Direccion")]
         [StringLength(500)]
         public string? Direccion { get; set; }
 
+        [Column("CodigoPostal")]
         [StringLength(15)]
         public string? CodigoPostal { get; set; }
 
+        [Column("Localidad")]
         [StringLength(150)]
         public string? Localidad { get; set; }
 
+        [Column("Provincia")]
         [StringLength(150)]
         public string? Provincia { get; set; }
 
-        // ---------------------------------------------------------------------------------------
-
-        [Required]
-        [StringLength(40)]
+        [Column("Telefono")]
+        [Required, StringLength(20)] 
         public string Telefono { get; set; } = string.Empty;
 
-        [StringLength(300)]
+        [Column("Email")]
+        [StringLength(150)] 
         public string? Email { get; set; }
 
-        public bool AceptaComunicaciones { get; set; }
+        [Column("AceptaComunicaciones")]
+        public bool AceptaComunicaciones { get; set; } = false;
 
-        public DateTime? FechaFirmaRGPD { get; set; }
+        [Column("FechaFirmaRgpd")]  
+        public DateTime? FechaFirmaRgpd { get; set; }
 
-        [StringLength(1000)]
+        [Column("FirmaDigitalUrl")]
+        [StringLength(500)]  
         public string? FirmaDigitalUrl { get; set; }
 
-        public bool Eliminado { get; set; }
+        [Column("Eliminado")]
+        public bool Eliminado { get; set; } = false;
 
+        [Column("FechaCreacion")]
         [Required]
         public DateTime FechaCreacion { get; set; }
 
+        [Column("FechaModificacion")]
         public DateTime? FechaModificacion { get; set; }
-
     }
 }

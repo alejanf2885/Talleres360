@@ -32,7 +32,7 @@ namespace Talleres360.Services.Vehiculos
             {
                 TallerId = tallerId,
                 ClienteId = request.ClienteId,
-                TipoVehiculoId = request.TipoVehiculoId,
+                VehiculoTipoId = request.VehiculoTipoId,
                 MarcaId = request.MarcaId,
                 ModeloId = request.ModeloId,
                 Matricula = matriculaLimpia,
@@ -69,7 +69,7 @@ namespace Talleres360.Services.Vehiculos
             existente.Matricula = request.Matricula.Trim().ToUpper().Replace("-", "").Replace(" ", "");
             existente.MarcaId = request.MarcaId;
             existente.ModeloId = request.ModeloId;
-            existente.TipoVehiculoId = request.TipoVehiculoId;
+            existente.VehiculoTipoId = request.VehiculoTipoId;
             existente.Anio = request.Anio;
             existente.ClienteId = request.ClienteId;
 

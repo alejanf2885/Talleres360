@@ -35,7 +35,7 @@ namespace Talleres360.Services.Talleres
             {
                 Id = taller.Id,
                 Nombre = taller.Nombre,
-                CIF = taller.CIF,
+                CIF = taller.Cif,
                 Direccion = taller.Direccion,
                 Localidad = taller.Localidad,
                 Telefono = taller.Telefono,
@@ -67,7 +67,7 @@ namespace Talleres360.Services.Talleres
                 );
             }
 
-            taller.CIF = request.CIF;
+            taller.Cif = request.CIF;
             taller.Direccion = request.Direccion;
             taller.Localidad = request.Localidad;
             taller.Telefono = request.Telefono;
