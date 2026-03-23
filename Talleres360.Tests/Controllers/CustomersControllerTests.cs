@@ -1,445 +1,228 @@
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Filters;
 using Moq;
-using System.Reflection;
-using System.Security.Claims;
-using Talleres360.API.Controllers;
-using Talleres360.API.Filters;
+using Talleres360.Controllers;
 using Talleres360.Dtos;
 using Talleres360.Dtos.Clientes;
+using Talleres360.Dtos.Responses;
+using Talleres360.Enums.Errors;
 using Talleres360.Interfaces.Clientes;
 using Talleres360.Interfaces.Seguridad;
 using Talleres360.Models;
-using Xunit;
 
 namespace Talleres360.Tests.Controllers
 {
     public class CustomersControllerTests
     {
-        // ==========================================
-        // TESTS PARA EL FILTRO RequiereSuscripcionActiva
-        // ==========================================
+        private readonly Mock<ICustomerService> _customerServiceMock;
+        private readonly Mock<IUserContextService> _userContextMock;
+        private readonly CustomersController _controller;
 
-        [Fact]
-        public void RequiereSuscripcionActiva_DebeEstarAplicadoEnMetodosCorrectos()
+        public CustomersControllerTests()
         {
-            // ARRANGE & ACT
-            var controllerType = typeof(CustomersController);
-            
-            var createMethod = controllerType.GetMethod("Create");
-            var updateMethod = controllerType.GetMethod("Update");
-            var deleteMethod = controllerType.GetMethod("Delete");
-            var getAllMethod = controllerType.GetMethod("GetAll");
-            var getByIdMethod = controllerType.GetMethod("GetById");
-            var searchMethod = controllerType.GetMethod("Search");
+            _customerServiceMock = new Mock<ICustomerService>();
+            _userContextMock = new Mock<IUserContextService>();
 
-            // ASSERT - Verificar que los métodos de escritura tienen el atributo
-            var createAttribute = createMethod?.GetCustomAttributes(typeof(RequiereSuscripcionActivaAttribute), false);
-            var updateAttribute = updateMethod?.GetCustomAttributes(typeof(RequiereSuscripcionActivaAttribute), false);
-            var deleteAttribute = deleteMethod?.GetCustomAttributes(typeof(RequiereSuscripcionActivaAttribute), false);
-            var getAllAttribute = getAllMethod?.GetCustomAttributes(typeof(RequiereSuscripcionActivaAttribute), false);
-            var getByIdAttribute = getByIdMethod?.GetCustomAttributes(typeof(RequiereSuscripcionActivaAttribute), false);
-            var searchAttribute = searchMethod?.GetCustomAttributes(typeof(RequiereSuscripcionActivaAttribute), false);
-
-            // Los métodos de escritura (Create, Update, Delete) DEBEN tener el atributo
-            Assert.NotNull(createAttribute);
-            Assert.Single(createAttribute);
-            Assert.NotNull(updateAttribute);
-            Assert.Single(updateAttribute);
-            Assert.NotNull(deleteAttribute);
-            Assert.Single(deleteAttribute);
-
-            // Los métodos de lectura (GetAll, GetById, Search) NO deben tener el atributo
-            Assert.Empty(getAllAttribute ?? Array.Empty<object>());
-            Assert.Empty(getByIdAttribute ?? Array.Empty<object>());
-            Assert.Empty(searchAttribute ?? Array.Empty<object>());
-        }
-
-        // ==========================================
-        // TESTS PARA EL CONTROLADOR CustomersController
-        // ==========================================
-
-        [Fact]
-        public async Task Create_DebeRetornar201_CuandoClienteSeCreaCorrectamente()
-        {
-            // ARRANGE
-            int tallerId = 1;
-            var mockCustomerService = new Mock<ICustomerService>();
-            var mockUserContext = new Mock<IUserContextService>();
-
-            var request = new CrearClienteRequest
-            {
-                Nombre = "Cliente Test",
-                Telefono = "123456789"
-            };
-
-            var clienteCreado = new Cliente
-            {
-                Id = 10,
-                TallerId = tallerId,
-                Nombre = request.Nombre,
-                Telefono = request.Telefono,
-                Eliminado = false
-            };
-
-            mockUserContext.Setup(x => x.GetTallerId()).Returns(tallerId);
-            mockCustomerService.Setup(x => x.CrearClienteAsync(tallerId, request))
-                .ReturnsAsync((true, "Cliente registrado con éxito.", clienteCreado));
-
-            var controller = new CustomersController(mockCustomerService.Object, mockUserContext.Object);
-
-            // ACT
-            var resultado = await controller.Create(request);
-
-            // ASSERT
-            var createdResult = Assert.IsType<CreatedAtActionResult>(resultado);
-            Assert.Equal("GetById", createdResult.ActionName);
-            Assert.Equal(clienteCreado, createdResult.Value);
-            mockCustomerService.Verify(x => x.CrearClienteAsync(tallerId, request), Times.Once);
+            _controller = new CustomersController(
+                _customerServiceMock.Object,
+                _userContextMock.Object);
         }
 
         [Fact]
-        public async Task Create_DebeRetornar400_CuandoClienteNoSePuedeCrear()
+        public async Task GetAll_SinTallerIdEnJWT_DebeRetornar401()
         {
-            // ARRANGE
-            int tallerId = 1;
-            var mockCustomerService = new Mock<ICustomerService>();
-            var mockUserContext = new Mock<IUserContextService>();
+            // Arrange
+            var pagination = new PaginationParams { PageNumber = 1, PageSize = 10 };
+            _userContextMock.Setup(x => x.GetTallerId()).Returns((int?)null);
 
-            var request = new CrearClienteRequest
-            {
-                Nombre = "Cliente Test",
-                Telefono = "123456789"
-            };
+            // Act
+            var result = await _controller.GetAll(pagination, "ana");
 
-            mockUserContext.Setup(x => x.GetTallerId()).Returns(tallerId);
-            mockCustomerService.Setup(x => x.CrearClienteAsync(tallerId, request))
-                .ReturnsAsync((false, "Límite de clientes alcanzado.", (Cliente?)null));
-
-            var controller = new CustomersController(mockCustomerService.Object, mockUserContext.Object);
-
-            // ACT
-            var resultado = await controller.Create(request);
-
-            // ASSERT
-            var badRequestResult = Assert.IsType<BadRequestObjectResult>(resultado);
-            Assert.NotNull(badRequestResult.Value);
+            // Assert
+            var unauthorizedResult = Assert.IsType<UnauthorizedResult>(result);
+            Assert.Equal(401, unauthorizedResult.StatusCode);
+            _customerServiceMock.Verify(
+                x => x.ObtenerTodosPagedAsync(It.IsAny<int>(), It.IsAny<PaginationParams>(), It.IsAny<string?>()),
+                Times.Never);
         }
 
         [Fact]
-        public async Task Create_DebeRetornar401_CuandoTallerIdEsNull()
+        public async Task GetAll_ConTallerId_DebeRetornar200ConPaginacion()
         {
-            // ARRANGE
-            var mockCustomerService = new Mock<ICustomerService>();
-            var mockUserContext = new Mock<IUserContextService>();
-
-            var request = new CrearClienteRequest
+            // Arrange
+            var pagination = new PaginationParams { PageNumber = 1, PageSize = 10 };
+            var response = new PagedResponse<Cliente>
             {
-                Nombre = "Cliente Test",
-                Telefono = "123456789"
-            };
-
-            mockUserContext.Setup(x => x.GetTallerId()).Returns((int?)null);
-
-            var controller = new CustomersController(mockCustomerService.Object, mockUserContext.Object);
-
-            // ACT
-            var resultado = await controller.Create(request);
-
-            // ASSERT
-            Assert.IsType<UnauthorizedResult>(resultado);
-            mockCustomerService.Verify(x => x.CrearClienteAsync(It.IsAny<int>(), It.IsAny<CrearClienteRequest>()), Times.Never);
-        }
-
-        [Fact]
-        public async Task Update_DebeRetornar200_CuandoClienteSeActualizaCorrectamente()
-        {
-            // ARRANGE
-            int tallerId = 1;
-            int clienteId = 10;
-            var mockCustomerService = new Mock<ICustomerService>();
-            var mockUserContext = new Mock<IUserContextService>();
-
-            var request = new ActualizarClienteRequest
-            {
-                Nombre = "Cliente Actualizado",
-                Telefono = "987654321"
-            };
-
-            var clienteActualizado = new Cliente
-            {
-                Id = clienteId,
-                TallerId = tallerId,
-                Nombre = request.Nombre,
-                Telefono = request.Telefono,
-                Eliminado = false
-            };
-
-            mockUserContext.Setup(x => x.GetTallerId()).Returns(tallerId);
-            mockCustomerService.Setup(x => x.ActualizarClienteAsync(tallerId, clienteId, request))
-                .ReturnsAsync((true, "Cliente actualizado con éxito.", clienteActualizado));
-
-            var controller = new CustomersController(mockCustomerService.Object, mockUserContext.Object);
-
-            // ACT
-            var resultado = await controller.Update(clienteId, request);
-
-            // ASSERT
-            var okResult = Assert.IsType<OkObjectResult>(resultado);
-            Assert.NotNull(okResult.Value);
-            mockCustomerService.Verify(x => x.ActualizarClienteAsync(tallerId, clienteId, request), Times.Once);
-        }
-
-        [Fact]
-        public async Task Update_DebeRetornar400_CuandoClienteNoSePuedeActualizar()
-        {
-            // ARRANGE
-            int tallerId = 1;
-            int clienteId = 999;
-            var mockCustomerService = new Mock<ICustomerService>();
-            var mockUserContext = new Mock<IUserContextService>();
-
-            var request = new ActualizarClienteRequest
-            {
-                Nombre = "Cliente Test",
-                Telefono = "123456789"
-            };
-
-            mockUserContext.Setup(x => x.GetTallerId()).Returns(tallerId);
-            mockCustomerService.Setup(x => x.ActualizarClienteAsync(tallerId, clienteId, request))
-                .ReturnsAsync((false, "Cliente no encontrado.", (Cliente?)null));
-
-            var controller = new CustomersController(mockCustomerService.Object, mockUserContext.Object);
-
-            // ACT
-            var resultado = await controller.Update(clienteId, request);
-
-            // ASSERT
-            var badRequestResult = Assert.IsType<BadRequestObjectResult>(resultado);
-            Assert.NotNull(badRequestResult.Value);
-        }
-
-        [Fact]
-        public async Task Delete_DebeRetornar200_CuandoClienteSeEliminaCorrectamente()
-        {
-            // ARRANGE
-            int tallerId = 1;
-            int clienteId = 10;
-            var mockCustomerService = new Mock<ICustomerService>();
-            var mockUserContext = new Mock<IUserContextService>();
-
-            mockUserContext.Setup(x => x.GetTallerId()).Returns(tallerId);
-            mockCustomerService.Setup(x => x.EliminarClienteAsync(tallerId, clienteId))
-                .ReturnsAsync((true, "Cliente eliminado correctamente."));
-
-            var controller = new CustomersController(mockCustomerService.Object, mockUserContext.Object);
-
-            // ACT
-            var resultado = await controller.Delete(clienteId);
-
-            // ASSERT
-            var okResult = Assert.IsType<OkObjectResult>(resultado);
-            Assert.NotNull(okResult.Value);
-            mockCustomerService.Verify(x => x.EliminarClienteAsync(tallerId, clienteId), Times.Once);
-        }
-
-        [Fact]
-        public async Task Delete_DebeRetornar400_CuandoClienteNoSePuedeEliminar()
-        {
-            // ARRANGE
-            int tallerId = 1;
-            int clienteId = 999;
-            var mockCustomerService = new Mock<ICustomerService>();
-            var mockUserContext = new Mock<IUserContextService>();
-
-            mockUserContext.Setup(x => x.GetTallerId()).Returns(tallerId);
-            mockCustomerService.Setup(x => x.EliminarClienteAsync(tallerId, clienteId))
-                .ReturnsAsync((false, "Cliente no encontrado."));
-
-            var controller = new CustomersController(mockCustomerService.Object, mockUserContext.Object);
-
-            // ACT
-            var resultado = await controller.Delete(clienteId);
-
-            // ASSERT
-            var badRequestResult = Assert.IsType<BadRequestObjectResult>(resultado);
-            Assert.NotNull(badRequestResult.Value);
-        }
-
-        [Fact]
-        public async Task GetAll_DebeRetornar200_ConListaPaginadaDeClientes()
-        {
-            // ARRANGE
-            int tallerId = 1;
-            var mockCustomerService = new Mock<ICustomerService>();
-            var mockUserContext = new Mock<IUserContextService>();
-
-            var clientes = new List<Cliente>
-            {
-                new Cliente { Id = 1, TallerId = tallerId, Nombre = "Cliente 1", Eliminado = false },
-                new Cliente { Id = 2, TallerId = tallerId, Nombre = "Cliente 2", Eliminado = false }
-            };
-
-            var pagedResponse = new Talleres360.Dtos.PagedResponse<Cliente>
-            {
-                Data = clientes,
-                PageNumber = 1,
-                PageSize = 10,
-                TotalCount = 2
-            };
-
-            mockUserContext.Setup(x => x.GetTallerId()).Returns(tallerId);
-            mockCustomerService.Setup(x => x.ObtenerTodosPagedAsync(tallerId, It.IsAny<Talleres360.Dtos.PaginationParams>(), null))
-                .ReturnsAsync(pagedResponse);
-
-            var controller = new CustomersController(mockCustomerService.Object, mockUserContext.Object);
-
-            // ACT
-            var resultado = await controller.GetAll();
-
-            // ASSERT
-            var okResult = Assert.IsType<OkObjectResult>(resultado);
-            var respuestaPaginada = Assert.IsType<Talleres360.Dtos.PagedResponse<Cliente>>(okResult.Value);
-            Assert.Equal(2, respuestaPaginada.Data.Count());
-            Assert.Equal(1, respuestaPaginada.PageNumber);
-            Assert.Equal(10, respuestaPaginada.PageSize);
-            Assert.Equal(2, respuestaPaginada.TotalCount);
-            Assert.Equal(1, respuestaPaginada.TotalPages);
-            mockCustomerService.Verify(x => x.ObtenerTodosPagedAsync(tallerId, It.IsAny<Talleres360.Dtos.PaginationParams>(), null), Times.Once);
-        }
-
-        [Fact]
-        public async Task GetAll_DebePasarParametrosDePaginacion()
-        {
-            // ARRANGE
-            int tallerId = 1;
-            int pageNumber = 2;
-            int pageSize = 5;
-            var mockCustomerService = new Mock<ICustomerService>();
-            var mockUserContext = new Mock<IUserContextService>();
-
-            var pagedResponse = new Talleres360.Dtos.PagedResponse<Cliente>
-            {
-                Data = new List<Cliente>(),
-                PageNumber = pageNumber,
-                PageSize = pageSize,
-                TotalCount = 10
-            };
-
-            mockUserContext.Setup(x => x.GetTallerId()).Returns(tallerId);
-            mockCustomerService.Setup(x => x.ObtenerTodosPagedAsync(tallerId, It.Is<Talleres360.Dtos.PaginationParams>(p => p.PageNumber == pageNumber && p.PageSize == pageSize), null))
-                .ReturnsAsync(pagedResponse);
-
-            var controller = new CustomersController(mockCustomerService.Object, mockUserContext.Object);
-
-            // ACT
-            var resultado = await controller.GetAll(pageNumber, pageSize);
-
-            // ASSERT
-            var okResult = Assert.IsType<OkObjectResult>(resultado);
-            var respuestaPaginada = Assert.IsType<Talleres360.Dtos.PagedResponse<Cliente>>(okResult.Value);
-            Assert.Equal(pageNumber, respuestaPaginada.PageNumber);
-            Assert.Equal(pageSize, respuestaPaginada.PageSize);
-            Assert.Equal(2, respuestaPaginada.TotalPages);
-            mockCustomerService.Verify(x => x.ObtenerTodosPagedAsync(tallerId, It.Is<Talleres360.Dtos.PaginationParams>(p => p.PageNumber == pageNumber && p.PageSize == pageSize), null), Times.Once);
-        }
-
-        [Fact]
-        public async Task GetById_DebeRetornar200_CuandoClienteExiste()
-        {
-            // ARRANGE
-            int tallerId = 1;
-            int clienteId = 10;
-            var mockCustomerService = new Mock<ICustomerService>();
-            var mockUserContext = new Mock<IUserContextService>();
-
-            var cliente = new Cliente
-            {
-                Id = clienteId,
-                TallerId = tallerId,
-                Nombre = "Cliente Test",
-                Eliminado = false
-            };
-
-            mockUserContext.Setup(x => x.GetTallerId()).Returns(tallerId);
-            mockCustomerService.Setup(x => x.ObtenerPorIdAsync(tallerId, clienteId))
-                .ReturnsAsync(cliente);
-
-            var controller = new CustomersController(mockCustomerService.Object, mockUserContext.Object);
-
-            // ACT
-            var resultado = await controller.GetById(clienteId);
-
-            // ASSERT
-            var okResult = Assert.IsType<OkObjectResult>(resultado);
-            Assert.Equal(cliente, okResult.Value);
-            mockCustomerService.Verify(x => x.ObtenerPorIdAsync(tallerId, clienteId), Times.Once);
-        }
-
-        [Fact]
-        public async Task GetById_DebeRetornar404_CuandoClienteNoExiste()
-        {
-            // ARRANGE
-            int tallerId = 1;
-            int clienteId = 999;
-            var mockCustomerService = new Mock<ICustomerService>();
-            var mockUserContext = new Mock<IUserContextService>();
-
-            mockUserContext.Setup(x => x.GetTallerId()).Returns(tallerId);
-            mockCustomerService.Setup(x => x.ObtenerPorIdAsync(tallerId, clienteId))
-                .ReturnsAsync((Cliente?)null);
-
-            var controller = new CustomersController(mockCustomerService.Object, mockUserContext.Object);
-
-            // ACT
-            var resultado = await controller.GetById(clienteId);
-
-            // ASSERT
-            var notFoundResult = Assert.IsType<NotFoundObjectResult>(resultado);
-            Assert.NotNull(notFoundResult.Value);
-            mockCustomerService.Verify(x => x.ObtenerPorIdAsync(tallerId, clienteId), Times.Once);
-        }
-
-        [Fact]
-        public async Task Search_DebeRetornar200_ConClientesFiltradosPaginados()
-        {
-            // ARRANGE
-            int tallerId = 1;
-            string busqueda = "Juan";
-            var mockCustomerService = new Mock<ICustomerService>();
-            var mockUserContext = new Mock<IUserContextService>();
-
-            var clientes = new List<Cliente>
-            {
-                new Cliente { Id = 1, TallerId = tallerId, Nombre = "Juan Pérez", Eliminado = false }
-            };
-
-            var pagedResponse = new Talleres360.Dtos.PagedResponse<Cliente>
-            {
-                Data = clientes,
+                Data = [new Cliente { Id = 1, Nombre = "Cliente 1", Telefono = "111", Email = "c1@test.com" }],
                 PageNumber = 1,
                 PageSize = 10,
                 TotalCount = 1
             };
 
-            mockUserContext.Setup(x => x.GetTallerId()).Returns(tallerId);
-            mockCustomerService.Setup(x => x.ObtenerTodosPagedAsync(tallerId, It.IsAny<Talleres360.Dtos.PaginationParams>(), busqueda))
-                .ReturnsAsync(pagedResponse);
+            _userContextMock.Setup(x => x.GetTallerId()).Returns(1);
+            _customerServiceMock
+                .Setup(x => x.ObtenerTodosPagedAsync(1, pagination, "ana"))
+                .ReturnsAsync(response);
 
-            var controller = new CustomersController(mockCustomerService.Object, mockUserContext.Object);
+            // Act
+            var result = await _controller.GetAll(pagination, "ana");
 
-            var request = new BusquedaClienteRequest { Texto = busqueda };
+            // Assert
+            var okResult = Assert.IsType<OkObjectResult>(result);
+            Assert.Equal(200, okResult.StatusCode);
+            _customerServiceMock.Verify(x => x.ObtenerTodosPagedAsync(1, pagination, "ana"), Times.Once);
+        }
 
-            // ACT
-            var resultado = await controller.Search(request);
+        [Fact]
+        public async Task GetById_ClienteEncontrado_DebeRetornar200()
+        {
+            // Arrange
+            var cliente = new Cliente
+            {
+                Id = 5,
+                Nombre = "Cliente Test",
+                Telefono = "222",
+                Email = "cliente@test.com"
+            };
 
-            // ASSERT
-            var okResult = Assert.IsType<OkObjectResult>(resultado);
-            var respuestaPaginada = Assert.IsType<Talleres360.Dtos.PagedResponse<Cliente>>(okResult.Value);
-            Assert.Single(respuestaPaginada.Data);
-            Assert.Equal(1, respuestaPaginada.TotalCount);
-            mockCustomerService.Verify(x => x.ObtenerTodosPagedAsync(tallerId, It.IsAny<Talleres360.Dtos.PaginationParams>(), busqueda), Times.Once);
+            _userContextMock.Setup(x => x.GetTallerId()).Returns(1);
+            _customerServiceMock
+                .Setup(x => x.ObtenerPorIdAsync(1, 5))
+                .ReturnsAsync(cliente);
+
+            // Act
+            var result = await _controller.GetById(5);
+
+            // Assert
+            var okResult = Assert.IsType<OkObjectResult>(result);
+            Assert.Equal(200, okResult.StatusCode);
+        }
+
+        [Fact]
+        public async Task GetById_ClienteNoEncontrado_DebeRetornar404()
+        {
+            // Arrange
+            _userContextMock.Setup(x => x.GetTallerId()).Returns(1);
+            _customerServiceMock
+                .Setup(x => x.ObtenerPorIdAsync(1, 99))
+                .ReturnsAsync((Cliente?)null);
+
+            // Act
+            var result = await _controller.GetById(99);
+
+            // Assert
+            var notFoundResult = Assert.IsType<NotFoundObjectResult>(result);
+            Assert.Equal(404, notFoundResult.StatusCode);
+            var error = Assert.IsType<ApiErrorResponse>(notFoundResult.Value);
+            Assert.Equal(ErrorCode.CUST_NO_ENCONTRADO.ToString(), error.Codigo);
+        }
+
+        [Fact]
+        public async Task Create_DatosValidos_DebeRetornar201()
+        {
+            // Arrange
+            var request = new CrearClienteRequest
+            {
+                Nombre = "Cliente Nuevo",
+                Telefono = "333",
+                Email = "nuevo@test.com"
+            };
+
+            var cliente = new Cliente
+            {
+                Id = 10,
+                Nombre = "Cliente Nuevo",
+                Telefono = "333",
+                Email = "nuevo@test.com"
+            };
+
+            _userContextMock.Setup(x => x.GetTallerId()).Returns(1);
+            _customerServiceMock
+                .Setup(x => x.CrearClienteAsync(1, request))
+                .ReturnsAsync(ServiceResult<Cliente>.Ok(cliente));
+
+            // Act
+            var result = await _controller.Create(request);
+
+            // Assert
+            var createdResult = Assert.IsType<CreatedAtActionResult>(result);
+            Assert.Equal(201, createdResult.StatusCode);
+        }
+
+        [Fact]
+        public async Task Create_EmailDuplicado_DebeRetornar400()
+        {
+            // Arrange
+            var request = new CrearClienteRequest
+            {
+                Nombre = "Cliente",
+                Telefono = "444",
+                Email = "duplicado@test.com"
+            };
+
+            _userContextMock.Setup(x => x.GetTallerId()).Returns(1);
+            _customerServiceMock
+                .Setup(x => x.CrearClienteAsync(1, request))
+                .ReturnsAsync(ServiceResult<Cliente>.Fail(
+                    ErrorCode.CUST_EMAIL_DUPLICADO.ToString(),
+                    "Email duplicado"));
+
+            // Act
+            var result = await _controller.Create(request);
+
+            // Assert
+            var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
+            Assert.Equal(400, badRequestResult.StatusCode);
+            var error = Assert.IsType<ApiErrorResponse>(badRequestResult.Value);
+            Assert.Equal(ErrorCode.CUST_EMAIL_DUPLICADO.ToString(), error.Codigo);
+        }
+
+        [Fact]
+        public async Task Update_DatosValidos_DebeRetornar200()
+        {
+            // Arrange
+            var request = new ActualizarClienteRequest
+            {
+                Nombre = "Cliente Editado",
+                Telefono = "555",
+                Email = "editado@test.com"
+            };
+
+            var cliente = new Cliente
+            {
+                Id = 7,
+                Nombre = "Cliente Editado",
+                Telefono = "555",
+                Email = "editado@test.com"
+            };
+
+            _userContextMock.Setup(x => x.GetTallerId()).Returns(1);
+            _customerServiceMock
+                .Setup(x => x.ActualizarClienteAsync(1, 7, request))
+                .ReturnsAsync(ServiceResult<Cliente>.Ok(cliente));
+
+            // Act
+            var result = await _controller.Update(7, request);
+
+            // Assert
+            var okResult = Assert.IsType<OkObjectResult>(result);
+            Assert.Equal(200, okResult.StatusCode);
+        }
+
+        [Fact]
+        public async Task Delete_SoftDelete_DebeRetornar200()
+        {
+            // Arrange
+            _userContextMock.Setup(x => x.GetTallerId()).Returns(1);
+            _customerServiceMock
+                .Setup(x => x.EliminarClienteAsync(1, 8))
+                .ReturnsAsync(ServiceResult<bool>.Ok(true));
+
+            // Act
+            var result = await _controller.Delete(8);
+
+            // Assert
+            var okResult = Assert.IsType<OkObjectResult>(result);
+            Assert.Equal(200, okResult.StatusCode);
         }
     }
 }

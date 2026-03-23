@@ -1,175 +1,230 @@
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
-using System.Reflection;
-using System.Security.Claims;
-using Talleres360.Controllers;
+using Talleres360.API.Controllers;
 using Talleres360.Dtos;
+using Talleres360.Dtos.Responses;
 using Talleres360.Dtos.Vehiculos;
-using Talleres360.Filters;
+using Talleres360.Enums.Errors;
+using Talleres360.Interfaces.Seguridad;
 using Talleres360.Interfaces.Vehiculos;
 using Talleres360.Models;
-using Xunit;
 
 namespace Talleres360.Tests.Controllers
 {
     public class VehiculosControllerTests
     {
-        [Fact]
-        public void TallerAuthorize_DebeEstarAplicadoEnGetByIdYUpdate()
+        private readonly Mock<IVehiculoService> _vehiculoServiceMock;
+        private readonly Mock<IUserContextService> _userContextMock;
+        private readonly VehiculosController _controller;
+
+        public VehiculosControllerTests()
         {
-            var controllerType = typeof(VehiculosController);
-            MethodInfo? getByIdMethod = controllerType.GetMethod("GetById");
-            MethodInfo? updateMethod = controllerType.GetMethod("Update");
+            _vehiculoServiceMock = new Mock<IVehiculoService>();
+            _userContextMock = new Mock<IUserContextService>();
 
-            var getByIdAttr = getByIdMethod?.GetCustomAttributes(typeof(TallerAuthorizeAttribute<IVehiculoRepository>), false);
-            var updateAttr = updateMethod?.GetCustomAttributes(typeof(TallerAuthorizeAttribute<IVehiculoRepository>), false);
-
-            Assert.NotNull(getByIdAttr);
-            Assert.Single(getByIdAttr!);
-            Assert.NotNull(updateAttr);
-            Assert.Single(updateAttr!);
+            _controller = new VehiculosController(
+                _vehiculoServiceMock.Object,
+                _userContextMock.Object);
         }
 
         [Fact]
-        public async Task GetAll_DebeLlamarAlServicio_ConElTallerIdDelToken()
+        public async Task GetAll_SinTallerId_DebeRetornar401()
         {
-            // ARRANGE
-            int tallerIdDelToken = 1;
-            var serviceMock = new Mock<IVehiculoService>();
-            serviceMock.Setup(x => x.GetAllDetalleByTallerAsync(tallerIdDelToken, 1, 10, null))
-                .ReturnsAsync(new PagedResponse<VehiculoDetalle>());
+            // Arrange
+            var pagination = new PaginationParams { PageNumber = 1, PageSize = 10 };
+            _userContextMock.Setup(x => x.GetTallerId()).Returns((int?)null);
 
-            VehiculosController controller = BuildController(serviceMock, tallerIdDelToken);
+            // Act
+            var result = await _controller.GetAll(pagination, "1234ABC", 1, 2);
 
-            // ACT
-            var result = await controller.GetAll(1, 10, null);
-
-            // ASSERT
-            var okResult = Assert.IsType<OkObjectResult>(result.Result);
-            serviceMock.Verify(x => x.GetAllDetalleByTallerAsync(tallerIdDelToken, 1, 10, null), Times.Once);
+            // Assert
+            var unauthorizedResult = Assert.IsType<UnauthorizedResult>(result);
+            Assert.Equal(401, unauthorizedResult.StatusCode);
+            _vehiculoServiceMock.Verify(
+                x => x.GetAllDetalleByTallerPagedAsync(
+                    It.IsAny<int>(),
+                    It.IsAny<int>(),
+                    It.IsAny<int>(),
+                    It.IsAny<VehiculoFiltroDto?>()),
+                Times.Never);
         }
 
         [Fact]
-        public async Task Add_DebeRetornarConflict_CuandoMatriculaYaExiste()
+        public async Task GetAll_ConFiltros_DebeRetornar200()
         {
-            // ARRANGE
-            var serviceMock = new Mock<IVehiculoService>();
-            serviceMock.Setup(x => x.ExistsAsync("ABC123")).ReturnsAsync(true);
-
-            VehiculosController controller = BuildController(serviceMock, 1);
-            var vehiculo = new Vehiculo { Matricula = "ABC123" };
-
-            // ACT
-            var result = await controller.Add(vehiculo);
-
-            // ASSERT
-            Assert.IsType<ConflictObjectResult>(result);
-            serviceMock.Verify(x => x.AddAsync(It.IsAny<Vehiculo>()), Times.Never);
-        }
-
-        [Fact]
-        public async Task Add_DebeRetornarCreatedAtAction_CuandoDatosSonValidos()
-        {
-            // ARRANGE
-            var serviceMock = new Mock<IVehiculoService>();
-            serviceMock.Setup(x => x.ExistsAsync("XYZ999")).ReturnsAsync(false);
-
-            VehiculosController controller = BuildController(serviceMock, 1);
-            var vehiculo = new Vehiculo { Id = 9, Matricula = "XYZ999" };
-
-            // ACT
-            var result = await controller.Add(vehiculo);
-
-            // ASSERT
-            var created = Assert.IsType<CreatedAtActionResult>(result);
-            Assert.Equal("GetById", created.ActionName);
-            serviceMock.Verify(x => x.AddAsync(It.IsAny<Vehiculo>()), Times.Once);
-        }
-
-        [Fact]
-        public async Task GetByMatricula_DebeRetornarNotFound_CuandoNoExisteOEsDeOtroTaller()
-        {
-            // ARRANGE
-            var serviceMock = new Mock<IVehiculoService>();
-            // Simulamos que el vehículo existe pero es del taller 99 (el usuario es del taller 1)
-            serviceMock.Setup(x => x.GetDetalleByMatriculaAsync("OTRO99"))
-                .ReturnsAsync(new VehiculoDetalle { TallerId = 99 });
-
-            VehiculosController controller = BuildController(serviceMock, 1);
-
-            // ACT
-            var result = await controller.GetByMatricula("OTRO99");
-
-            // ASSERT
-            Assert.IsType<NotFoundResult>(result.Result);
-        }
-
-        [Fact]
-        public async Task Update_DebeRetornarBadRequest_CuandoIdNoCoincide()
-        {
-            // ARRANGE
-            var serviceMock = new Mock<IVehiculoService>();
-            VehiculosController controller = BuildController(serviceMock, 1);
-            var vehiculo = new Vehiculo { Id = 22 };
-
-            // ACT
-            var result = await controller.Update(23, vehiculo);
-
-            // ASSERT
-            Assert.IsType<BadRequestObjectResult>(result);
-            serviceMock.Verify(x => x.UpdateAsync(It.IsAny<Vehiculo>()), Times.Never);
-        }
-
-        [Fact]
-        public async Task Add_DebeRetornarBadRequest_CuandoVehiculoEsNull()
-        {
-            // ARRANGE
-            var serviceMock = new Mock<IVehiculoService>();
-            var controller = BuildController(serviceMock, 1);
-
-            // ACT
-            var result = await controller.Add(null!);
-
-            // ASSERT
-            var badRequest = Assert.IsType<BadRequestObjectResult>(result);
-            Assert.Equal("El cuerpo de la petición no puede estar vacío.", badRequest.Value);
-            serviceMock.Verify(x => x.AddAsync(It.IsAny<Vehiculo>()), Times.Never);
-        }
-
-        [Fact]
-        public async Task Update_DebeRetornarBadRequest_CuandoVehiculoEsNull()
-        {
-            // ARRANGE
-            var serviceMock = new Mock<IVehiculoService>();
-            var controller = BuildController(serviceMock, 1);
-
-            // ACT
-            var result = await controller.Update(23, null!);
-
-            // ASSERT
-            var badRequest = Assert.IsType<BadRequestObjectResult>(result);
-            Assert.Equal("Los datos son requeridos.", badRequest.Value);
-        }
-
-
-
-        private static VehiculosController BuildController(Mock<IVehiculoService> serviceMock, int tallerIdClaim)
-        {
-            var controller = new VehiculosController(serviceMock.Object);
-            controller.ControllerContext = new ControllerContext
+            // Arrange
+            var pagination = new PaginationParams { PageNumber = 1, PageSize = 10 };
+            var paged = new PagedResponse<VehiculoDetalle>
             {
-                HttpContext = new DefaultHttpContext
-                {
-                    User = new ClaimsPrincipal(new ClaimsIdentity(
-                    new[]
-                    {
-                        new Claim("TallerId", tallerIdClaim.ToString())
-                    }, "test"))
-                }
+                Data = [new VehiculoDetalle { Id = 1, Matricula = "1234ABC", MarcaId = 1, ModeloId = 2 }],
+                PageNumber = 1,
+                PageSize = 10,
+                TotalCount = 1
             };
 
-            return controller;
+            _userContextMock.Setup(x => x.GetTallerId()).Returns(1);
+            _vehiculoServiceMock
+                .Setup(x => x.GetAllDetalleByTallerPagedAsync(
+                    1,
+                    1,
+                    10,
+                    It.Is<VehiculoFiltroDto>(f =>
+                        f.Matricula == "1234ABC" &&
+                        f.MarcaId == 1 &&
+                        f.ModeloId == 2)))
+                .ReturnsAsync(paged);
+
+            // Act
+            var result = await _controller.GetAll(pagination, "1234ABC", 1, 2);
+
+            // Assert
+            var okResult = Assert.IsType<OkObjectResult>(result);
+            Assert.Equal(200, okResult.StatusCode);
+        }
+
+        [Fact]
+        public async Task GetById_Encontrado_DebeRetornar200()
+        {
+            // Arrange
+            var detalle = new VehiculoDetalle { Id = 5, Matricula = "1111BBB" };
+
+            _userContextMock.Setup(x => x.GetTallerId()).Returns(1);
+            _vehiculoServiceMock
+                .Setup(x => x.GetDetalleByIdAsync(1, 5))
+                .ReturnsAsync(ServiceResult<VehiculoDetalle>.Ok(detalle));
+
+            // Act
+            var result = await _controller.GetById(5);
+
+            // Assert
+            var okResult = Assert.IsType<OkObjectResult>(result);
+            Assert.Equal(200, okResult.StatusCode);
+        }
+
+        [Fact]
+        public async Task GetById_NoEncontrado_DebeRetornar404()
+        {
+            // Arrange
+            _userContextMock.Setup(x => x.GetTallerId()).Returns(1);
+            _vehiculoServiceMock
+                .Setup(x => x.GetDetalleByIdAsync(1, 99))
+                .ReturnsAsync(ServiceResult<VehiculoDetalle>.Fail(
+                    ErrorCode.VEH_NO_ENCONTRADO.ToString(),
+                    "Vehículo no encontrado"));
+
+            // Act
+            var result = await _controller.GetById(99);
+
+            // Assert
+            var notFoundResult = Assert.IsType<NotFoundObjectResult>(result);
+            Assert.Equal(404, notFoundResult.StatusCode);
+            var error = Assert.IsType<ApiErrorResponse>(notFoundResult.Value);
+            Assert.Equal(ErrorCode.VEH_NO_ENCONTRADO.ToString(), error.Codigo);
+        }
+
+        [Fact]
+        public async Task GetByMatricula_Encontrado_DebeRetornar200()
+        {
+            // Arrange
+            var detalle = new VehiculoDetalle { Id = 3, Matricula = "2222CCC" };
+
+            _userContextMock.Setup(x => x.GetTallerId()).Returns(1);
+            _vehiculoServiceMock
+                .Setup(x => x.GetDetalleByMatriculaAsync(1, "2222CCC"))
+                .ReturnsAsync(ServiceResult<VehiculoDetalle>.Ok(detalle));
+
+            // Act
+            var result = await _controller.GetByMatricula("2222CCC");
+
+            // Assert
+            var okResult = Assert.IsType<OkObjectResult>(result);
+            Assert.Equal(200, okResult.StatusCode);
+        }
+
+        [Fact]
+        public async Task Create_MatriculaDuplicada_DebeRetornar400()
+        {
+            // Arrange
+            var request = new Vehiculo
+            {
+                TallerId = 1,
+                Matricula = "3333DDD",
+                MarcaId = 1,
+                ModeloId = 1,
+                VehiculoTipoId = 1
+            };
+
+            _userContextMock.Setup(x => x.GetTallerId()).Returns(1);
+            _vehiculoServiceMock
+                .Setup(x => x.RegistrarVehiculoAsync(1, request))
+                .ReturnsAsync(ServiceResult<VehiculoDetalle>.Fail(
+                    ErrorCode.VEH_MATRICULA_DUPLICADA.ToString(),
+                    "Matrícula duplicada"));
+
+            // Act
+            var result = await _controller.Create(request);
+
+            // Assert
+            var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
+            Assert.Equal(400, badRequestResult.StatusCode);
+            var error = Assert.IsType<ApiErrorResponse>(badRequestResult.Value);
+            Assert.Equal(ErrorCode.VEH_MATRICULA_DUPLICADA.ToString(), error.Codigo);
+        }
+
+        [Fact]
+        public async Task Create_DatosValidos_DebeRetornar201()
+        {
+            // Arrange
+            var request = new Vehiculo
+            {
+                TallerId = 1,
+                Matricula = "4444EEE",
+                MarcaId = 1,
+                ModeloId = 1,
+                VehiculoTipoId = 1
+            };
+
+            var detalle = new VehiculoDetalle { Id = 12, Matricula = "4444EEE" };
+
+            _userContextMock.Setup(x => x.GetTallerId()).Returns(1);
+            _vehiculoServiceMock
+                .Setup(x => x.RegistrarVehiculoAsync(1, request))
+                .ReturnsAsync(ServiceResult<VehiculoDetalle>.Ok(detalle));
+
+            // Act
+            var result = await _controller.Create(request);
+
+            // Assert
+            var createdResult = Assert.IsType<CreatedAtActionResult>(result);
+            Assert.Equal(201, createdResult.StatusCode);
+        }
+
+        [Fact]
+        public async Task Update_DatosValidos_DebeRetornar200()
+        {
+            // Arrange
+            var request = new Vehiculo
+            {
+                TallerId = 1,
+                Matricula = "5555FFF",
+                MarcaId = 2,
+                ModeloId = 3,
+                VehiculoTipoId = 1
+            };
+
+            var detalle = new VehiculoDetalle { Id = 15, Matricula = "5555FFF" };
+
+            _userContextMock.Setup(x => x.GetTallerId()).Returns(1);
+            _vehiculoServiceMock
+                .Setup(x => x.ActualizarVehiculoAsync(1, 15, request))
+                .ReturnsAsync(ServiceResult<VehiculoDetalle>.Ok(detalle));
+
+            // Act
+            var result = await _controller.Update(15, request);
+
+            // Assert
+            var okResult = Assert.IsType<OkObjectResult>(result);
+            Assert.Equal(200, okResult.StatusCode);
         }
     }
 }
