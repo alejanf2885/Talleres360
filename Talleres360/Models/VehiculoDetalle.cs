@@ -1,57 +1,64 @@
-﻿using System;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Talleres360.Models.Enums;
 
 namespace Talleres360.Models
 {
-    [Table("VW_VEHICULODETALLES")]
+    [Table("VW_VehiculoDetalles")]
     public class VehiculoDetalle
     {
-        [Key]
-        [Column("ID")]
+        [Column("Id")]
         public int Id { get; set; }
 
-        [Column("TALLERID")]
+        [Column("TallerId")]
         public int TallerId { get; set; }
 
-        [Column("CLIENTEID")]
+        [Column("ClienteId")]
         public int? ClienteId { get; set; }
 
-        [Column("TIPO_VEHICULO_ID")]
-        public int TipoVehiculoId { get; set; }
+        [Column("VehiculoTipoId")]
+        public int VehiculoTipoId { get; set; }
 
-        [Column("MARCAID")]
+        [Column("MarcaId")]
         public int MarcaId { get; set; }
 
-        [Column("MODELOID")]
+        [Column("ModeloId")]
         public int ModeloId { get; set; }
 
-        [Column("MATRICULA")]
+        [Column("Matricula")]
         public string Matricula { get; set; } = string.Empty;
 
-        [Column("AÑO")]
+        [Column("Anno")]
         public int? Anio { get; set; }
 
-        [Column("KMACTUALES")]
+        [Column("KmActuales")]
         public int? KmActuales { get; set; }
 
-        [Column("PROMEDIOKMDIARIOS")]
+        [Column("PromedioKmDiarios")]
         public decimal? PromedioKmDiarios { get; set; }
 
-        [Column("FECHAULTIMAACTUALIZACIONKM")]
+        [Column("FechaUltimaActualizacionKm")]
         public DateTime? FechaUltimaActualizacionKm { get; set; }
 
-        [Column("ELIMINADO")]
+        [Column("Eliminado")]
         public bool Eliminado { get; set; }
 
-        [Column("MARCANOMBRE")]
+        [Column("MarcaNombre")]
         public string MarcaNombre { get; set; } = string.Empty;
 
-        [Column("MODELONOMBRE")]
+        [Column("ModeloNombre")]
         public string ModeloNombre { get; set; } = string.Empty;
 
+        [Column("TipoNombre")]
+        public string TipoNombre { get; set; } = string.Empty;
+
+        [Column("NotasPendientes")]
+        public int NotasPendientes { get; set; }
+
+        [Column("TieneAviso")]
+        public bool TieneAviso { get; set; }
+
         [NotMapped]
-        public TipoVehiculo Tipo => (TipoVehiculo)TipoVehiculoId;
+        public TipoVehiculo Tipo => (TipoVehiculo)VehiculoTipoId;
     }
 }

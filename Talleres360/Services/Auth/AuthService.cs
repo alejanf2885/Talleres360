@@ -1,4 +1,4 @@
-using Talleres360.Dtos.Responses; 
+using Talleres360.Dtos.Responses;
 using Talleres360.Dtos.Usuarios;
 using Talleres360.Enums.Errors;
 using Talleres360.Interfaces.Auth;
@@ -15,16 +15,22 @@ namespace Talleres360.Services.Auth
         private readonly IPasswordService _passwordService;
         private readonly ITallerService _tallerService;
 
-        public AuthService(IUsuarioRepository userRepo, IPasswordService passwordService, ITallerService tallerService)
+        public AuthService(
+            IUsuarioRepository userRepo,
+            IPasswordService passwordService,
+            ITallerService tallerService)
         {
             _userRepo = userRepo;
             _passwordService = passwordService;
             _tallerService = tallerService;
         }
 
-        public async Task<ServiceResult<UsuarioLoginDto>> ValidarLoginAsync(string email, string password)
+        public async Task<ServiceResult<UsuarioLoginDto>> ValidarLoginAsync(
+            string email, string password)
         {
-            Usuario? usuario = await _userRepo.GetByEmailAsync(email);
+            string emailNormalizado = email.Trim().ToLower();
+
+            Usuario? usuario = await _userRepo.GetByEmailAsync(emailNormalizado);
 
             if (usuario == null || usuario.Eliminado)
             {
@@ -42,9 +48,11 @@ namespace Talleres360.Services.Auth
                 );
             }
 
-            Credencial? credencial = await _userRepo.GetCredencialLocalByUsuarioIdAsync(usuario.Id);
+            Credencial? credencial = await _userRepo
+                .GetCredencialLocalByUsuarioIdAsync(usuario.Id);
 
-            if (credencial == null || !_passwordService.VerifyPassword(password, credencial.PasswordHash))
+            if (credencial == null ||
+                !_passwordService.VerifyPassword(password, credencial.PasswordHash))
             {
                 return ServiceResult<UsuarioLoginDto>.Fail(
                     ErrorCode.AUTH_CREDENCIALES_INCORRECTAS.ToString(),
@@ -55,10 +63,10 @@ namespace Talleres360.Services.Auth
             await _userRepo.ActualizarUltimoAccesoAsync(usuario.Id);
 
             bool perfilConfigurado = false;
-
             if (usuario.TallerId.HasValue)
             {
-                perfilConfigurado = await _tallerService.VerificarPerfilConfiguradoAsync(usuario.TallerId.Value);
+                perfilConfigurado = await _tallerService
+                    .VerificarPerfilConfiguradoAsync(usuario.TallerId.Value);
             }
 
             UsuarioLoginDto dto = new UsuarioLoginDto
@@ -68,7 +76,8 @@ namespace Talleres360.Services.Auth
                 Email = usuario.Email,
                 Rol = usuario.Rol.ToString(),
                 TallerId = usuario.TallerId,
-                PerfilConfigurado = perfilConfigurado 
+                SecurityStamp = usuario.SecurityStamp, 
+                PerfilConfigurado = perfilConfigurado
             };
 
             return ServiceResult<UsuarioLoginDto>.Ok(dto);

@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Talleres360.Models
 {
-    [Table("CREDENCIALES")]
+    [Table("Credenciales")]  
     public class Credencial
     {
         [Key]

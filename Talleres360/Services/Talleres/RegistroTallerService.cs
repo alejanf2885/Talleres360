@@ -63,7 +63,7 @@ namespace Talleres360.Services.Talleres
                 {
                     Nombre = request.NombreTaller,
                     PlanId = plan.Id,
-                    CIF = cifTemporal,
+                    Cif = cifTemporal,
                     TipoSuscripcion = "TRIAL",
                     Activo = true,
                     PerfilConfigurado = false,

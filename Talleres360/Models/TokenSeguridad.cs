@@ -3,31 +3,31 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Talleres360.Models
 {
-    [Table("TOKENS_SEGURIDAD")]
+    [Table("TokensSeguridad")]  
     public class TokenSeguridad
     {
         [Key]
-        [Column("ID")]
+        [Column("Id")]  
         public int Id { get; set; }
 
-        [Column("USUARIOID")]
-        public int UsuarioId { get; set; }
+        [Column("UsuarioId")] 
+        public int? UsuarioId { get; set; }  
 
-        [Column("TOKEN")]
-        public string Token { get; set; }
+        [Column("Token")]  
+        [Required, StringLength(255)]
+        public string Token { get; set; } = string.Empty;
 
-        [Column("TIPOTOKEN")]
-        public string TipoToken { get; set; }
+        [Column("TipoToken")]  
+        [Required, StringLength(50)]
+        public string TipoToken { get; set; } = "RESET_PASSWORD";
 
-        [Column("FECHACREACION")]
+        [Column("FechaCreacion")] 
         public DateTime FechaCreacion { get; set; }
 
-        [Column("FECHAEXPIRACION")]
+        [Column("FechaExpiracion")] 
         public DateTime FechaExpiracion { get; set; }
 
-        [Column("USADO")]
-        public bool Usado { get; set; }
-
+        [Column("Usado")]  
+        public bool Usado { get; set; } = false;
     }
-
 }

@@ -15,7 +15,7 @@ namespace Talleres360.Services.Usuarios
                 new Claim(ClaimTypes.Name, usuario.Nombre),
                 new Claim(ClaimTypes.Email, usuario.Email),
                 new Claim(ClaimTypes.Role, usuario.Rol.ToString()),
-                new Claim("TallerId", usuario.TallerId.ToString()),
+                new Claim("TallerId", usuario.TallerId?.ToString() ?? ""),
                 new Claim("SecurityStamp", usuario.SecurityStamp ?? Guid.NewGuid().ToString())
             };
 

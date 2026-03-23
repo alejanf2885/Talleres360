@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Talleres360.Models
 {
-    [Table("USUARIO_VERIFICACIONES")]
+    [Table("UsuarioVerificaciones")]
     public class UsuarioVerificacion
     {
         [Key]
@@ -28,7 +28,8 @@ namespace Talleres360.Models
         [Column("FechaExpiracion")]
         public DateTime FechaExpiracion { get; set; }
 
+        [Required]
         [Column("FechaCreacion")]
-        public DateTime? FechaCreacion { get; set; } = DateTime.UtcNow;
+        public DateTime FechaCreacion { get; set; }
     }
 }

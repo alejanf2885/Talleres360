@@ -49,41 +49,41 @@ namespace Talleres360.Services.Seguridad
 
         public async Task<ServiceResult<TokenResponseDto>> ValidarYRenovarAsync(string refreshToken)
         {
-            TokenSeguridad tokenEntity = await _refreshTokenRepo.ObtenerPorTokenAsync(refreshToken);
+            TokenSeguridad? tokenEntity = await _refreshTokenRepo.ObtenerPorTokenAsync(refreshToken);
 
             if (tokenEntity == null)
-            {
                 return ServiceResult<TokenResponseDto>.Fail(
-                    ErrorCode.AUTH_TOKEN_INVALIDO.ToString(), "El token de refresco no es válido.");
-            }
+                    ErrorCode.AUTH_TOKEN_INVALIDO.ToString(),
+                    "El token de refresco no es válido.");
 
             if (tokenEntity.Usado)
-            {
                 return ServiceResult<TokenResponseDto>.Fail(
-                    ErrorCode.AUTH_TOKEN_INVALIDO.ToString(), "Este token ya ha sido utilizado.");
-            }
+                    ErrorCode.AUTH_TOKEN_INVALIDO.ToString(),
+                    "Este token ya ha sido utilizado.");
 
             if (tokenEntity.FechaExpiracion < DateTime.UtcNow)
-            {
                 return ServiceResult<TokenResponseDto>.Fail(
-                    ErrorCode.AUTH_REFRESH_TOKEN_EXPIRADO.ToString(), "La sesión ha expirado.");
-            }
+                    ErrorCode.AUTH_REFRESH_TOKEN_EXPIRADO.ToString(),
+                    "La sesión ha expirado.");
 
-            Usuario usuario = await _usuarioRepo.GetByIdAsync(tokenEntity.UsuarioId);
-            if (usuario == null || !usuario.Activo)
-            {
+            if (!tokenEntity.UsuarioId.HasValue)
                 return ServiceResult<TokenResponseDto>.Fail(
-                    ErrorCode.AUTH_CUENTA_INACTIVA.ToString(), "El usuario ya no está activo o no existe.");
-            }
+                    ErrorCode.AUTH_TOKEN_INVALIDO.ToString(),
+                    "Token sin usuario asociado.");
+
+            Usuario? usuario = await _usuarioRepo.GetByIdAsync(tokenEntity.UsuarioId.Value);
+            if (usuario == null || !usuario.Activo)
+                return ServiceResult<TokenResponseDto>.Fail(
+                    ErrorCode.AUTH_CUENTA_INACTIVA.ToString(),
+                    "El usuario ya no está activo o no existe.");
 
             tokenEntity.Usado = true;
             await _refreshTokenRepo.ActualizarAsync(tokenEntity);
 
             bool perfilConfigurado = false;
             if (usuario.TallerId.HasValue)
-            {
-                perfilConfigurado = await _tallerService.VerificarPerfilConfiguradoAsync(usuario.TallerId.Value);
-            }
+                perfilConfigurado = await _tallerService
+                    .VerificarPerfilConfiguradoAsync(usuario.TallerId.Value);
 
             UsuarioLoginDto usuarioDto = new UsuarioLoginDto
             {
@@ -92,6 +92,7 @@ namespace Talleres360.Services.Seguridad
                 Email = usuario.Email,
                 Rol = usuario.Rol.ToString(),
                 TallerId = usuario.TallerId,
+                SecurityStamp = usuario.SecurityStamp,
                 PerfilConfigurado = perfilConfigurado
             };
 
@@ -104,7 +105,6 @@ namespace Talleres360.Services.Seguridad
                 RefreshToken = nuevoRefreshToken
             });
         }
-
         public async Task<ServiceResult<bool>> RevocarRefreshTokenAsync(string refreshToken)
         {
             try

@@ -24,28 +24,47 @@ namespace Talleres360.Data
         {
             base.OnModelCreating(modelBuilder);
 
-            // --- CONVERSIÓN DE ENUM A STRING ---
             modelBuilder.Entity<Usuario>()
                 .Property(u => u.Rol)
                 .HasConversion<string>();
 
-            // --- FILTRO GLOBAL (SOFT DELETE) ---
             modelBuilder.Entity<Usuario>().HasQueryFilter(u => !u.Eliminado);
             modelBuilder.Entity<Credencial>().HasQueryFilter(c => !c.Eliminado);
+            modelBuilder.Entity<Cliente>().HasQueryFilter(c => !c.Eliminado);
+            modelBuilder.Entity<Vehiculo>().HasQueryFilter(v => !v.Eliminado);
 
-            // --- CONFIGURACIÓN DE PRECISIÓN PARA DECIMAL ---
             modelBuilder.Entity<Plan>()
                 .Property(p => p.PrecioMensual)
-                .HasPrecision(18, 2); // 18 dígitos totales, 2 decimales
+                .HasPrecision(18, 2);
 
-            // --- ÍNDICES PARA VELOCIDAD ---
+            modelBuilder.Entity<Plan>()
+                .Property(p => p.PrecioAnual)
+                .HasPrecision(18, 2);
+
+            modelBuilder.Entity<Vehiculo>()
+                .Property(v => v.PromedioKmDiarios)
+                .HasPrecision(8, 2);
+
+            modelBuilder.Entity<VehiculoDetalle>()
+                .ToView("VW_VehiculoDetalles")
+                .HasNoKey();
+
             modelBuilder.Entity<Usuario>()
                 .HasIndex(u => u.Email)
                 .IsUnique();
 
-            // Índice en UsuarioId de Credenciales para mejorar rendimiento de consultas
             modelBuilder.Entity<Credencial>()
                 .HasIndex(c => c.UsuarioId);
+
+            modelBuilder.Entity<Marca>()
+                .HasIndex(m => new { m.Nombre, m.TallerId })
+                .HasFilter("[EsOficial] = 0")
+                .IsUnique();
+
+            modelBuilder.Entity<Marca>()
+                .HasIndex(m => m.Nombre)
+                .HasFilter("[EsOficial] = 1")
+                .IsUnique();
         }
     }
 }
