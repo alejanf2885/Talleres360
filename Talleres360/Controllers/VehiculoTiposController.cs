@@ -11,17 +11,17 @@ namespace Talleres360.API.Controllers
     [Authorize]
     public class VehiculoTiposController : ControllerBase
     {
-        private readonly IVehiculoMaestroService _vehiculoMaestroService;
+        private readonly IVehiculoTipoService _vehiculoTipoService;
 
-        public VehiculoTiposController(IVehiculoMaestroService vehiculoMaestroService)
+        public VehiculoTiposController(IVehiculoTipoService vehiculoTipoService)
         {
-            _vehiculoMaestroService = vehiculoMaestroService;
+            _vehiculoTipoService = vehiculoTipoService;
         }
 
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
-            ServiceResult<List<VehiculoTipoDto>> resultado = await _vehiculoMaestroService.ObtenerTiposVehiculoAsync();
+            ServiceResult<List<VehiculoTipoDto>> resultado = await _vehiculoTipoService.ObtenerTiposVehiculoAsync();
 
             if (!resultado.Success)
             {

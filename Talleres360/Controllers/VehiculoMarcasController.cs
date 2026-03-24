@@ -12,14 +12,14 @@ namespace Talleres360.API.Controllers
     [Authorize]
     public class VehiculoMarcasController : ControllerBase
     {
-        private readonly IVehiculoMaestroService _vehiculoMaestroService;
+        private readonly IMarcaService _marcaService;
         private readonly IUserContextService _userContextService;
 
         public VehiculoMarcasController(
-            IVehiculoMaestroService vehiculoMaestroService,
+            IMarcaService marcaService,
             IUserContextService userContextService)
         {
-            _vehiculoMaestroService = vehiculoMaestroService;
+            _marcaService = marcaService;
             _userContextService = userContextService;
         }
 
@@ -32,7 +32,7 @@ namespace Talleres360.API.Controllers
                 return Unauthorized();
             }
 
-            ServiceResult<List<MarcaVehiculoDto>> resultado = await _vehiculoMaestroService.ObtenerMarcasAsync(tallerId.Value);
+            ServiceResult<List<MarcaVehiculoDto>> resultado = await _marcaService.ObtenerMarcasAsync(tallerId.Value);
 
             if (!resultado.Success)
             {

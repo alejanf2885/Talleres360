@@ -63,7 +63,6 @@ namespace Talleres360.Services.Usuarios
         public async Task<ServiceResult<Usuario>> CrearUsuarioAdminAsync(
             int tallerId, string nombre, string email, string password, string? rutaImagen = null)
         {
-            // Bug 2 — normalizar email antes de cualquier operación
             string emailNormalizado = email.Trim().ToLower();
 
             if (await _userRepo.ExisteEmailAsync(emailNormalizado))
@@ -77,7 +76,7 @@ namespace Talleres360.Services.Usuarios
                 {
                     TallerId = tallerId,
                     Nombre = nombre.Trim(),
-                    Email = emailNormalizado,  // Bug 2 — guardar normalizado
+                    Email = emailNormalizado,  
                     Rol = RolesUsuario.ADMIN,
                     FechaCreacion = DateTime.UtcNow,
                     SecurityStamp = Guid.NewGuid().ToString(),
@@ -88,10 +87,33 @@ namespace Talleres360.Services.Usuarios
                 await _userRepo.AddAsync(usuario);
                 int filasAfectadasUser = await _userRepo.SaveChangesAsync();
 
+                _logger.LogInformation(
+                    "Usuario persistido. UsuarioId={UsuarioId}, TallerId={TallerId}, FilasAfectadas={FilasAfectadas}",
+                    usuario.Id,
+                    tallerId,
+                    filasAfectadasUser);
+
                 if (filasAfectadasUser == 0 || usuario.Id == 0)
                     return ServiceResult<Usuario>.Fail(
                         ErrorCode.REG_ERROR_CREACION_USUARIO.ToString(),
                         "No se pudo guardar el perfil de usuario.");
+
+                Usuario? usuarioPersistido = await _userRepo.GetByIdSinFiltrosAsync(usuario.Id);
+                if (usuarioPersistido == null)
+                {
+                    _logger.LogWarning(
+                        "Post-save check: no se encontró UsuarioId={UsuarioId} en BD (sin filtros).",
+                        usuario.Id);
+                }
+                else
+                {
+                    _logger.LogInformation(
+                        "Post-save check UsuarioId={UsuarioId}: Activo={Activo}, Eliminado={Eliminado}, TallerId={TallerId}",
+                        usuarioPersistido.Id,
+                        usuarioPersistido.Activo,
+                        usuarioPersistido.Eliminado,
+                        usuarioPersistido.TallerId);
+                }
 
                 Credencial credencial = new Credencial
                 {
@@ -102,6 +124,11 @@ namespace Talleres360.Services.Usuarios
 
                 await _userRepo.AddCredencialAsync(credencial);
                 int filasAfectadasCred = await _userRepo.SaveChangesAsync();
+
+                _logger.LogInformation(
+                    "Credencial persistida para UsuarioId={UsuarioId}. FilasAfectadas={FilasAfectadas}",
+                    usuario.Id,
+                    filasAfectadasCred);
 
                 if (filasAfectadasCred == 0)
                     return ServiceResult<Usuario>.Fail(

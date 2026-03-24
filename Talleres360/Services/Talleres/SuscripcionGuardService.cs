@@ -1,4 +1,5 @@
 ﻿using Talleres360.Dtos.Seguridad;
+using Talleres360.Enums;
 using Talleres360.Interfaces.Seguridad;
 using Talleres360.Interfaces.Talleres;
 using Talleres360.Models;
@@ -33,7 +34,8 @@ namespace Talleres360.Services.Talleres
             if (taller.TipoSuscripcion == "TRIAL")
             {
                 DateTime fechaExpiracion = taller.FechaCreacion.AddDays(30);
-                if (DateTime.UtcNow > fechaExpiracion)
+                DateTime fechaActual = DateTime.UtcNow;
+                if (fechaActual > fechaExpiracion)
                     return AccesoResult.Denegado(
                         "Tu periodo de prueba de 30 días ha finalizado. Elige un plan para continuar.",
                         ErrorCode.SUBS_SIN_PLAN_ACTIVO.ToString());
@@ -63,9 +65,15 @@ namespace Talleres360.Services.Talleres
                     "Tu cuenta de taller está desactivada.",
                     ErrorCode.AUTH_CUENTA_INACTIVA.ToString());
 
-            if (taller.TipoSuscripcion != "PRO" && taller.TipoSuscripcion != "PREMIUM")
+            if (!taller.PlanId.HasValue)
                 return AccesoResult.Denegado(
-                    "Esta funcionalidad requiere un plan Pro o Premium.",
+                    "Tu taller no tiene un plan configurado.",
+                    ErrorCode.SUBS_LIMITE_ALCANZADO.ToString());
+
+            int planMinimoPremium = (int)PlanTipo.Profesional;
+            if (taller.PlanId.Value < planMinimoPremium)
+                return AccesoResult.Denegado(
+                    "Esta funcionalidad requiere un plan Profesional o Empresa.",
                     ErrorCode.SUBS_LIMITE_ALCANZADO.ToString());
 
             return AccesoResult.Permitido();

@@ -13,5 +13,6 @@ namespace Talleres360.Interfaces.Usuarios
         Task<Credencial?> GetCredencialLocalByUsuarioIdAsync(int usuarioId);
         Task ActualizarUltimoAccesoAsync(int usuarioId);
         Task<Usuario?> GetByIdAsync(int id);
+        Task<Usuario?> GetByIdSinFiltrosAsync(int id);
     }
 }

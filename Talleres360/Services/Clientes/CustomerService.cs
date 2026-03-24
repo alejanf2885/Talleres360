@@ -39,7 +39,7 @@ namespace Talleres360.Services.Clientes
             {
                 int totalClientes = await _customerRepo.CountByTallerIdAsync(tallerId);
                 Plan? planActual = await _planRepo.GetPlanPorIdAsync(
-                    taller.PlanId ?? (int)PlanTipo.FREE);
+                    taller.PlanId ?? (int)PlanTipo.Basico);
 
                 // CAMBIO: LimiteClientes ya es int no nullable
                 // Convenio: 0 = sin límite
@@ -192,7 +192,7 @@ namespace Talleres360.Services.Clientes
             if (taller == null) throw new Exception("Taller no encontrado.");
 
             Plan? plan = await _planRepo.GetPlanPorIdAsync(
-                taller.PlanId ?? (int)PlanTipo.FREE);
+                taller.PlanId ?? (int)PlanTipo.Basico);
 
             int total = await _customerRepo.CountByTallerIdAsync(tallerId);
             int nuevosEsteMes = await _customerRepo.CountNuevosEsteMesAsync(tallerId);

@@ -52,8 +52,8 @@ using Talleres360.Services.Vehiculos;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
-string connectionString = builder.Configuration.GetConnectionString("SqlSaas")
-    ?? throw new InvalidOperationException("No se encontró la cadena de conexión 'SqlSaas'.");
+string connectionString = builder.Configuration.GetConnectionString("SqlBBDD")
+    ?? throw new InvalidOperationException("No se encontró la cadena de conexión 'SqlBBDD'.");
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(connectionString));
@@ -77,7 +77,9 @@ builder.Services.AddScoped<IPlanRepository, PlanRepository>();
 builder.Services.AddScoped<ICustomerRepository, CustomerRepository>();
 builder.Services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
 builder.Services.AddScoped<IVehiculoRepository, VehiculoRepository>();
-builder.Services.AddScoped<IVehiculoMaestroRepository, VehiculoMaestroRepository>();
+builder.Services.AddScoped<IVehiculoTipoRepository, VehiculoTipoRepository>();
+builder.Services.AddScoped<IMarcaRepository, MarcaRepository>();
+builder.Services.AddScoped<IModeloRepository, ModeloRepository>();
 builder.Services.AddScoped<IVerificacionRepository, VerificacionRepository>();
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
@@ -86,7 +88,9 @@ builder.Services.AddScoped<ITallerService, TallerService>();
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IUserContextService, UserContextService>();
 builder.Services.AddScoped<IVehiculoService, VehiculoService>();
-builder.Services.AddScoped<IVehiculoMaestroService, VehiculoMaestroService>();
+builder.Services.AddScoped<IVehiculoTipoService, VehiculoTipoService>();
+builder.Services.AddScoped<IMarcaService, MarcaService>();
+builder.Services.AddScoped<IModeloService, ModeloService>();
 builder.Services.AddScoped<IProcesadorImagenService, ProcesadorImagenService>();
 builder.Services.AddScoped<IImagenService, ImagenService>();
 builder.Services.AddScoped<INombreArchivoService, NombreArchivoService>();

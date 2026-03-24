@@ -50,7 +50,7 @@ namespace Talleres360.Services.Talleres
 
             try
             {
-                Plan? plan = await _planRepo.GetPlanPorNombreAsync(PlanTipo.PRO.ToString());
+                Plan? plan = await _planRepo.GetPlanPorNombreAsync(PlanTipo.Profesional.ToString());
                 if (plan == null)
                 {
                     return ServiceResult<bool>.Fail(
