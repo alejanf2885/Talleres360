@@ -52,8 +52,8 @@ using Talleres360.Services.Vehiculos;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
-string connectionString = builder.Configuration.GetConnectionString("SqlSaas")
-    ?? throw new InvalidOperationException("No se encontró la cadena de conexión 'SqlSaas'.");
+string connectionString = builder.Configuration.GetConnectionString("SqlBBDD")
+    ?? throw new InvalidOperationException("No se encontró la cadena de conexión 'SqlBBDD'.");
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(connectionString));

@@ -3,7 +3,7 @@ using Microsoft.Extensions.Options;
 using Talleres360.Configuration;
 using Talleres360.Dtos.Responses;
 using Talleres360.Enums;
-using Talleres360.Enums.Errors; 
+using Talleres360.Enums.Errors;
 using Talleres360.Interfaces.Seguridad;
 using Talleres360.Interfaces.Usuarios;
 using Talleres360.Models;
