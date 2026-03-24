@@ -1,9 +1,11 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using Resend;
 using Scalar.AspNetCore;
+using Serilog;
 using System.Text;
 using System.Threading.RateLimiting;
 using Talleres360.Configuration;
@@ -49,6 +51,7 @@ using Talleres360.Services.Seguridad;
 using Talleres360.Services.Talleres;
 using Talleres360.Services.Usuarios;
 using Talleres360.Services.Vehiculos;
+
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
@@ -217,7 +220,13 @@ builder.Services.AddControllers()
             return new BadRequestObjectResult(response);
         };
     });
+Log.Logger = new LoggerConfiguration()
+    .MinimumLevel.Debug()
+    .WriteTo.Console()
+    .WriteTo.File("Logs/Talleres360-log.txt", rollingInterval: RollingInterval.Day)
+    .CreateLogger();
 
+builder.Host.UseSerilog();
 builder.Services.AddOpenApi(options =>
 {
     options.AddDocumentTransformer((document, context, cancellationToken) =>
