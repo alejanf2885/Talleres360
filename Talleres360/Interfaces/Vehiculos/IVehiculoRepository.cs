@@ -28,5 +28,7 @@ namespace Talleres360.Interfaces.Vehiculos
             int pageNumber,
             int pageSize,
             VehiculoFiltroDto? filtro = null);
+
+
     }
 }

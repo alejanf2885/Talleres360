@@ -55,7 +55,7 @@ using Talleres360.Services.Vehiculos;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
-string connectionString = builder.Configuration.GetConnectionString("SqlBBDD")
+string connectionString = builder.Configuration.GetConnectionString("SqlSaas")
     ?? throw new InvalidOperationException("No se encontró la cadena de conexión 'SqlBBDD'.");
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
@@ -220,13 +220,8 @@ builder.Services.AddControllers()
             return new BadRequestObjectResult(response);
         };
     });
-Log.Logger = new LoggerConfiguration()
-    .MinimumLevel.Debug()
-    .WriteTo.Console()
-    .WriteTo.File("Logs/Talleres360-log.txt", rollingInterval: RollingInterval.Day)
-    .CreateLogger();
 
-builder.Host.UseSerilog();
+
 builder.Services.AddOpenApi(options =>
 {
     options.AddDocumentTransformer((document, context, cancellationToken) =>
