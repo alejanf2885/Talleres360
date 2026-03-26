@@ -50,6 +50,11 @@
         VEH_MARCA_NO_ENCONTRADA,
         VEH_MODELO_NO_ENCONTRADA,
 
+
+        // Marcas
+
+        MAR_NOMBRE_DUPLICADO,
+
         // --- SYS: Sistema y Errores Globales ---
         SYS_DATOS_INVALIDOS,
         SYS_ERROR_GENERICO,
