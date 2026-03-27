@@ -13,7 +13,7 @@ using Talleres360.Interfaces.Vehiculos;
 using Talleres360.Models;
 using Talleres360.Repositories.Vehiculos;
 
-namespace Talleres360.API.Controllers
+namespace Talleres360.Controllers
 {
     [Route("api/v1/vehiculos/marcas")]
     [ApiController]

@@ -10,7 +10,7 @@ using Talleres360.Interfaces.Seguridad;
 using Talleres360.Interfaces.Vehiculos;
 using Talleres360.Models;
 
-namespace Talleres360.API.Controllers
+namespace Talleres360.Controllers
 {
     [Route("api/v1/[controller]")]
     [ApiController]
