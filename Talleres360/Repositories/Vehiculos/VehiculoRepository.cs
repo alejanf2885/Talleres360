@@ -40,7 +40,9 @@ namespace Talleres360.Repositories.Vehiculos
 
         public async Task<VehiculoDetalle?> GetDetalleByIdAsync(int id)
         {
+
             return await _context.VehiculosDetalle.FirstOrDefaultAsync(v => v.Id == id);
+
         }
 
         public async Task<VehiculoDetalle?> GetDetalleByMatriculaAsync(string matricula)

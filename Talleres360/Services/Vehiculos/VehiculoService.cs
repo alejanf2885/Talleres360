@@ -16,8 +16,10 @@ namespace Talleres360.Services.Vehiculos
             _vehiculoRepository = vehiculoRepository;
         }
 
-        public async Task<ServiceResult<VehiculoDetalle>> RegistrarVehiculoAsync(int tallerId, Vehiculo request)
+        public async Task<ServiceResult<VehiculoDetalle>> RegistrarVehiculoAsync(int tallerId, CrearVehiculoRequest request)
         {
+            ArgumentNullException.ThrowIfNull(request);
+
             string matriculaLimpia = request.Matricula.Trim().ToUpper().Replace("-", "").Replace(" ", "");
 
             bool existe = await _vehiculoRepository.ExistsAsync(matriculaLimpia);
@@ -57,7 +59,7 @@ namespace Talleres360.Services.Vehiculos
                 : ServiceResult<VehiculoDetalle>.Fail(ErrorCode.SYS_ERROR_GENERICO.ToString(), "Vehículo guardado, pero error al recuperar vista de detalles.");
         }
 
-        public async Task<ServiceResult<VehiculoDetalle>> ActualizarVehiculoAsync(int tallerId, int id, Vehiculo request)
+        public async Task<ServiceResult<VehiculoDetalle>> ActualizarVehiculoAsync(int tallerId, int id, ActualizarVehiculoRequest request)
         {
             Vehiculo? existente = await _vehiculoRepository.GetByIdAsync(id);
 
@@ -113,6 +115,30 @@ namespace Talleres360.Services.Vehiculos
             }
 
             return ServiceResult<VehiculoDetalle>.Ok(detalle);
+        }
+
+        public async Task<ServiceResult<bool>> EliminarVehiculoAsync(int tallerId, int id)
+        {
+            if (tallerId <= 0 || id <= 0)
+            {
+                return ServiceResult<bool>.Fail(
+                    ErrorCode.SYS_DATOS_INVALIDOS.ToString(),
+                    "El ID del taller y del vehículo deben ser mayores a 0");
+            }
+
+            Vehiculo? existente = await _vehiculoRepository.GetByIdAsync(id);
+
+            if (existente == null || existente.TallerId != tallerId || existente.Eliminado)
+            {
+                return ServiceResult<bool>.Fail(
+                    ErrorCode.SYS_ENTIDAD_NO_ENCONTRADA.ToString(),
+                    "Vehículo no encontrado.");
+            }
+
+            existente.Eliminado = true;
+            await _vehiculoRepository.UpdateAsync(existente);
+
+            return ServiceResult<bool>.Ok(true);
         }
     }
 }

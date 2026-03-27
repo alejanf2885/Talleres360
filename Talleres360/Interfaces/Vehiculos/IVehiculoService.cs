@@ -7,10 +7,12 @@ namespace Talleres360.Interfaces.Vehiculos
 {
     public interface IVehiculoService
     {
-        Task<ServiceResult<VehiculoDetalle>> RegistrarVehiculoAsync(int tallerId, Vehiculo vehiculo);
-        Task<ServiceResult<VehiculoDetalle>> ActualizarVehiculoAsync(int tallerId, int id, Vehiculo vehiculo);
+        Task<ServiceResult<VehiculoDetalle>> RegistrarVehiculoAsync(int tallerId, CrearVehiculoRequest vehiculo);
+        Task<ServiceResult<VehiculoDetalle>> ActualizarVehiculoAsync(int tallerId, int id, ActualizarVehiculoRequest vehiculo);
         Task<ServiceResult<VehiculoDetalle>> GetDetalleByIdAsync(int tallerId, int id);
         Task<ServiceResult<VehiculoDetalle>> GetDetalleByMatriculaAsync(int tallerId, string matricula);
+
+        Task<ServiceResult<bool>> EliminarVehiculoAsync(int tallerId, int id);
 
         Task<PagedResponse<VehiculoDetalle>> GetAllDetalleByTallerPagedAsync(
             int tallerId,

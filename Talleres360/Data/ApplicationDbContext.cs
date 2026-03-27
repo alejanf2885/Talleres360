@@ -84,6 +84,14 @@ namespace Talleres360.Data
                 .ToView("VW_VehiculoDetalles")
                 .HasNoKey();
 
+            modelBuilder.Entity<VehiculoDetalle>()
+                .Property(v => v.Eliminado)
+                .HasConversion<bool>();
+
+            modelBuilder.Entity<VehiculoDetalle>()
+                .Property(v => v.TieneAviso)
+                .HasConversion<int>();
+
             modelBuilder.Entity<Usuario>()
                 .HasIndex(u => u.Email)
                 .IsUnique();

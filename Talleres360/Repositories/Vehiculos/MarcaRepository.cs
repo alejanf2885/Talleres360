@@ -12,6 +12,7 @@ namespace Talleres360.Repositories.Vehiculos
 
         public MarcaRepository(ApplicationDbContext context)
         {
+            ArgumentNullException.ThrowIfNull(context);
             _context = context;
         }
 
@@ -19,7 +20,7 @@ namespace Talleres360.Repositories.Vehiculos
         {
             return await _context.Marcas
                 .AsNoTracking()
-                .Where(marca => marca.EsOficial || marca.TallerId == tallerId)
+                .Where(marca =>  marca.TallerId == tallerId || marca.EsOficial)
                 .Select(marca => new MarcaVehiculoDto
                 {
                     Id = marca.Id,
@@ -41,34 +42,55 @@ namespace Talleres360.Repositories.Vehiculos
         {
             return await _context.Marcas
                 .AsNoTracking()
-                .FirstOrDefaultAsync(m => m.Id == id);
+                .FirstOrDefaultAsync(marca => marca.Id == id);
         }
 
-        // Buscar marca visible para un taller (oficial O propia)
         public async Task<Marca?> GetMarcaVisibleByNombreAsync(int tallerId, string nombre)
         {
+            string nombreNormalizado = nombre.Trim().ToUpper();
+
             return await _context.Marcas
                 .AsNoTracking()
-                .FirstOrDefaultAsync(m => m.Nombre.ToLower() == nombre.ToLower()
-                                      && (m.EsOficial || m.TallerId == tallerId));
+                .FirstOrDefaultAsync(marca =>
+                    marca.Nombre.ToUpper() == nombreNormalizado &&
+                    (marca.EsOficial || marca.TallerId == tallerId));
         }
 
-        // Validar si existe marca oficial con ese nombre
         public async Task<bool> ExisteMarcaOficialAsync(string nombre)
         {
+            string nombreNormalizado = nombre.Trim().ToUpper();
+
             return await _context.Marcas
                 .AsNoTracking()
-                .AnyAsync(m => m.Nombre.ToLower() == nombre.ToLower() && m.EsOficial);
+                .AnyAsync(marca => marca.Nombre.ToUpper() == nombreNormalizado && marca.EsOficial);
         }
 
-        // Validar si existe marca del taller con ese nombre
         public async Task<bool> ExisteMarcaEnTallerAsync(string nombre, int tallerId)
         {
+            string nombreNormalizado = nombre.Trim().ToUpper();
+
             return await _context.Marcas
                 .AsNoTracking()
-                .AnyAsync(m => m.Nombre.ToLower() == nombre.ToLower()
-                            && m.TallerId == tallerId
-                            && !m.EsOficial);
+                .AnyAsync(marca =>
+                    marca.Nombre.ToUpper() == nombreNormalizado &&
+                    marca.TallerId == tallerId &&
+                    !marca.EsOficial);
+        }
+
+        public async Task<bool> TieneDependenciasAsync(int marcaId)
+        {
+            bool tieneVehiculos = await _context.Vehiculos
+                .AnyAsync(v => v.MarcaId == marcaId);
+
+            if (tieneVehiculos)
+            {
+                return true;
+            }
+
+            bool tieneModelos = await _context.Modelos
+                .AnyAsync(m => m.MarcaId == marcaId);
+
+            return tieneModelos;
         }
 
         public async Task AddAsync(Marca marca)
@@ -87,6 +109,13 @@ namespace Talleres360.Repositories.Vehiculos
         {
             _context.Marcas.Remove(marca);
             await _context.SaveChangesAsync();
+        }
+
+        public async Task<bool> PerteneceATallerAsync(int id, int tallerId)
+        {
+            return await _context.Marcas
+                .AsNoTracking()
+                .AnyAsync(m => m.Id == id && m.TallerId == tallerId && !m.EsOficial);
         }
     }
 }

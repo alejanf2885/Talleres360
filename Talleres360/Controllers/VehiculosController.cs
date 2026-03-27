@@ -89,7 +89,7 @@ namespace Talleres360.API.Controllers
 
         [RequiereSuscripcionActiva]
         [HttpPost]
-        public async Task<IActionResult> Create([FromBody] Vehiculo request)
+        public async Task<IActionResult> Create([FromBody] CrearVehiculoRequest request)
         {
             int? tallerId = _userContext.GetTallerId();
             if (!tallerId.HasValue) return Unauthorized();
@@ -108,7 +108,7 @@ namespace Talleres360.API.Controllers
         [TallerAuthorize<IVehiculoRepository>]
         [RequiereSuscripcionActiva]
         [HttpPut("{id:int:min(1)}")]
-        public async Task<IActionResult> Update(int id, [FromBody] Vehiculo request)
+        public async Task<IActionResult> Update(int id, [FromBody] ActualizarVehiculoRequest request)
         {
             int? tallerId = _userContext.GetTallerId();
             if (!tallerId.HasValue) return Unauthorized();
@@ -120,6 +120,22 @@ namespace Talleres360.API.Controllers
                 return BadRequest(new ApiErrorResponse(resultado.ErrorCode!, resultado.Message!));
 
             return Ok(ApiResponse<VehiculoDetalle>.Ok(resultado.Data!, "Vehículo actualizado correctamente."));
+        }
+
+
+        [TallerAuthorize<IVehiculoRepository>]
+        [RequiereSuscripcionActiva]
+        [HttpDelete("{id:int:min(1)}")]
+        public async Task<IActionResult> Delete(int id)
+        {
+            int? tallerId = _userContext.GetTallerId();
+            if (!tallerId.HasValue) return Unauthorized();
+            ServiceResult<bool> resultado = await _vehiculoService
+                .EliminarVehiculoAsync(tallerId.Value, id);
+            if (!resultado.Success)
+                return BadRequest(new ApiErrorResponse(resultado.ErrorCode!, resultado.Message!));
+
+            return Ok(ApiResponse<bool>.Ok(true, "¡Vehiculo archivado con éxito!"));
         }
     }
 }

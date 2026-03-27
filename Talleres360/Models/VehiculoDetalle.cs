@@ -56,7 +56,7 @@ namespace Talleres360.Models
         public int NotasPendientes { get; set; }
 
         [Column("TieneAviso")]
-        public bool TieneAviso { get; set; }
+        public int TieneAviso { get; set; }
 
         [NotMapped]
         public TipoVehiculo Tipo => (TipoVehiculo)VehiculoTipoId;

@@ -46,5 +46,7 @@ El Controller debe mapear el `ServiceResult` a un formato JSON estándar:
   - `MarcaService` y `MarcaRepository` para gestionar marcas de vehículos.
   - `ModeloService` y `ModeloRepository` para gestionar modelos de vehículos.
 - Implementar caché por dominio: tipos de vehículos con un tiempo de expiración de 24 horas, y marcas por taller con un tiempo de expiración de 30 minutos.
+- No existirá endpoint de detalle de marca (GET por id) en el módulo de marcas; mantener creación sin `CreatedAtAction` dependiente de detalle.
+- **Histórico de Vehículos**: Permitir la consulta de registros eliminados para implementar un archivo/histórico. Ajustar los requests de crear/actualizar en consecuencia.
 
 Esperando instrucciones del Director de Proyecto para iniciar la implementación del Módulo de Trabajos.
