@@ -4,7 +4,7 @@ using Talleres360.Dtos.Responses;
 using Talleres360.Dtos.Vehiculos;
 using Talleres360.Interfaces.Vehiculos;
 
-namespace Talleres360.API.Controllers
+namespace Talleres360.Controllers
 {
     [Route("api/v1/vehiculos/tipos")]
     [ApiController]
