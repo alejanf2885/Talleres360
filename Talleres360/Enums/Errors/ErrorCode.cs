@@ -55,6 +55,23 @@
 
         MAR_NOMBRE_DUPLICADO,
 
+        // --- INV: Inventario ---
+        INV_CATEGORIA_NO_ENCONTRADA,
+        INV_CATEGORIA_NOMBRE_DUPLICADO,
+        INV_PRODUCTO_NO_ENCONTRADO,
+        INV_PRODUCTO_NOMBRE_DUPLICADO,
+        INV_PRODUCTO_REFERENCIA_DUPLICADA,
+        INV_PRECIO_INVALIDO,
+
+        // --- CITA: Gestión de citas ---
+        CITA_NO_ENCONTRADA,
+        CITA_ESTADO_INVALIDO,
+
+        // --- TRA: Gestión de trabajos ---
+        TRA_NO_ENCONTRADO,
+        TRA_ESTADO_INVALIDO,
+        TRA_ESTADO_PAGO_INVALIDO,
+
         // --- SYS: Sistema y Errores Globales ---
         SYS_DATOS_INVALIDOS,
         SYS_ERROR_GENERICO,

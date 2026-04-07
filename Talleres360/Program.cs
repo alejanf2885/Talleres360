@@ -7,6 +7,7 @@ using Resend;
 using Scalar.AspNetCore;
 using Serilog;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.RateLimiting;
 using Talleres360.Configuration;
 using Talleres360.Data;
@@ -17,38 +18,58 @@ using Talleres360.Interfaces.Auth;
 using Talleres360.Interfaces.Background;
 using Talleres360.Interfaces.Cache;
 using Talleres360.Interfaces.Clientes;
+using Talleres360.Interfaces.Citas;
 using Talleres360.Interfaces.Data;
+using Talleres360.Interfaces.DocumentosComerciales;
 using Talleres360.Interfaces.Emails;
 using Talleres360.Interfaces.FileStorage;
 using Talleres360.Interfaces.Imagenes;
+using Talleres360.Interfaces.Inventario;
+using Talleres360.Interfaces.NotasVehiculo;
 using Talleres360.Interfaces.Password;
+using Talleres360.Interfaces.Presupuestos;
 using Talleres360.Interfaces.Planes;
 using Talleres360.Interfaces.SaneadorFotos;
 using Talleres360.Interfaces.Seguridad;
+using Talleres360.Interfaces.Servicios;
 using Talleres360.Interfaces.Talleres;
+using Talleres360.Interfaces.Trabajos;
 using Talleres360.Interfaces.Usuarios;
 using Talleres360.Interfaces.Vehiculos;
 using Talleres360.Middlewares;
 using Talleres360.Repositories;
 using Talleres360.Repositories.Clientes;
+using Talleres360.Repositories.Citas;
 using Talleres360.Repositories.Data;
+using Talleres360.Repositories.Inventario;
+using Talleres360.Repositories.NotasVehiculo;
 using Talleres360.Repositories.Planes;
+using Talleres360.Repositories.Presupuestos;
 using Talleres360.Repositories.Seguridad;
+using Talleres360.Repositories.Servicios;
 using Talleres360.Repositories.Talleres;
+using Talleres360.Repositories.Trabajos;
 using Talleres360.Repositories.Usuarios;
 using Talleres360.Repositories.Vehiculos;
 using Talleres360.Services.Archivos;
 using Talleres360.Services.Auth;
 using Talleres360.Services.Background;
 using Talleres360.Services.Cache;
+using Talleres360.Services.Citas;
 using Talleres360.Services.Clientes;
+using Talleres360.Services.DocumentosComerciales;
 using Talleres360.Services.Emails;
 using Talleres360.Services.FileStorage;
 using Talleres360.Services.Imagenes;
+using Talleres360.Services.Inventario;
+using Talleres360.Services.NotasVehiculo;
 using Talleres360.Services.Password;
+using Talleres360.Services.Presupuestos;
 using Talleres360.Services.SaneadorFotos;
 using Talleres360.Services.Seguridad;
+using Talleres360.Services.Servicios;
 using Talleres360.Services.Talleres;
+using Talleres360.Services.Trabajos;
 using Talleres360.Services.Usuarios;
 using Talleres360.Services.Vehiculos;
 
@@ -78,12 +99,19 @@ builder.Services.AddScoped<IUsuarioRepository, UsuarioRepository>();
 builder.Services.AddScoped<ITallerRepository, TallerRepository>();
 builder.Services.AddScoped<IPlanRepository, PlanRepository>();
 builder.Services.AddScoped<ICustomerRepository, CustomerRepository>();
+builder.Services.AddScoped<ICitaRepository, CitaRepository>();
 builder.Services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
 builder.Services.AddScoped<IVehiculoRepository, VehiculoRepository>();
 builder.Services.AddScoped<IVehiculoTipoRepository, VehiculoTipoRepository>();
 builder.Services.AddScoped<IMarcaRepository, MarcaRepository>();
 builder.Services.AddScoped<IModeloRepository, ModeloRepository>();
 builder.Services.AddScoped<IVerificacionRepository, VerificacionRepository>();
+builder.Services.AddScoped<ICategoriaProductoRepository, CategoriaProductoRepository>();
+builder.Services.AddScoped<IProductoRepository, ProductoRepository>();
+builder.Services.AddScoped<IServicioRepository, ServicioRepository>();
+builder.Services.AddScoped<ITrabajoRepository, TrabajoRepository>();
+builder.Services.AddScoped<IPresupuestoRepository, PresupuestoRepository>();
+builder.Services.AddScoped<INotaVehiculoRepository, NotaVehiculoRepository>();
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
 builder.Services.AddSingleton<IPasswordService, BcryptPasswordService>();
@@ -94,6 +122,13 @@ builder.Services.AddScoped<IVehiculoService, VehiculoService>();
 builder.Services.AddScoped<IVehiculoTipoService, VehiculoTipoService>();
 builder.Services.AddScoped<IMarcaService, MarcaService>();
 builder.Services.AddScoped<IModeloService, ModeloService>();
+builder.Services.AddScoped<ICategoriaProductoService, CategoriaProductoService>();
+builder.Services.AddScoped<IProductoService, ProductoService>();
+builder.Services.AddScoped<IServicioService, ServicioService>();
+builder.Services.AddScoped<ITrabajoService, TrabajoService>();
+builder.Services.AddScoped<IPresupuestoService, PresupuestoService>();
+builder.Services.AddScoped<IDocumentoComercialService, DocumentoComercialService>();
+builder.Services.AddScoped<INotaVehiculoService, NotaVehiculoService>();
 builder.Services.AddScoped<IProcesadorImagenService, ProcesadorImagenService>();
 builder.Services.AddScoped<IImagenService, ImagenService>();
 builder.Services.AddScoped<INombreArchivoService, NombreArchivoService>();
@@ -106,6 +141,7 @@ builder.Services.AddHostedService<EmailBackgroundWorker>();
 
 builder.Services.AddScoped<ISuscripcionGuardService, SuscripcionGuardService>();
 builder.Services.AddScoped<ICustomerService, CustomerService>();
+builder.Services.AddScoped<ICitaService, CitaService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IUsuarioService, UsuarioService>();
 builder.Services.AddScoped<IRegistroTallerService, RegistroTallerService>();
@@ -199,6 +235,10 @@ builder.Services.AddRateLimiter(options =>
 });
 
 builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+    })
     .ConfigureApiBehaviorOptions(options =>
     {
         options.InvalidModelStateResponseFactory = context =>

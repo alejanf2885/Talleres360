@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Talleres360.Enums;
 
 namespace Talleres360.Models
 {
@@ -24,8 +25,8 @@ namespace Talleres360.Models
         public string Texto { get; set; } = string.Empty;
 
         [Column("Tipo")]
-        [Required, StringLength(20)]
-        public string Tipo { get; set; } = "GENERAL";
+        [Required]
+        public NotaVehiculoTipo Tipo { get; set; } = NotaVehiculoTipo.GENERAL;
 
         [Column("Resuelta")]
         public bool Resuelta { get; set; } = false;
