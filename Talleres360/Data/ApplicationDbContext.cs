@@ -23,6 +23,12 @@ namespace Talleres360.Data
         public DbSet<Trabajo> Trabajos { get; set; }
         public DbSet<DetalleTrabajo> DetallesTrabajo { get; set; }
         public DbSet<NotaVehiculo> NotasVehiculo { get; set; }
+        public DbSet<CategoriaProducto> CategoriasProducto { get; set; }
+        public DbSet<Producto> Productos { get; set; }
+        public DbSet<Servicio> Servicios { get; set; }
+        public DbSet<Cita> Citas { get; set; }
+        public DbSet<Factura> Facturas { get; set; }
+        public DbSet<LineaFactura> LineasFactura { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -32,6 +38,26 @@ namespace Talleres360.Data
                 .Property(u => u.Rol)
                 .HasConversion<string>();
 
+            modelBuilder.Entity<Trabajo>()
+                .Property(t => t.Estado)
+                .HasConversion<string>();
+
+            modelBuilder.Entity<Trabajo>()
+                .Property(t => t.EstadoPago)
+                .HasConversion<string>();
+
+            modelBuilder.Entity<Cita>()
+                .Property(c => c.Estado)
+                .HasConversion<string>();
+
+            modelBuilder.Entity<NotaVehiculo>()
+                .Property(n => n.Tipo)
+                .HasConversion<string>();
+
+            modelBuilder.Entity<Factura>()
+                .Property(f => f.TipoDocumento)
+                .HasConversion<string>();
+
             modelBuilder.Entity<Usuario>().HasQueryFilter(u => !u.Eliminado);
             modelBuilder.Entity<Credencial>().HasQueryFilter(c => !c.Eliminado);
             modelBuilder.Entity<Cliente>().HasQueryFilter(c => !c.Eliminado);
@@ -39,6 +65,10 @@ namespace Talleres360.Data
             modelBuilder.Entity<Trabajo>().HasQueryFilter(t => !t.Eliminado);
             modelBuilder.Entity<DetalleTrabajo>().HasQueryFilter(d => !d.Eliminado);
             modelBuilder.Entity<NotaVehiculo>().HasQueryFilter(n => !n.Eliminado);
+            modelBuilder.Entity<CategoriaProducto>().HasQueryFilter(c => !c.Eliminado);
+            modelBuilder.Entity<Producto>().HasQueryFilter(p => !p.Eliminado);
+            modelBuilder.Entity<Servicio>().HasQueryFilter(s => !s.Eliminado);
+            modelBuilder.Entity<Cita>().HasQueryFilter(c => !c.Eliminado);
 
             modelBuilder.Entity<Plan>()
                 .Property(p => p.PrecioMensual)
@@ -79,6 +109,62 @@ namespace Talleres360.Data
             modelBuilder.Entity<DetalleTrabajo>()
                 .Property(d => d.ImpuestoPorcentaje)
                 .HasPrecision(5, 2);
+
+            modelBuilder.Entity<Producto>()
+                .Property(p => p.PrecioCompra)
+                .HasPrecision(10, 2);
+
+            modelBuilder.Entity<Producto>()
+                .Property(p => p.PrecioVenta)
+                .HasPrecision(10, 2);
+
+            modelBuilder.Entity<Producto>()
+                .Property(p => p.StockActual)
+                .HasPrecision(10, 2);
+
+            modelBuilder.Entity<Servicio>()
+                .Property(s => s.PrecioBase)
+                .HasPrecision(18, 2);
+
+            modelBuilder.Entity<Servicio>()
+                .Property(s => s.ImpuestoPorcentaje)
+                .HasPrecision(5, 2);
+
+            modelBuilder.Entity<Factura>()
+                .Property(f => f.Subtotal)
+                .HasPrecision(18, 2);
+
+            modelBuilder.Entity<Factura>()
+                .Property(f => f.ImporteImpuestos)
+                .HasPrecision(18, 2);
+
+            modelBuilder.Entity<Factura>()
+                .Property(f => f.Total)
+                .HasPrecision(18, 2);
+
+            modelBuilder.Entity<LineaFactura>()
+                .Property(l => l.Cantidad)
+                .HasPrecision(8, 2);
+
+            modelBuilder.Entity<LineaFactura>()
+                .Property(l => l.PrecioUnitario)
+                .HasPrecision(18, 2);
+
+            modelBuilder.Entity<LineaFactura>()
+                .Property(l => l.DescuentoPorcentaje)
+                .HasPrecision(5, 2);
+
+            modelBuilder.Entity<LineaFactura>()
+                .Property(l => l.ImpuestoPorcentaje)
+                .HasPrecision(5, 2);
+
+            modelBuilder.Entity<LineaFactura>()
+                .Property(l => l.SubtotalLinea)
+                .HasPrecision(18, 2);
+
+            modelBuilder.Entity<LineaFactura>()
+                .Property(l => l.TotalLinea)
+                .HasPrecision(18, 2);
 
             modelBuilder.Entity<VehiculoDetalle>()
                 .ToView("VW_VehiculoDetalles")

@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Talleres360.Enums;
 
 namespace Talleres360.Models
 {
@@ -34,12 +35,12 @@ namespace Talleres360.Models
         public int KmEntrada { get; set; }
 
         [Column("Estado")]
-        [Required, StringLength(20)]
-        public string Estado { get; set; } = "ABIERTO";
+        [Required]
+        public TrabajoEstado Estado { get; set; } = TrabajoEstado.ABIERTO;
 
         [Column("EstadoPago")]
-        [Required, StringLength(20)]
-        public string EstadoPago { get; set; } = "PENDIENTE";
+        [Required]
+        public TrabajoEstadoPago EstadoPago { get; set; } = TrabajoEstadoPago.PENDIENTE;
 
         [Column("Subtotal")]
         public decimal Subtotal { get; set; }
