@@ -36,5 +36,10 @@ namespace Talleres360.Repositories.Data
                 await _transaction.DisposeAsync();
             }
         }
+
+        public async Task SaveChangesAsync()
+        {
+            await _context.SaveChangesAsync();
+        }
     }
 }

@@ -15,7 +15,7 @@ namespace Talleres360.Interfaces.Vehiculos
 
         Task UpdateAsync(Vehiculo vehiculo);
 
-        Task<bool> ExistsAsync(string matricula);
+        Task<bool> ExistsAsync(string matricula, int tallerId);
 
 
 

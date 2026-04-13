@@ -22,12 +22,12 @@ namespace Talleres360.Services.Vehiculos
 
             string matriculaLimpia = request.Matricula.Trim().ToUpper().Replace("-", "").Replace(" ", "");
 
-            bool existe = await _vehiculoRepository.ExistsAsync(matriculaLimpia);
+            bool existe = await _vehiculoRepository.ExistsAsync(matriculaLimpia, tallerId);
             if (existe)
             {
                 return ServiceResult<VehiculoDetalle>.Fail(
-                    ErrorCode.SYS_OPERACION_INVALIDA.ToString(),
-                    $"La matrícula {matriculaLimpia} ya está registrada en el sistema.");
+                    ErrorCode.VEH_MATRICULA_DUPLICADA.ToString(),
+                    $"La matrícula {matriculaLimpia} ya está registrada en tu taller.");
             }
 
             Vehiculo nuevoVehiculo = new Vehiculo

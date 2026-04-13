@@ -18,8 +18,8 @@ namespace Talleres360.Test.Repositories
             await context.SaveChangesAsync();
 
             VehiculoRepository repository = new VehiculoRepository(context);
-            bool existe = await repository.ExistsAsync("1234ABC");
-            bool existeEliminado = await repository.ExistsAsync("9999ZZZ");
+            bool existe = await repository.ExistsAsync("1234ABC", 1);
+            bool existeEliminado = await repository.ExistsAsync("9999ZZZ", 1);
 
             Assert.True(existe);
             Assert.False(existeEliminado);

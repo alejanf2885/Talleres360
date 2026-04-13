@@ -119,10 +119,10 @@ namespace Talleres360.Repositories.Trabajos
             await _context.SaveChangesAsync();
         }
 
-        public async Task UpdateAsync(Trabajo trabajo)
+        public Task UpdateAsync(Trabajo trabajo)
         {
             _context.Trabajos.Update(trabajo);
-            await _context.SaveChangesAsync();
+            return Task.CompletedTask;
         }
 
         public async Task<bool> PerteneceATallerAsync(int id, int tallerId)
