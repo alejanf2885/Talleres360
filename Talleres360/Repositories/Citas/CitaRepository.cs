@@ -19,60 +19,58 @@ namespace Talleres360.Repositories.Citas
 
         public async Task<PagedResponse<CitaDto>> ObtenerTodasPagedAsync(int tallerId, PaginationParams paginacion, DateTime? fechaDesde = null, DateTime? fechaHasta = null, CitaEstado? estado = null, int? vehiculoId = null)
         {
-            IQueryable<Cita> query = _context.Citas
+            IQueryable<Cita> citasBase = _context.Citas
                 .AsNoTracking()
                 .Where(cita => cita.TallerId == tallerId && !cita.Eliminado);
 
             if (vehiculoId.HasValue)
-            {
-                query = query.Where(cita => cita.VehiculoId == vehiculoId.Value);
-            }
+                citasBase = citasBase.Where(cita => cita.VehiculoId == vehiculoId.Value);
 
             if (fechaDesde.HasValue)
-            {
-                DateTime desde = fechaDesde.Value.Date;
-                query = query.Where(cita => cita.FechaCita >= desde);
-            }
+                citasBase = citasBase.Where(cita => cita.FechaCita >= fechaDesde.Value.Date);
 
             if (fechaHasta.HasValue)
-            {
-                DateTime hasta = fechaHasta.Value.Date;
-                query = query.Where(cita => cita.FechaCita <= hasta);
-            }
+                citasBase = citasBase.Where(cita => cita.FechaCita <= fechaHasta.Value.Date);
 
             if (estado.HasValue)
-            {
-                query = query.Where(cita => cita.Estado == estado.Value);
-            }
+                citasBase = citasBase.Where(cita => cita.Estado == estado.Value);
 
-            int totalCount = await query.CountAsync();
+            int totalCount = await citasBase.CountAsync();
 
-            List<CitaDto> data = await query
-                .OrderBy(cita => cita.FechaCita)
-                .ThenBy(cita => cita.Id)
+            List<CitaDto> data = await (
+                from cita in citasBase
+                join vd in _context.VehiculosDetalle.AsNoTracking()
+                    on cita.VehiculoId equals (int?)vd.Id into vdGroup
+                from vd in vdGroup.DefaultIfEmpty()
+                join c in _context.Clientes.AsNoTracking()
+                    on vd.ClienteId equals c.Id into cGroup
+                from c in cGroup.DefaultIfEmpty()
+                orderby cita.FechaCita, cita.Id
+                select new CitaDto
+                {
+                    Id                = cita.Id,
+                    VehiculoId        = cita.VehiculoId,
+                    VehiculoMatricula = vd == null ? null : vd.Matricula,
+                    VehiculoMarca     = vd == null ? null : vd.MarcaNombre,
+                    VehiculoModelo    = vd == null ? null : vd.ModeloNombre,
+                    ClienteNombre     = c == null ? null : (c.Apellidos == null ? c.Nombre : c.Nombre + " " + c.Apellidos),
+                    NombreClienteTemp = cita.NombreClienteTemp,
+                    FechaCita         = cita.FechaCita,
+                    HoraAproximada    = cita.HoraAproximada,
+                    Descripcion       = cita.Descripcion,
+                    Estado            = cita.Estado
+                })
                 .Skip((paginacion.PageNumber - 1) * paginacion.PageSize)
                 .Take(paginacion.PageSize)
-                .Select(cita => new CitaDto
-                {
-                    Id = cita.Id,
-                    VehiculoId = cita.VehiculoId,
-                    NombreClienteTemp = cita.NombreClienteTemp,
-                    FechaCita = cita.FechaCita,
-                    HoraAproximada = cita.HoraAproximada,
-                    Descripcion = cita.Descripcion,
-                    Estado = cita.Estado
-                })
                 .ToListAsync();
 
-            PagedResponse<CitaDto> respuesta = new PagedResponse<CitaDto>
+            return new PagedResponse<CitaDto>
             {
-                Data = data,
+                Data       = data,
                 PageNumber = paginacion.PageNumber,
-                PageSize = paginacion.PageSize,
+                PageSize   = paginacion.PageSize,
                 TotalCount = totalCount
             };
-
-            return respuesta;
         }
 
         public async Task<Cita?> ObtenerEntidadPorIdAsync(int citaId)
@@ -83,22 +81,30 @@ namespace Talleres360.Repositories.Citas
 
         public async Task<CitaDto?> ObtenerDetallePorIdAsync(int citaId)
         {
-            CitaDto? cita = await _context.Citas
-                .AsNoTracking()
-                .Where(c => c.Id == citaId && !c.Eliminado)
-                .Select(c => new CitaDto
+            return await (
+                from cita in _context.Citas.AsNoTracking()
+                    .Where(c => c.Id == citaId && !c.Eliminado)
+                join vd in _context.VehiculosDetalle.AsNoTracking()
+                    on cita.VehiculoId equals (int?)vd.Id into vdGroup
+                from vd in vdGroup.DefaultIfEmpty()
+                join c in _context.Clientes.AsNoTracking()
+                    on vd.ClienteId equals c.Id into cGroup
+                from c in cGroup.DefaultIfEmpty()
+                select new CitaDto
                 {
-                    Id = c.Id,
-                    VehiculoId = c.VehiculoId,
-                    NombreClienteTemp = c.NombreClienteTemp,
-                    FechaCita = c.FechaCita,
-                    HoraAproximada = c.HoraAproximada,
-                    Descripcion = c.Descripcion,
-                    Estado = c.Estado
+                    Id                = cita.Id,
+                    VehiculoId        = cita.VehiculoId,
+                    VehiculoMatricula = vd == null ? null : vd.Matricula,
+                    VehiculoMarca     = vd == null ? null : vd.MarcaNombre,
+                    VehiculoModelo    = vd == null ? null : vd.ModeloNombre,
+                    ClienteNombre     = c == null ? null : (c.Apellidos == null ? c.Nombre : c.Nombre + " " + c.Apellidos),
+                    NombreClienteTemp = cita.NombreClienteTemp,
+                    FechaCita         = cita.FechaCita,
+                    HoraAproximada    = cita.HoraAproximada,
+                    Descripcion       = cita.Descripcion,
+                    Estado            = cita.Estado
                 })
                 .FirstOrDefaultAsync();
-
-            return cita;
         }
 
         public async Task AddAsync(Cita cita)

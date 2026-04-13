@@ -110,6 +110,7 @@ builder.Services.AddScoped<ICategoriaProductoRepository, CategoriaProductoReposi
 builder.Services.AddScoped<IProductoRepository, ProductoRepository>();
 builder.Services.AddScoped<IServicioRepository, ServicioRepository>();
 builder.Services.AddScoped<ITrabajoRepository, TrabajoRepository>();
+builder.Services.AddScoped<ICobroTrabajoRepository, CobroTrabajoRepository>();
 builder.Services.AddScoped<IPresupuestoRepository, PresupuestoRepository>();
 builder.Services.AddScoped<INotaVehiculoRepository, NotaVehiculoRepository>();
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
@@ -126,6 +127,7 @@ builder.Services.AddScoped<ICategoriaProductoService, CategoriaProductoService>(
 builder.Services.AddScoped<IProductoService, ProductoService>();
 builder.Services.AddScoped<IServicioService, ServicioService>();
 builder.Services.AddScoped<ITrabajoService, TrabajoService>();
+builder.Services.AddScoped<ICobroTrabajoService, CobroTrabajoService>();
 builder.Services.AddScoped<IPresupuestoService, PresupuestoService>();
 builder.Services.AddScoped<IDocumentoComercialService, DocumentoComercialService>();
 builder.Services.AddScoped<INotaVehiculoService, NotaVehiculoService>();
