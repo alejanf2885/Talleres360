@@ -46,14 +46,14 @@ namespace Talleres360.Controllers
                 return Unauthorized();
             }
 
-            int? vehiculoIdFiltrado = vehiculoId;
-
-            if (vehiculoIdFiltrado.HasValue)
+            if (vehiculoId.HasValue)
             {
-                bool vehiculoPertenece = await _vehiculoRepository.PerteneceATallerAsync(vehiculoIdFiltrado.Value, tallerId.Value);
+                bool vehiculoPertenece = await _vehiculoRepository.PerteneceATallerAsync(vehiculoId.Value, tallerId.Value);
                 if (!vehiculoPertenece)
                 {
-                    vehiculoIdFiltrado = null;
+                    return BadRequest(new ApiErrorResponse(
+                        codigo: ErrorCode.VEH_NO_ENCONTRADO.ToString(),
+                        mensaje: "El vehículo indicado no pertenece a este taller."));
                 }
             }
 
@@ -63,7 +63,7 @@ namespace Talleres360.Controllers
                 fechaDesde,
                 fechaHasta,
                 estado,
-                vehiculoIdFiltrado);
+                vehiculoId);
 
             return Ok(ApiResponse<PagedResponse<CitaDto>>.Ok(citas, "Listado de citas recuperado correctamente."));
         }

@@ -32,20 +32,11 @@ namespace Talleres360.Services.Citas
 
         public async Task<PagedResponse<CitaDto>> ObtenerTodasAsync(int tallerId, PaginationParams paginacion, DateTime? fechaDesde = null, DateTime? fechaHasta = null, CitaEstado? estado = null, int? vehiculoId = null)
         {
-            PagedResponse<CitaDto> citas = await _citaRepository.ObtenerTodasPagedAsync(tallerId, paginacion, fechaDesde, fechaHasta, estado, vehiculoId);
-            return citas;
+            return await _citaRepository.ObtenerTodasPagedAsync(tallerId, paginacion, fechaDesde, fechaHasta, estado, vehiculoId);
         }
 
         public async Task<ServiceResult<CitaDto>> ObtenerPorIdAsync(int tallerId, int citaId)
         {
-            Cita? entidad = await _citaRepository.ObtenerEntidadPorIdAsync(citaId);
-            if (entidad == null || entidad.TallerId != tallerId || entidad.Eliminado)
-            {
-                return ServiceResult<CitaDto>.Fail(
-                    ErrorCode.CITA_NO_ENCONTRADA.ToString(),
-                    "Cita no encontrada.");
-            }
-
             CitaDto? cita = await _citaRepository.ObtenerDetallePorIdAsync(citaId);
             if (cita == null)
             {
@@ -59,20 +50,13 @@ namespace Talleres360.Services.Citas
 
         public async Task<ServiceResult<CitaDto>> CrearAsync(int tallerId, CrearCitaRequest request)
         {
-            if (!request.Estado.HasValue)
-            {
-                return ServiceResult<CitaDto>.Fail(
-                    ErrorCode.CITA_ESTADO_INVALIDO.ToString(),
-                    "El estado de la cita no es válido.");
-            }
-
-            CitaEstado estadoCita = request.Estado.Value;
+            CitaEstado estadoCita = request.Estado!.Value;
 
             if (!request.VehiculoId.HasValue && string.IsNullOrWhiteSpace(request.NombreClienteTemp))
             {
                 return ServiceResult<CitaDto>.Fail(
                     ErrorCode.SYS_DATOS_INVALIDOS.ToString(),
-                    "Debe indicar un vehículo o un nombre temporal de cliente.");
+                    "Debe indicar un vehÃ­culo o un nombre temporal de cliente.");
             }
 
             if (request.VehiculoId.HasValue)
@@ -82,25 +66,25 @@ namespace Talleres360.Services.Citas
                 {
                     return ServiceResult<CitaDto>.Fail(
                         ErrorCode.VEH_NO_ENCONTRADO.ToString(),
-                        "El vehículo indicado no existe en el taller.");
+                        "El vehÃ­culo indicado no existe en el taller.");
                 }
             }
 
             Cita cita = new Cita
             {
-                TallerId = tallerId,
-                VehiculoId = request.VehiculoId,
+                TallerId          = tallerId,
+                VehiculoId        = request.VehiculoId,
                 NombreClienteTemp = string.IsNullOrWhiteSpace(request.NombreClienteTemp)
                     ? null
                     : request.NombreClienteTemp.Trim(),
-                FechaCita = request.FechaCita.Date,
+                FechaCita      = request.FechaCita.Date,
                 HoraAproximada = string.IsNullOrWhiteSpace(request.HoraAproximada)
                     ? null
                     : request.HoraAproximada.Trim(),
                 Descripcion = string.IsNullOrWhiteSpace(request.Descripcion)
                     ? null
                     : request.Descripcion.Trim(),
-                Estado = estadoCita,
+                Estado    = estadoCita,
                 Eliminado = false
             };
 
@@ -127,20 +111,13 @@ namespace Talleres360.Services.Citas
                     "Cita no encontrada.");
             }
 
-            if (!request.Estado.HasValue)
-            {
-                return ServiceResult<CitaDto>.Fail(
-                    ErrorCode.CITA_ESTADO_INVALIDO.ToString(),
-                    "El estado de la cita no es válido.");
-            }
-
-            CitaEstado estadoCita = request.Estado.Value;
+            CitaEstado estadoCita = request.Estado!.Value;
 
             if (!request.VehiculoId.HasValue && string.IsNullOrWhiteSpace(request.NombreClienteTemp))
             {
                 return ServiceResult<CitaDto>.Fail(
                     ErrorCode.SYS_DATOS_INVALIDOS.ToString(),
-                    "Debe indicar un vehículo o un nombre temporal de cliente.");
+                    "Debe indicar un vehÃ­culo o un nombre temporal de cliente.");
             }
 
             if (request.VehiculoId.HasValue)
@@ -150,7 +127,7 @@ namespace Talleres360.Services.Citas
                 {
                     return ServiceResult<CitaDto>.Fail(
                         ErrorCode.VEH_NO_ENCONTRADO.ToString(),
-                        "El vehículo indicado no existe en el taller.");
+                        "El vehÃ­culo indicado no existe en el taller.");
                 }
             }
 
@@ -219,7 +196,7 @@ namespace Talleres360.Services.Citas
             {
                 return ServiceResult<CitaTrabajoDto>.Fail(
                     ErrorCode.SYS_OPERACION_INVALIDA.ToString(),
-                    "Debes completar el vehículo antes de convertir la cita a trabajo.");
+                    "Debes completar el vehÃ­culo antes de convertir la cita a trabajo.");
             }
 
             bool vehiculoPertenece = await _vehiculoRepository.PerteneceATallerAsync(cita.VehiculoId.Value, tallerId);
@@ -227,8 +204,10 @@ namespace Talleres360.Services.Citas
             {
                 return ServiceResult<CitaTrabajoDto>.Fail(
                     ErrorCode.VEH_NO_ENCONTRADO.ToString(),
-                    "El vehículo de la cita no pertenece a tu taller.");
+                    "El vehÃ­culo de la cita no pertenece a tu taller.");
             }
+
+            bool datosIncompletos = string.IsNullOrWhiteSpace(request.TituloMantenimiento);
 
             Trabajo trabajo = new Trabajo
             {
@@ -249,7 +228,7 @@ namespace Talleres360.Services.Citas
                 ModificadoPorId         = null,
                 FechaUltimaModificacion = null,
                 Eliminado               = false,
-                DatosIncompletos        = false
+                DatosIncompletos        = datosIncompletos
             };
 
             try
@@ -265,17 +244,15 @@ namespace Talleres360.Services.Citas
                 await _unitOfWork.RollbackTransactionAsync();
                 return ServiceResult<CitaTrabajoDto>.Fail(
                     ErrorCode.SYS_ERROR_BASE_DATOS.ToString(),
-                    "No se pudo completar la conversión de la cita a trabajo.");
+                    "No se pudo completar la conversiÃ³n de la cita a trabajo.");
             }
 
-            CitaTrabajoDto resultado = new CitaTrabajoDto
+            return ServiceResult<CitaTrabajoDto>.Ok(new CitaTrabajoDto
             {
-                CitaId          = citaId,
-                TrabajoId       = trabajo.Id,
+                CitaId           = citaId,
+                TrabajoId        = trabajo.Id,
                 DatosIncompletos = trabajo.DatosIncompletos
-            };
-
-            return ServiceResult<CitaTrabajoDto>.Ok(resultado);
+            });
         }
     }
 }

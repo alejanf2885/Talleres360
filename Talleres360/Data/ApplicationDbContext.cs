@@ -27,6 +27,7 @@ namespace Talleres360.Data
         public DbSet<Producto> Productos { get; set; }
         public DbSet<Servicio> Servicios { get; set; }
         public DbSet<Cita> Citas { get; set; }
+        public DbSet<CobroTrabajo> CobrosTrabajo { get; set; }
         public DbSet<Factura> Facturas { get; set; }
         public DbSet<LineaFactura> LineasFactura { get; set; }
 
@@ -58,6 +59,10 @@ namespace Talleres360.Data
                 .Property(f => f.TipoDocumento)
                 .HasConversion<string>();
 
+            modelBuilder.Entity<CobroTrabajo>()
+                .Property(c => c.MetodoPago)
+                .HasConversion<string>();
+
             modelBuilder.Entity<Usuario>().HasQueryFilter(u => !u.Eliminado);
             modelBuilder.Entity<Credencial>().HasQueryFilter(c => !c.Eliminado);
             modelBuilder.Entity<Cliente>().HasQueryFilter(c => !c.Eliminado);
@@ -69,6 +74,7 @@ namespace Talleres360.Data
             modelBuilder.Entity<Producto>().HasQueryFilter(p => !p.Eliminado);
             modelBuilder.Entity<Servicio>().HasQueryFilter(s => !s.Eliminado);
             modelBuilder.Entity<Cita>().HasQueryFilter(c => !c.Eliminado);
+            modelBuilder.Entity<CobroTrabajo>().HasQueryFilter(c => !c.Eliminado);
 
             modelBuilder.Entity<Plan>()
                 .Property(p => p.PrecioMensual)
@@ -92,6 +98,10 @@ namespace Talleres360.Data
 
             modelBuilder.Entity<Trabajo>()
                 .Property(t => t.Total)
+                .HasPrecision(10, 2);
+
+            modelBuilder.Entity<CobroTrabajo>()
+                .Property(c => c.Importe)
                 .HasPrecision(10, 2);
 
             modelBuilder.Entity<DetalleTrabajo>()
