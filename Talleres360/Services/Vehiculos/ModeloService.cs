@@ -27,7 +27,7 @@ namespace Talleres360.Services.Vehiculos
             {
                 return ServiceResult<List<ModeloVehiculoDto>>.Fail(
                     ErrorCode.VEH_MARCA_NO_ENCONTRADA.ToString(),
-                    "La marca indicada no existe o no está disponible para el taller.");
+                    "La marca indicada no existe o no estï¿½ disponible para el taller.");
             }
 
             List<ModeloVehiculoDto> modelos = await _modeloRepository.ObtenerModelosPorMarcaAsync(tallerId, marcaId);
@@ -49,7 +49,7 @@ namespace Talleres360.Services.Vehiculos
             {
                 return ServiceResult<ModeloVehiculoDto>.Fail(
                     ErrorCode.SYS_DATOS_INVALIDOS.ToString(),
-                    "La marca y el tipo de vehículo son obligatorios.");
+                    "La marca y el tipo de vehï¿½culo son obligatorios.");
             }
 
             if (string.IsNullOrWhiteSpace(crearModeloDto.Nombre))
@@ -64,7 +64,7 @@ namespace Talleres360.Services.Vehiculos
             {
                 return ServiceResult<ModeloVehiculoDto>.Fail(
                     ErrorCode.VEH_MARCA_NO_ENCONTRADA.ToString(),
-                    "La marca indicada no existe o no está disponible para el taller.");
+                    "La marca indicada no existe o no estï¿½ disponible para el taller.");
             }
 
             string nombreNormalizado = crearModeloDto.Nombre.Trim();
@@ -124,26 +124,12 @@ namespace Talleres360.Services.Vehiculos
 
             ArgumentNullException.ThrowIfNull(actualizarModeloDto);
 
-            Modelo? modelo = await _modeloRepository.GetByIdAsync(modeloId);
-            if (modelo == null)
+            Modelo? modelo = await _modeloRepository.GetByIdAsync(modeloId, tallerId);
+            if (modelo == null || modelo.EsOficial)
             {
                 return ServiceResult<ModeloVehiculoDto>.Fail(
                     ErrorCode.VEH_MODELO_NO_ENCONTRADA.ToString(),
-                    $"No se encontró el modelo con ID {modeloId}");
-            }
-
-            if (modelo.EsOficial)
-            {
-                return ServiceResult<ModeloVehiculoDto>.Fail(
-                    ErrorCode.SYS_OPERACION_INVALIDA.ToString(),
-                    "No se puede actualizar un modelo oficial.");
-            }
-
-            if (modelo.TallerId != tallerId)
-            {
-                return ServiceResult<ModeloVehiculoDto>.Fail(
-                    ErrorCode.VEH_MODELO_NO_ENCONTRADA.ToString(),
-                    "El modelo no pertenece al taller.");
+                    $"No se encontrï¿½ el modelo o no pertenece al taller");
             }
 
             if (actualizarModeloDto.MarcaId <= 0 || actualizarModeloDto.VehiculoTipoId <= 0 || string.IsNullOrWhiteSpace(actualizarModeloDto.Nombre))
@@ -158,7 +144,7 @@ namespace Talleres360.Services.Vehiculos
             {
                 return ServiceResult<ModeloVehiculoDto>.Fail(
                     ErrorCode.VEH_MARCA_NO_ENCONTRADA.ToString(),
-                    "La marca indicada no existe o no está disponible para el taller.");
+                    "La marca indicada no existe o no estï¿½ disponible para el taller.");
             }
 
             string nombreNormalizado = actualizarModeloDto.Nombre.Trim();
@@ -198,26 +184,12 @@ namespace Talleres360.Services.Vehiculos
                     "El ID del taller y del modelo deben ser mayores a 0");
             }
 
-            Modelo? modelo = await _modeloRepository.GetByIdAsync(modeloId);
-            if (modelo == null)
+            Modelo? modelo = await _modeloRepository.GetByIdAsync(modeloId, tallerId);
+            if (modelo == null || modelo.EsOficial)
             {
                 return ServiceResult<bool>.Fail(
                     ErrorCode.VEH_MODELO_NO_ENCONTRADA.ToString(),
-                    $"No se encontró el modelo con ID {modeloId}");
-            }
-
-            if (modelo.EsOficial)
-            {
-                return ServiceResult<bool>.Fail(
-                    ErrorCode.SYS_OPERACION_INVALIDA.ToString(),
-                    "No se puede eliminar un modelo oficial.");
-            }
-
-            if (modelo.TallerId != tallerId)
-            {
-                return ServiceResult<bool>.Fail(
-                    ErrorCode.VEH_MODELO_NO_ENCONTRADA.ToString(),
-                    "El modelo no pertenece al taller.");
+                    $"No se encontrï¿½ el modelo o no pertenece al taller");
             }
 
             bool tieneDependencias = await _modeloRepository.TieneDependenciasAsync(modeloId);
@@ -225,17 +197,17 @@ namespace Talleres360.Services.Vehiculos
             {
                 return ServiceResult<bool>.Fail(
                     ErrorCode.SYS_OPERACION_INVALIDA.ToString(),
-                    "No se puede eliminar el modelo porque tiene vehículos asociados.");
+                    "No se puede eliminar el modelo porque tiene vehï¿½culos asociados.");
             }
 
             await _modeloRepository.DeleteAsync(modelo);
 
-            Modelo? verificacion = await _modeloRepository.GetByIdAsync(modeloId);
+            Modelo? verificacion = await _modeloRepository.GetByIdAsync(modeloId, tallerId);
             if (verificacion != null)
             {
                 return ServiceResult<bool>.Fail(
                     ErrorCode.SYS_ERROR_GENERICO.ToString(),
-                    "El modelo no se eliminó correctamente.");
+                    "El modelo no se eliminï¿½ correctamente.");
             }
 
             return ServiceResult<bool>.Ok(true);

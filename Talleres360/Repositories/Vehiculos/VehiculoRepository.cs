@@ -28,9 +28,9 @@ namespace Talleres360.Repositories.Vehiculos
             await _context.SaveChangesAsync();
         }
 
-        public async Task<Vehiculo?> GetByIdAsync(int id)
+        public async Task<Vehiculo?> GetByIdAsync(int id, int tallerId)
         {
-            return await _context.Vehiculos.FindAsync(id);
+            return await _context.Vehiculos.FirstOrDefaultAsync(v => v.Id == id && v.TallerId == tallerId && !v.Eliminado);
         }
 
         public async Task<bool> ExistsAsync(string matricula, int tallerId)

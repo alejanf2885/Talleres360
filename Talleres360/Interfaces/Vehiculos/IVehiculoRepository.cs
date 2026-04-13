@@ -9,7 +9,7 @@ namespace Talleres360.Interfaces.Vehiculos
     public interface IVehiculoRepository : ITallerRecursoRepository
     {
 
-        Task<Vehiculo?> GetByIdAsync(int id);
+        Task<Vehiculo?> GetByIdAsync(int id, int tallerId);
 
         Task AddAsync(Vehiculo vehiculo);
 

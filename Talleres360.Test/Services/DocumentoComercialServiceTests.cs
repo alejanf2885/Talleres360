@@ -17,7 +17,7 @@ namespace Talleres360.Test.Services
             Mock<ICustomerRepository> customerRepositoryMock = new Mock<ICustomerRepository>();
             Mock<IServicioRepository> servicioRepositoryMock = new Mock<IServicioRepository>();
             customerRepositoryMock
-                .Setup(repo => repo.GetByIdAsync(10))
+                .Setup(repo => repo.GetByIdAsync(10, It.IsAny<int>()))
                 .ReturnsAsync((Cliente?)null);
 
             DocumentoComercialService service = new DocumentoComercialService(customerRepositoryMock.Object, servicioRepositoryMock.Object);
@@ -54,7 +54,7 @@ namespace Talleres360.Test.Services
             Mock<ICustomerRepository> customerRepositoryMock = new Mock<ICustomerRepository>();
             Mock<IServicioRepository> servicioRepositoryMock = new Mock<IServicioRepository>();
             customerRepositoryMock
-                .Setup(repo => repo.GetByIdAsync(10))
+                .Setup(repo => repo.GetByIdAsync(10, It.IsAny<int>()))
                 .ReturnsAsync(new Cliente
                 {
                     Id = 10,
@@ -86,13 +86,13 @@ namespace Talleres360.Test.Services
             Mock<ICustomerRepository> customerRepositoryMock = new Mock<ICustomerRepository>();
             Mock<IServicioRepository> servicioRepositoryMock = new Mock<IServicioRepository>();
             customerRepositoryMock
-                .Setup(repo => repo.GetByIdAsync(10))
+                .Setup(repo => repo.GetByIdAsync(10, It.IsAny<int>()))
                 .ReturnsAsync(new Cliente
                 {
                     Id = 10,
                     TallerId = 1,
                     Nombre = "Ana",
-                    Apellidos = "López",
+                    Apellidos = "Lï¿½pez",
                     NifCif = "12345678A"
                 });
 
@@ -135,7 +135,7 @@ namespace Talleres360.Test.Services
             Mock<IServicioRepository> servicioRepositoryMock = new Mock<IServicioRepository>();
 
             customerRepositoryMock
-                .Setup(repo => repo.GetByIdAsync(10))
+                .Setup(repo => repo.GetByIdAsync(10, It.IsAny<int>()))
                 .ReturnsAsync(new Cliente
                 {
                     Id = 10,
@@ -183,7 +183,7 @@ namespace Talleres360.Test.Services
             Mock<IServicioRepository> servicioRepositoryMock = new Mock<IServicioRepository>();
 
             customerRepositoryMock
-                .Setup(repo => repo.GetByIdAsync(10))
+                .Setup(repo => repo.GetByIdAsync(10, It.IsAny<int>()))
                 .ReturnsAsync(new Cliente
                 {
                     Id = 10,
