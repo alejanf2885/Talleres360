@@ -72,7 +72,7 @@ namespace Talleres360.Controllers
                 return BadRequest(new ApiErrorResponse(resultado.ErrorCode!, resultado.Message!));
             }
 
-            return Ok(ApiResponse<ModeloVehiculoDto>.Ok(resultado.Data, "Modelo creado correctamente."));
+            return Ok(ApiResponse<ModeloVehiculoDto>.Ok(resultado.Data!, "Modelo creado correctamente."));
         }
 
         [HttpPut("{id:int:min(1)}")]
@@ -118,7 +118,7 @@ namespace Talleres360.Controllers
                     mensaje: resultado.Message ?? "Error al eliminar el modelo."));
             }
 
-            return Ok(ApiResponse<bool>.Ok(true, "¡Modelo eliminado con éxito!"));
+            return Ok(ApiResponse<bool>.Ok(true, "ï¿½Modelo eliminado con ï¿½xito!"));
         }
     }
 }

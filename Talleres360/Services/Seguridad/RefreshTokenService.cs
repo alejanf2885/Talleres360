@@ -110,7 +110,7 @@ namespace Talleres360.Services.Seguridad
         {
             try
             {
-                TokenSeguridad tokenEntity = await _refreshTokenRepo.ObtenerPorTokenAsync(refreshToken);
+                TokenSeguridad? tokenEntity = await _refreshTokenRepo.ObtenerPorTokenAsync(refreshToken);
 
                 if (tokenEntity != null && !tokenEntity.Usado)
                 {

@@ -4,7 +4,7 @@ namespace Talleres360.Interfaces.Usuarios
 {
     public interface IUsuarioRepository
     {
-        Task<Usuario> GetByEmailAsync(string email);
+        Task<Usuario?> GetByEmailAsync(string email);
         Task AddAsync(Usuario usuario);
         Task AddCredencialAsync(Credencial credencial);
         Task ActivarUsuarioAsync(int usuarioId);

@@ -14,7 +14,7 @@ namespace Talleres360.Repositories.Usuarios
             _context = context;
         }
 
-        public async Task<Usuario> GetByEmailAsync(string email)
+        public async Task<Usuario?> GetByEmailAsync(string email)
         {
             return await _context.Usuarios
                 .FirstOrDefaultAsync(u => u.Email == email);

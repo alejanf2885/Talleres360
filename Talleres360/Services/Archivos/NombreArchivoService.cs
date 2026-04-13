@@ -4,7 +4,7 @@ namespace Talleres360.Services.Archivos
 {
     public class NombreArchivoService : INombreArchivoService
     {
-        public string GenerarNombreUnico(string nombreOriginal, string sufijo = "", string extensionDeseada = null)
+        public string GenerarNombreUnico(string nombreOriginal, string sufijo = "", string? extensionDeseada = null)
         {
             if (string.IsNullOrWhiteSpace(nombreOriginal))
             {

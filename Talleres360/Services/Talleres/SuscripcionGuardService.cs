@@ -100,7 +100,7 @@ namespace Talleres360.Services.Talleres
             EstadoSuscripcionResponse response = new EstadoSuscripcionResponse
             {
                 EsActivo = taller.Activo,
-                TipoSuscripcion = taller.TipoSuscripcion
+                TipoSuscripcion = taller.TipoSuscripcion ?? "UNKNOWN"
             };
 
             if (taller.TipoSuscripcion == "TRIAL")
