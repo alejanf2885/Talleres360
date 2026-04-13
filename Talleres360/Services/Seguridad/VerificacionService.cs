@@ -31,6 +31,9 @@ namespace Talleres360.Services.Seguridad
 
         public async Task<string> GenerarTokenRegistroAsync(int usuarioId)
         {
+            // Limpiar tokens expirados antes de generar uno nuevo
+            await _verificacionRepo.LimpiarTokensExpiradosDelUsuarioAsync(usuarioId);
+
             string token = Convert.ToBase64String(RandomNumberGenerator.GetBytes(32))
                 .Replace("/", "_")
                 .Replace("+", "-")
