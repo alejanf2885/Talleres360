@@ -71,17 +71,16 @@ namespace Talleres360.Controllers
 
             if (!resultadoUser.Success)
             {
+                // No revelar si el email existe (security by obscurity)
                 return Ok(ApiResponse<bool>.Ok(true, "Si el correo existe, se ha enviado un enlace."));
             }
 
             Usuario usuario = resultadoUser.Data!;
 
+            // Validar que no esté ya activo ANTES de generar token
             if (usuario.Activo)
             {
-                return BadRequest(new ApiErrorResponse(
-                    ErrorCode.AUTH_CUENTA_YA_ACTIVA.ToString(),
-                    "Esta cuenta ya está activa."
-                ));
+                return Ok(ApiResponse<bool>.Ok(true, "Si el correo existe, se ha enviado un enlace."));
             }
 
             string token = await _verificacionService.GenerarTokenRegistroAsync(usuario.Id);
