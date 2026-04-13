@@ -6,6 +6,6 @@ namespace Talleres360.Dtos.Emails
     {
         [Required(ErrorMessage = "El email es obligatorio.")]
         [EmailAddress(ErrorMessage = "El formato del correo no es válido.")]
-        public string Email { get; set; }
+        public string Email { get; set; } = string.Empty;
     }
 }

@@ -2,6 +2,6 @@
 {
     public interface INombreArchivoService
     {
-        string GenerarNombreUnico(string nombreOriginal, string sufijo = "", string extensionDeseada = null);
+        string GenerarNombreUnico(string nombreOriginal, string sufijo = "", string? extensionDeseada = null);
     }
 }

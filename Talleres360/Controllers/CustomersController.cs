@@ -96,7 +96,7 @@ namespace Talleres360.Controllers
                     codigo: resultado.ErrorCode ?? ErrorCode.SYS_ERROR_GENERICO.ToString(),
                     mensaje: resultado.Message ?? "Error al actualizar el cliente."));
 
-            return Ok(ApiResponse<Cliente>.Ok(resultado.Data, "Los datos del cliente han sido actualizados."));
+            return Ok(ApiResponse<Cliente>.Ok(resultado.Data!, "Los datos del cliente han sido actualizados."));
         }
 
         [TallerAuthorize<ICustomerRepository>]

@@ -36,7 +36,7 @@ namespace Talleres360.Services.Emails
 
                 return ServiceResult<bool>.Ok(true);
             }
-            catch (Exception ex)
+            catch
             {
                 return ServiceResult<bool>.Fail(ErrorCode.SYS_ERROR_GENERICO.ToString(), "No se pudo enviar el email de bienvenida.");
             }

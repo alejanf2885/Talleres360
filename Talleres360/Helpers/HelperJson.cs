@@ -11,10 +11,10 @@ namespace Talleres360.Helpers
 
         }
 
-        public static T DeserializeObject<T>(string data)
+        public static T? DeserializeObject<T>(string data)
         {
 
-            T objeto = JsonConvert.DeserializeObject<T>(data);
+            T? objeto = JsonConvert.DeserializeObject<T>(data);
             return objeto;
 
         }

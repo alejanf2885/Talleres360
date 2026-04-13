@@ -24,7 +24,7 @@ namespace Talleres360.Dtos.Clientes
 
         [Required(ErrorMessage = "El correo es obligatorio")]
         [EmailAddress(ErrorMessage = "El correo no es válido")]
-        public string Email { get; set; }
+        public string Email { get; set; } = string.Empty;
         public bool AceptaComunicaciones { get; set; }
     }
 }

@@ -41,7 +41,7 @@ namespace Talleres360.Services.Talleres
                 Telefono = taller.Telefono,
                 PerfilConfigurado = taller.PerfilConfigurado,
                 TipoSuscripcion = taller.TipoSuscripcion,
-                Logo = taller.Logo
+                Logo = taller.Logo!
             };
 
             return ServiceResult<WorkshopDto>.Ok(dto);

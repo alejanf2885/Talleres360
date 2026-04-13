@@ -106,7 +106,7 @@ namespace Talleres360.Services.Talleres
                 await _unitOfWork.CommitTransactionAsync();
                 return ServiceResult<bool>.Ok(true);
             }
-            catch (Exception ex)
+            catch
             {
                 await _unitOfWork.RollbackTransactionAsync();
                 return ServiceResult<bool>.Fail(
