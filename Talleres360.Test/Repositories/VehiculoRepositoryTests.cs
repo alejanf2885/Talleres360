@@ -86,7 +86,7 @@ namespace Talleres360.Test.Repositories
             };
 
             await repository.AddAsync(vehiculo);
-            Vehiculo? cargado = await repository.GetByIdAsync(vehiculo.Id);
+            Vehiculo? cargado = await repository.GetByIdAsync(vehiculo.Id, 1);
 
             Assert.NotNull(cargado);
             Assert.Equal("5555DDD", cargado!.Matricula);

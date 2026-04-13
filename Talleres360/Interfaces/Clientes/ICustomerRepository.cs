@@ -8,7 +8,7 @@ namespace Talleres360.Interfaces.Clientes
     {
         Task<IEnumerable<Cliente>> GetAllByTallerIdAsync(int tallerId, string? buscar = null);
         Task<PagedResponse<Cliente>> GetAllByTallerIdPagedAsync(int tallerId, PaginationParams pagination, string? buscar = null);
-        Task<Cliente?> GetByIdAsync(int id);
+        Task<Cliente?> GetByIdAsync(int id, int tallerId);
         Task<int> CountByTallerIdAsync(int tallerId);
         Task<int> CountNuevosEsteMesAsync(int tallerId);
         Task AddAsync(Cliente cliente);

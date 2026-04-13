@@ -26,8 +26,8 @@ namespace Talleres360.Services.DocumentosComerciales
             string numeroDocumento,
             DocumentoComercialInput input)
         {
-            Cliente? cliente = await _customerRepository.GetByIdAsync(input.ClienteId);
-            if (cliente == null || cliente.TallerId != tallerId)
+            Cliente? cliente = await _customerRepository.GetByIdAsync(input.ClienteId, tallerId);
+            if (cliente == null)
             {
                 return ServiceResult<DocumentoComercialPreparado>.Fail(
                     ErrorCode.CUST_NO_ENCONTRADO.ToString(),
@@ -38,7 +38,7 @@ namespace Talleres360.Services.DocumentosComerciales
             {
                 return ServiceResult<DocumentoComercialPreparado>.Fail(
                     ErrorCode.SYS_DATOS_INVALIDOS.ToString(),
-                    "Debe indicar al menos una línea del documento.");
+                    "Debe indicar al menos una lï¿½nea del documento.");
             }
 
             decimal subtotal = 0;
@@ -57,7 +57,7 @@ namespace Talleres360.Services.DocumentosComerciales
                     {
                         return ServiceResult<DocumentoComercialPreparado>.Fail(
                             ErrorCode.SYS_ENTIDAD_NO_ENCONTRADA.ToString(),
-                            "El servicio indicado no existe o no está disponible en tu taller.");
+                            "El servicio indicado no existe o no estï¿½ disponible en tu taller.");
                     }
 
                     precioUnitarioLinea = servicio.PrecioBase;

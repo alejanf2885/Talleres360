@@ -30,6 +30,7 @@ namespace Talleres360.Repositories.Usuarios
         public async Task AddAsync(Usuario usuario)
         {
             await _context.Usuarios.AddAsync(usuario);
+            await _context.SaveChangesAsync();
         }
 
         public async Task AddCredencialAsync(Credencial credencial)
