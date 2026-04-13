@@ -152,7 +152,14 @@ builder.Services.AddScoped<IVerificacionService, VerificacionService>();
 
 builder.Services.Configure<UrlSettings>(builder.Configuration.GetSection("AppSettings"));
 
-string jwtKey = builder.Configuration["Jwt:Key"] ?? "TuSuperClaveSecretaDeDesarrolloMuyLarga123456789!";
+string? jwtKey = builder.Configuration["Jwt:Key"];
+if (string.IsNullOrEmpty(jwtKey))
+{
+    if (!builder.Environment.IsDevelopment())
+        throw new InvalidOperationException("La clave JWT (Jwt:Key) no está configurada en variables de entorno. Es obligatoria en producción.");
+
+    jwtKey = "dev-secret-key-only-for-testing-replace-in-production-" + Guid.NewGuid().ToString()[..16];
+}
 byte[] keyBytes = Encoding.UTF8.GetBytes(jwtKey);
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)

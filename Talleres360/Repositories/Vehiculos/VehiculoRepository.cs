@@ -33,9 +33,9 @@ namespace Talleres360.Repositories.Vehiculos
             return await _context.Vehiculos.FindAsync(id);
         }
 
-        public async Task<bool> ExistsAsync(string matricula)
+        public async Task<bool> ExistsAsync(string matricula, int tallerId)
         {
-            return await _context.Vehiculos.AnyAsync(v => v.Matricula == matricula && !v.Eliminado);
+            return await _context.Vehiculos.AnyAsync(v => v.Matricula == matricula && v.TallerId == tallerId && !v.Eliminado);
         }
 
         public async Task<VehiculoDetalle?> GetDetalleByIdAsync(int id)

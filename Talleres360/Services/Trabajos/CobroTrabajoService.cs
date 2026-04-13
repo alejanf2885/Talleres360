@@ -77,18 +77,21 @@ namespace Talleres360.Services.Trabajos
                 await _unitOfWork.BeginTransactionAsync();
 
                 await _cobroRepository.AddAsync(cobro);
-
                 await RecalcularEstadoPagoAsync(trabajo);
                 await _trabajoRepository.UpdateAsync(trabajo);
 
+                await _unitOfWork.SaveChangesAsync();
                 await _unitOfWork.CommitTransactionAsync();
             }
-            catch
+            catch (Exception ex)
             {
                 await _unitOfWork.RollbackTransactionAsync();
+
+                // Log inner exception details for debugging
+                string detalles = ex.InnerException?.Message ?? ex.Message;
                 return ServiceResult<CobroTrabajoDto>.Fail(
                     ErrorCode.SYS_ERROR_BASE_DATOS.ToString(),
-                    "No se pudo registrar el cobro.");
+                    $"No se pudo registrar el cobro. Detalles: {detalles}");
             }
 
             return ServiceResult<CobroTrabajoDto>.Ok(new CobroTrabajoDto
@@ -127,18 +130,21 @@ namespace Talleres360.Services.Trabajos
 
                 cobro.Eliminado = true;
                 await _cobroRepository.UpdateAsync(cobro);
-
                 await RecalcularEstadoPagoAsync(trabajo);
                 await _trabajoRepository.UpdateAsync(trabajo);
 
+                await _unitOfWork.SaveChangesAsync();
                 await _unitOfWork.CommitTransactionAsync();
             }
-            catch
+            catch (Exception ex)
             {
                 await _unitOfWork.RollbackTransactionAsync();
+
+                // Log inner exception details for debugging
+                string detalles = ex.InnerException?.Message ?? ex.Message;
                 return ServiceResult<bool>.Fail(
                     ErrorCode.SYS_ERROR_BASE_DATOS.ToString(),
-                    "No se pudo eliminar el cobro.");
+                    $"No se pudo eliminar el cobro. Detalles: {detalles}");
             }
 
             return ServiceResult<bool>.Ok(true);

@@ -66,13 +66,12 @@ namespace Talleres360.Repositories.Trabajos
         public async Task AddAsync(CobroTrabajo cobro)
         {
             await _context.CobrosTrabajo.AddAsync(cobro);
-            await _context.SaveChangesAsync();
         }
 
-        public async Task UpdateAsync(CobroTrabajo cobro)
+        public Task UpdateAsync(CobroTrabajo cobro)
         {
             _context.CobrosTrabajo.Update(cobro);
-            await _context.SaveChangesAsync();
+            return Task.CompletedTask;
         }
 
         public async Task<bool> PerteneceATallerAsync(int id, int tallerId)
