@@ -125,7 +125,7 @@ namespace Talleres360.Repositories.Presupuestos
             return factura;
         }
 
-        public async Task AddAsync(Factura factura, List<LineaFactura> lineas)
+        public async Task AddAsync(Factura factura, List<LineaFactura> lineas, List<DesgloseIva>? desglosesIva = null)
         {
             await _context.Facturas.AddAsync(factura);
             await _context.SaveChangesAsync();
@@ -136,6 +136,16 @@ namespace Talleres360.Repositories.Presupuestos
             }
 
             await _context.LineasFactura.AddRangeAsync(lineas);
+
+            if (desglosesIva?.Count > 0)
+            {
+                foreach (DesgloseIva desglose in desglosesIva)
+                {
+                    desglose.FacturaId = factura.Id;
+                }
+                await _context.DesglosesIva.AddRangeAsync(desglosesIva);
+            }
+
             await _context.SaveChangesAsync();
         }
 

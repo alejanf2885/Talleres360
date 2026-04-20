@@ -57,7 +57,7 @@ namespace Talleres360.Services.Presupuestos
             {
                 return ServiceResult<PresupuestoDto>.Fail(
                     ErrorCode.SYS_ERROR_BASE_DATOS.ToString(),
-                    "No se pudo generar el número de presupuesto.");
+                    "No se pudo generar el nï¿½mero de presupuesto.");
             }
 
             DocumentoComercialInput inputDocumento = new DocumentoComercialInput
@@ -95,7 +95,7 @@ namespace Talleres360.Services.Presupuestos
 
             DocumentoComercialPreparado preparado = preparadoResultado.Data;
 
-            await _presupuestoRepository.AddAsync(preparado.Documento, preparado.Lineas);
+            await _presupuestoRepository.AddAsync(preparado.Documento, preparado.Lineas, preparado.DesglosesIva);
 
             PresupuestoDto? detalle = await _presupuestoRepository.ObtenerDetallePorIdAsync(preparado.Documento.Id);
             if (detalle == null)

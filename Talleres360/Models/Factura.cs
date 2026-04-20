@@ -79,5 +79,37 @@ namespace Talleres360.Models
         [Column("ClienteProvincia")]
         [StringLength(150)]
         public string? ClienteProvincia { get; set; }
+
+        [Column("ClienteEmail")]
+        [StringLength(150)]
+        public string? ClienteEmail { get; set; }
+
+        [Column("ClienteTelefono")]
+        [StringLength(30)]
+        public string? ClienteTelefono { get; set; }
+
+        [Column("TallerNombre")]
+        [StringLength(150)]
+        public string? TallerNombre { get; set; }
+
+        [Column("TallerCif")]
+        [StringLength(20)]
+        public string? TallerCif { get; set; }
+
+        [Column("TallerDireccion")]
+        [StringLength(255)]
+        public string? TallerDireccion { get; set; }
+
+        [Column("TallerLocalidad")]
+        [StringLength(100)]
+        public string? TallerLocalidad { get; set; }
+
+        [Column("TallerTelefono")]
+        [StringLength(20)]
+        public string? TallerTelefono { get; set; }
+
+        [Column("Serie")]
+        [StringLength(10)]
+        public string? Serie { get; set; }
     }
 }

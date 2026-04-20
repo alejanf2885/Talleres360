@@ -5,6 +5,7 @@ using Talleres360.Enums.Errors;
 using Talleres360.Interfaces.Clientes;
 using Talleres360.Interfaces.DocumentosComerciales;
 using Talleres360.Interfaces.Servicios;
+using Talleres360.Interfaces.Talleres;
 using Talleres360.Models;
 
 namespace Talleres360.Services.DocumentosComerciales
@@ -13,11 +14,16 @@ namespace Talleres360.Services.DocumentosComerciales
     {
         private readonly ICustomerRepository _customerRepository;
         private readonly IServicioRepository _servicioRepository;
+        private readonly ITallerRepository _tallerRepository;
 
-        public DocumentoComercialService(ICustomerRepository customerRepository, IServicioRepository servicioRepository)
+        public DocumentoComercialService(
+            ICustomerRepository customerRepository,
+            IServicioRepository servicioRepository,
+            ITallerRepository tallerRepository)
         {
             _customerRepository = customerRepository;
             _servicioRepository = servicioRepository;
+            _tallerRepository   = tallerRepository;
         }
 
         public async Task<ServiceResult<DocumentoComercialPreparado>> PrepararDocumentoAsync(
@@ -26,6 +32,14 @@ namespace Talleres360.Services.DocumentosComerciales
             string numeroDocumento,
             DocumentoComercialInput input)
         {
+            Taller? taller = await _tallerRepository.GetByIdAsync(tallerId);
+            if (taller == null)
+            {
+                return ServiceResult<DocumentoComercialPreparado>.Fail(
+                    ErrorCode.SYS_ENTIDAD_NO_ENCONTRADA.ToString(),
+                    "Taller no encontrado.");
+            }
+
             Cliente? cliente = await _customerRepository.GetByIdAsync(input.ClienteId);
             if (cliente == null || cliente.TallerId != tallerId)
             {
@@ -38,7 +52,7 @@ namespace Talleres360.Services.DocumentosComerciales
             {
                 return ServiceResult<DocumentoComercialPreparado>.Fail(
                     ErrorCode.SYS_DATOS_INVALIDOS.ToString(),
-                    "Debe indicar al menos una línea del documento.");
+                    "Debe indicar al menos una lï¿½nea del documento.");
             }
 
             decimal subtotal = 0;
@@ -57,7 +71,7 @@ namespace Talleres360.Services.DocumentosComerciales
                     {
                         return ServiceResult<DocumentoComercialPreparado>.Fail(
                             ErrorCode.SYS_ENTIDAD_NO_ENCONTRADA.ToString(),
-                            "El servicio indicado no existe o no está disponible en tu taller.");
+                            "El servicio indicado no existe o no estï¿½ disponible en tu taller.");
                     }
 
                     precioUnitarioLinea = servicio.PrecioBase;
@@ -111,13 +125,31 @@ namespace Talleres360.Services.DocumentosComerciales
                 ClienteDireccion = cliente.Direccion,
                 ClienteCodigoPostal = cliente.CodigoPostal,
                 ClienteLocalidad = cliente.Localidad,
-                ClienteProvincia = cliente.Provincia
+                ClienteProvincia = cliente.Provincia,
+                ClienteEmail = cliente.Email,
+                ClienteTelefono = cliente.Telefono,
+                TallerNombre = taller.Nombre,
+                TallerCif = taller.Cif,
+                TallerDireccion = taller.Direccion,
+                TallerLocalidad = taller.Localidad,
+                TallerTelefono = taller.Telefono
             };
+
+            List<DesgloseIva> desglosesIva = lineas
+                .GroupBy(l => l.ImpuestoPorcentaje)
+                .Select(g => new DesgloseIva
+                {
+                    TipoIvaPorcentaje = g.Key,
+                    BaseImponible     = g.Sum(l => l.SubtotalLinea),
+                    CuotaIva          = g.Sum(l => l.TotalLinea - l.SubtotalLinea)
+                })
+                .ToList();
 
             DocumentoComercialPreparado preparado = new DocumentoComercialPreparado
             {
-                Documento = documento,
-                Lineas = lineas
+                Documento    = documento,
+                Lineas       = lineas,
+                DesglosesIva = desglosesIva
             };
 
             return ServiceResult<DocumentoComercialPreparado>.Ok(preparado);

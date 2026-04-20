@@ -32,6 +32,7 @@ namespace Talleres360.Data
         public DbSet<LineaFactura> LineasFactura { get; set; }
         public DbSet<TarifaHora> TarifasHora { get; set; } = null!;
         public DbSet<AuditLog> AuditLog { get; set; } = null!;
+        public DbSet<DesgloseIva> DesglosesIva { get; set; } = null!;
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -193,6 +194,22 @@ namespace Talleres360.Data
             modelBuilder.Entity<LineaFactura>()
                 .Property(l => l.TotalLinea)
                 .HasPrecision(18, 2);
+
+            modelBuilder.Entity<DesgloseIva>()
+                .Property(d => d.TipoIvaPorcentaje)
+                .HasPrecision(5, 2);
+
+            modelBuilder.Entity<DesgloseIva>()
+                .Property(d => d.BaseImponible)
+                .HasPrecision(18, 2);
+
+            modelBuilder.Entity<DesgloseIva>()
+                .Property(d => d.CuotaIva)
+                .HasPrecision(18, 2);
+
+            modelBuilder.Entity<DesgloseIva>()
+                .HasIndex(d => new { d.FacturaId, d.TipoIvaPorcentaje })
+                .IsUnique();
 
             modelBuilder.Entity<VehiculoDetalle>()
                 .ToView("VW_VehiculoDetalles")
