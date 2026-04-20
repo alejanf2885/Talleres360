@@ -1,7 +1,9 @@
 {
   "permissions": {
     "allow": [
-      "Bash(dotnet build:*)"
+      "Bash(dotnet build:*)",
+      "Bash(git -C \"c:/Users/aleja/source/Talleres360\" add Talleres360/Models/AuditLog.cs Talleres360/Enums/AuditOperacion.cs Talleres360/Data/ApplicationDbContext.cs)",
+      "Bash(git -C c:/Users/aleja/source/Talleres360 commit -m 'feat\\(audit\\): map AuditLog table with BIGINT id and before/after value columns *)"
     ]
   }
 }

@@ -48,7 +48,7 @@ namespace Talleres360.Test.Repositories
             ApplicationDbContext context = CrearContexto(Guid.NewGuid().ToString());
 
             await context.Clientes.AddRangeAsync(
-                new Cliente { Id = 1, TallerId = 1, Nombre = "Ana", Apellidos = "López", Telefono = "111", Email = "ana@mail.com", FechaCreacion = DateTime.UtcNow, Eliminado = false },
+                new Cliente { Id = 1, TallerId = 1, Nombre = "Ana", Apellidos = "Lï¿½pez", Telefono = "111", Email = "ana@mail.com", FechaCreacion = DateTime.UtcNow, Eliminado = false },
                 new Cliente { Id = 2, TallerId = 1, Nombre = "Pedro", Apellidos = "Ruiz", Telefono = "222", Email = "pedro@mail.com", FechaCreacion = DateTime.UtcNow, Eliminado = false });
             await context.SaveChangesAsync();
 
