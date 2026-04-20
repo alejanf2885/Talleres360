@@ -18,6 +18,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Talleres360\Talleres360.csproj" />
+    <ProjectReference Include="..\Talleres360.Shared\Talleres360.Shared.csproj" />
   </ItemGroup>
 
   <ItemGroup>
