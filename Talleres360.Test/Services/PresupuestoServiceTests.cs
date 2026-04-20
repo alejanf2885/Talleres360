@@ -92,7 +92,7 @@ namespace Talleres360.Test.Services
 
             Assert.False(resultado.Success);
             Assert.Equal(ErrorCode.CUST_NO_ENCONTRADO.ToString(), resultado.ErrorCode);
-            presupuestoRepositoryMock.Verify(repo => repo.AddAsync(It.IsAny<Factura>(), It.IsAny<List<LineaFactura>>()), Times.Never);
+            presupuestoRepositoryMock.Verify(repo => repo.AddAsync(It.IsAny<Factura>(), It.IsAny<List<LineaFactura>>(), It.IsAny<List<DesgloseIva>?>()), Times.Never);
         }
 
         [Fact]
@@ -146,8 +146,8 @@ namespace Talleres360.Test.Services
                 }));
 
             presupuestoRepositoryMock
-                .Setup(repo => repo.AddAsync(It.IsAny<Factura>(), It.IsAny<List<LineaFactura>>()))
-                .Callback<Factura, List<LineaFactura>>((factura, lineas) => factura.Id = 300)
+                .Setup(repo => repo.AddAsync(It.IsAny<Factura>(), It.IsAny<List<LineaFactura>>(), It.IsAny<List<DesgloseIva>?>()))
+                .Callback<Factura, List<LineaFactura>, List<DesgloseIva>?>((factura, lineas, desglosesIva) => factura.Id = 300)
                 .Returns(Task.CompletedTask);
 
             presupuestoRepositoryMock
@@ -185,7 +185,7 @@ namespace Talleres360.Test.Services
             Assert.True(resultado.Success);
             Assert.NotNull(resultado.Data);
             Assert.Equal(300, resultado.Data!.Id);
-            presupuestoRepositoryMock.Verify(repo => repo.AddAsync(It.IsAny<Factura>(), It.IsAny<List<LineaFactura>>()), Times.Once);
+            presupuestoRepositoryMock.Verify(repo => repo.AddAsync(It.IsAny<Factura>(), It.IsAny<List<LineaFactura>>(), It.IsAny<List<DesgloseIva>?>()), Times.Once);
         }
     }
 }

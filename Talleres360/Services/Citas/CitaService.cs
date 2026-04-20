@@ -50,7 +50,12 @@ namespace Talleres360.Services.Citas
 
         public async Task<ServiceResult<CitaDto>> CrearAsync(int tallerId, CrearCitaRequest request)
         {
-            CitaEstado estadoCita = request.Estado!.Value;
+            if (!request.Estado.HasValue)
+                return ServiceResult<CitaDto>.Fail(
+                    ErrorCode.CITA_ESTADO_INVALIDO.ToString(),
+                    "El estado de la cita es obligatorio.");
+
+            CitaEstado estadoCita = request.Estado.Value;
 
             if (!request.VehiculoId.HasValue && string.IsNullOrWhiteSpace(request.NombreClienteTemp))
             {
