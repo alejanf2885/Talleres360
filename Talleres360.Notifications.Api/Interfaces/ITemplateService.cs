@@ -1,4 +1,4 @@
-﻿namespace Talleres360.Interfaces.Emails
+namespace Talleres360.Notifications.Api.Interfaces
 {
     public interface ITemplateService
     {

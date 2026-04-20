@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
-using Resend;
 using Scalar.AspNetCore;
 using Serilog;
 using System.Text;
@@ -15,7 +14,6 @@ using Talleres360.Dtos.Responses;
 using Talleres360.Enums.Errors;
 using Talleres360.Interfaces.Archivos;
 using Talleres360.Interfaces.Auth;
-using Talleres360.Interfaces.Background;
 using Talleres360.Interfaces.Cache;
 using Talleres360.Interfaces.Clientes;
 using Talleres360.Interfaces.Citas;
@@ -53,7 +51,6 @@ using Talleres360.Repositories.Usuarios;
 using Talleres360.Repositories.Vehiculos;
 using Talleres360.Services.Archivos;
 using Talleres360.Services.Auth;
-using Talleres360.Services.Background;
 using Talleres360.Services.Cache;
 using Talleres360.Services.Citas;
 using Talleres360.Services.Clientes;
@@ -88,12 +85,14 @@ builder.Services.AddScoped<ICacheService, CacheService>();
 builder.Services.AddHttpContextAccessor();
 
 builder.Services.AddOptions();
-builder.Services.AddHttpClient<ResendClient>();
-builder.Services.Configure<ResendClientOptions>(o =>
+
+builder.Services.AddHttpClient<HttpNotificacionService>(client =>
 {
-    o.ApiToken = builder.Configuration["ResendSettings:ApiKey"] ?? "";
+    string baseUrl = builder.Configuration["NotificationsApi:BaseUrl"] ?? "https://localhost:7001";
+    string apiKey = builder.Configuration["NotificationsApi:ApiKey"] ?? "";
+    client.BaseAddress = new Uri(baseUrl);
+    client.DefaultRequestHeaders.Add("X-Api-Key", apiKey);
 });
-builder.Services.AddTransient<IResend, ResendClient>();
 
 builder.Services.AddScoped<IUsuarioRepository, UsuarioRepository>();
 builder.Services.AddScoped<ITallerRepository, TallerRepository>();
@@ -139,11 +138,7 @@ builder.Services.AddScoped<IProcesadorImagenService, ProcesadorImagenService>();
 builder.Services.AddScoped<IImagenService, ImagenService>();
 builder.Services.AddScoped<INombreArchivoService, NombreArchivoService>();
 builder.Services.AddScoped<IFileStorageService, AzureBlobStorageService>();
-builder.Services.AddScoped<IEmailService, ResendEmailService>();
-builder.Services.AddScoped<ITemplateService, TemplateService>();
-builder.Services.AddScoped<INotificacionService, NotificacionService>();
-builder.Services.AddSingleton<IBackgroundTaskQueue, BackgroundTaskQueue>();
-builder.Services.AddHostedService<EmailBackgroundWorker>();
+builder.Services.AddScoped<INotificacionService, HttpNotificacionService>();
 
 builder.Services.AddScoped<ISuscripcionGuardService, SuscripcionGuardService>();
 builder.Services.AddScoped<ICustomerService, CustomerService>();

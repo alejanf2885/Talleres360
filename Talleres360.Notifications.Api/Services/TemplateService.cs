@@ -1,6 +1,6 @@
-﻿using Talleres360.Interfaces.Emails;
+using Talleres360.Notifications.Api.Interfaces;
 
-namespace Talleres360.Services.Emails
+namespace Talleres360.Notifications.Api.Services
 {
     public class TemplateService : ITemplateService
     {
@@ -14,9 +14,7 @@ namespace Talleres360.Services.Emails
             string contenido = await File.ReadAllTextAsync(filePath);
 
             foreach (KeyValuePair<string, string> item in reemplazos)
-            {
                 contenido = contenido.Replace(item.Key, item.Value);
-            }
 
             return contenido;
         }
