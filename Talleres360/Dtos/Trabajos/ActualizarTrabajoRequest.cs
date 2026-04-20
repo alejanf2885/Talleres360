@@ -9,15 +9,15 @@ namespace Talleres360.Dtos.Trabajos
 
         public int? MecanicoAsignadoId { get; set; }
 
-        [StringLength(50, ErrorMessage = "El número de documento no puede superar 50 caracteres")]
+        [StringLength(50, ErrorMessage = "El nï¿½mero de documento no puede superar 50 caracteres")]
         public string? NumeroDocumento { get; set; }
 
-        [StringLength(150, ErrorMessage = "El título no puede superar 150 caracteres")]
+        [StringLength(150, ErrorMessage = "El tï¿½tulo no puede superar 150 caracteres")]
         public string? TituloMantenimiento { get; set; }
 
         public string? TrabajoRealizado { get; set; }
 
-        [Range(0, int.MaxValue, ErrorMessage = "El kilometraje de entrada no es válido")]
+        [Range(0, int.MaxValue, ErrorMessage = "El kilometraje de entrada no es vï¿½lido")]
         public int KmEntrada { get; set; }
 
         [Required(ErrorMessage = "El estado es obligatorio")]
@@ -26,15 +26,23 @@ namespace Talleres360.Dtos.Trabajos
         [Required(ErrorMessage = "El estado de pago es obligatorio")]
         public TrabajoEstadoPago? EstadoPago { get; set; }
 
-        [Range(0, 99999999.99, ErrorMessage = "El subtotal no es válido")]
+        [Range(0, 99999999.99, ErrorMessage = "El subtotal no es vï¿½lido")]
         public decimal Subtotal { get; set; }
 
-        [Range(0, 99999999.99, ErrorMessage = "El importe de impuestos no es válido")]
+        [Range(0, 99999999.99, ErrorMessage = "El importe de impuestos no es vï¿½lido")]
         public decimal ImporteImpuestos { get; set; }
 
-        [Range(0, 99999999.99, ErrorMessage = "El total no es válido")]
+        [Range(0, 99999999.99, ErrorMessage = "El total no es vï¿½lido")]
         public decimal Total { get; set; }
 
         public bool DatosIncompletos { get; set; }
+
+        public DateTime? FechaEntregaEstimada { get; set; }
+
+        [Range(0, int.MaxValue, ErrorMessage = "El kilometraje de salida no es vÃ¡lido")]
+        public int? KmSalida { get; set; }
+
+        [StringLength(1000, ErrorMessage = "Las observaciones de entrega no pueden superar 1000 caracteres")]
+        public string? ObservacionesEntrega { get; set; }
     }
 }

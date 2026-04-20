@@ -21,5 +21,11 @@ namespace Talleres360.Dtos.Trabajos
         public int? ModificadoPorId { get; set; }
         public DateTime? FechaUltimaModificacion { get; set; }
         public bool DatosIncompletos { get; set; }
+        public DateTime? FechaCierre { get; set; }
+        public DateTime? FechaEntregaEstimada { get; set; }
+        public int? KmSalida { get; set; }
+        public string? FotoEntradaUrl { get; set; }
+        public string? FotoSalidaUrl { get; set; }
+        public string? ObservacionesEntrega { get; set; }
     }
 }

@@ -62,7 +62,13 @@ namespace Talleres360.Repositories.Trabajos
                     FechaCreacion          = trabajo.FechaCreacion,
                     ModificadoPorId        = trabajo.ModificadoPorId,
                     FechaUltimaModificacion = trabajo.FechaUltimaModificacion,
-                    DatosIncompletos       = trabajo.DatosIncompletos
+                    DatosIncompletos       = trabajo.DatosIncompletos,
+                    FechaCierre            = trabajo.FechaCierre,
+                    FechaEntregaEstimada   = trabajo.FechaEntregaEstimada,
+                    KmSalida               = trabajo.KmSalida,
+                    FotoEntradaUrl         = trabajo.FotoEntradaUrl,
+                    FotoSalidaUrl          = trabajo.FotoSalidaUrl,
+                    ObservacionesEntrega   = trabajo.ObservacionesEntrega
                 })
                 .ToListAsync();
 
@@ -106,7 +112,13 @@ namespace Talleres360.Repositories.Trabajos
                     FechaCreacion          = t.FechaCreacion,
                     ModificadoPorId        = t.ModificadoPorId,
                     FechaUltimaModificacion = t.FechaUltimaModificacion,
-                    DatosIncompletos       = t.DatosIncompletos
+                    DatosIncompletos       = t.DatosIncompletos,
+                    FechaCierre            = t.FechaCierre,
+                    FechaEntregaEstimada   = t.FechaEntregaEstimada,
+                    KmSalida               = t.KmSalida,
+                    FotoEntradaUrl         = t.FotoEntradaUrl,
+                    FotoSalidaUrl          = t.FotoSalidaUrl,
+                    ObservacionesEntrega   = t.ObservacionesEntrega
                 })
                 .FirstOrDefaultAsync();
 

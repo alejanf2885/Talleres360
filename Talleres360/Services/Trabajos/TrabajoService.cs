@@ -64,14 +64,14 @@ namespace Talleres360.Services.Trabajos
             {
                 return ServiceResult<TrabajoDto>.Fail(
                     ErrorCode.TRA_ESTADO_INVALIDO.ToString(),
-                    "El estado del trabajo no es válido.");
+                    "El estado del trabajo no es vï¿½lido.");
             }
 
             if (!request.EstadoPago.HasValue)
             {
                 return ServiceResult<TrabajoDto>.Fail(
                     ErrorCode.TRA_ESTADO_PAGO_INVALIDO.ToString(),
-                    "El estado de pago del trabajo no es válido.");
+                    "El estado de pago del trabajo no es vï¿½lido.");
             }
 
             TrabajoEstado estadoTrabajo = request.Estado.Value;
@@ -84,7 +84,7 @@ namespace Talleres360.Services.Trabajos
                 {
                     return ServiceResult<TrabajoDto>.Fail(
                         ErrorCode.VEH_NO_ENCONTRADO.ToString(),
-                        "El vehículo indicado no existe en el taller.");
+                        "El vehï¿½culo indicado no existe en el taller.");
                 }
             }
 
@@ -139,14 +139,14 @@ namespace Talleres360.Services.Trabajos
             {
                 return ServiceResult<TrabajoDto>.Fail(
                     ErrorCode.TRA_ESTADO_INVALIDO.ToString(),
-                    "El estado del trabajo no es válido.");
+                    "El estado del trabajo no es vï¿½lido.");
             }
 
             if (!request.EstadoPago.HasValue)
             {
                 return ServiceResult<TrabajoDto>.Fail(
                     ErrorCode.TRA_ESTADO_PAGO_INVALIDO.ToString(),
-                    "El estado de pago del trabajo no es válido.");
+                    "El estado de pago del trabajo no es vï¿½lido.");
             }
 
             TrabajoEstado estadoTrabajo = request.Estado.Value;
@@ -159,11 +159,18 @@ namespace Talleres360.Services.Trabajos
                 {
                     return ServiceResult<TrabajoDto>.Fail(
                         ErrorCode.VEH_NO_ENCONTRADO.ToString(),
-                        "El vehículo indicado no existe en el taller.");
+                        "El vehï¿½culo indicado no existe en el taller.");
                 }
             }
 
             bool datosIncompletosFinal = request.DatosIncompletos || !request.VehiculoId.HasValue;
+
+            if (request.KmSalida.HasValue && request.KmSalida.Value < request.KmEntrada)
+            {
+                return ServiceResult<TrabajoDto>.Fail(
+                    ErrorCode.SYS_DATOS_INVALIDOS.ToString(),
+                    "El kilometraje de salida no puede ser menor al de entrada.");
+            }
 
             trabajo.VehiculoId              = request.VehiculoId;
             trabajo.MecanicoAsignadoId      = request.MecanicoAsignadoId;
@@ -176,9 +183,15 @@ namespace Talleres360.Services.Trabajos
             trabajo.Subtotal                = request.Subtotal;
             trabajo.ImporteImpuestos        = request.ImporteImpuestos;
             trabajo.Total                   = request.Total;
+            trabajo.FechaEntregaEstimada    = request.FechaEntregaEstimada;
+            trabajo.KmSalida                = request.KmSalida;
+            trabajo.ObservacionesEntrega    = string.IsNullOrWhiteSpace(request.ObservacionesEntrega) ? null : request.ObservacionesEntrega.Trim();
             trabajo.ModificadoPorId         = usuarioId;
             trabajo.FechaUltimaModificacion = DateTime.UtcNow;
             trabajo.DatosIncompletos        = datosIncompletosFinal;
+
+            if (estadoTrabajo == TrabajoEstado.CERRADO && trabajo.FechaCierre == null)
+                trabajo.FechaCierre = DateTime.UtcNow;
 
             await _trabajoRepository.UpdateAsync(trabajo);
 

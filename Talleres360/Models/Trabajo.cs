@@ -63,6 +63,27 @@ namespace Talleres360.Models
         [Column("FechaUltimaModificacion")]
         public DateTime? FechaUltimaModificacion { get; set; }
 
+        [Column("FechaCierre")]
+        public DateTime? FechaCierre { get; set; }
+
+        [Column("FechaEntregaEstimada")]
+        public DateTime? FechaEntregaEstimada { get; set; }
+
+        [Column("KmSalida")]
+        public int? KmSalida { get; set; }
+
+        [Column("FotoEntradaUrl")]
+        [StringLength(500)]
+        public string? FotoEntradaUrl { get; set; }
+
+        [Column("FotoSalidaUrl")]
+        [StringLength(500)]
+        public string? FotoSalidaUrl { get; set; }
+
+        [Column("ObservacionesEntrega")]
+        [StringLength(1000)]
+        public string? ObservacionesEntrega { get; set; }
+
         [Column("Eliminado")]
         public bool Eliminado { get; set; } = false;
 
