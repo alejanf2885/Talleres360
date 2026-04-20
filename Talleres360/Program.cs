@@ -86,7 +86,7 @@ builder.Services.AddHttpContextAccessor();
 
 builder.Services.AddOptions();
 
-builder.Services.AddHttpClient<HttpNotificacionService>(client =>
+builder.Services.AddHttpClient<INotificacionService, HttpNotificacionService>(client =>
 {
     string baseUrl = builder.Configuration["NotificationsApi:BaseUrl"] ?? "https://localhost:7001";
     string apiKey = builder.Configuration["NotificationsApi:ApiKey"] ?? "";
@@ -138,7 +138,6 @@ builder.Services.AddScoped<IProcesadorImagenService, ProcesadorImagenService>();
 builder.Services.AddScoped<IImagenService, ImagenService>();
 builder.Services.AddScoped<INombreArchivoService, NombreArchivoService>();
 builder.Services.AddScoped<IFileStorageService, AzureBlobStorageService>();
-builder.Services.AddScoped<INotificacionService, HttpNotificacionService>();
 
 builder.Services.AddScoped<ISuscripcionGuardService, SuscripcionGuardService>();
 builder.Services.AddScoped<ICustomerService, CustomerService>();

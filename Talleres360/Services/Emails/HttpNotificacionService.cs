@@ -20,7 +20,7 @@ namespace Talleres360.Services.Emails
         {
             try
             {
-                string frontendUrl = _config["FrontendSettings:Url"] ?? "https://localhost:4200";
+                string frontendUrl = _config["AppSettings:FrontendUrl"] ?? "https://localhost:4200";
 
                 var payload = new
                 {

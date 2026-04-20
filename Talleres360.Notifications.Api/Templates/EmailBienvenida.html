@@ -1,47 +1,152 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bienvenido a Talleres360</title>
 </head>
-<body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f4f7; color: #333;">
-    <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f4f4f7; padding: 20px;">
+<body style="margin: 0; padding: 0; background-color: #f1f5f9; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #334155;">
+    <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f1f5f9; padding: 40px 20px;">
         <tr>
             <td align="center">
-                <table width="600" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+                <table width="600" cellpadding="0" cellspacing="0" style="max-width: 600px; width: 100%; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 8px 24px rgba(0,0,0,0.08);">
+
+                    <!-- Header -->
                     <tr>
-                        <td style="background-color: #1e293b; padding: 40px; text-align: center;">
-                            <h1 style="color: #ffffff; margin: 0; font-size: 28px; letter-spacing: 1px;">TALLERES 360</h1>
+                        <td style="background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 100%); padding: 48px 40px; text-align: center;">
+                            <table width="100%" cellpadding="0" cellspacing="0">
+                                <tr>
+                                    <td align="center">
+                                        <div style="display: inline-block; background-color: rgba(255,255,255,0.1); border-radius: 50%; padding: 16px; margin-bottom: 20px;">
+                                            <img src="https://img.icons8.com/ios-filled/50/ffffff/car-service.png" width="48" height="48" alt="Talleres360" style="display: block;">
+                                        </div>
+                                        <h1 style="color: #ffffff; margin: 0 0 6px 0; font-size: 30px; font-weight: 700; letter-spacing: 2px;">TALLERES<span style="color: #38bdf8;">360</span></h1>
+                                        <p style="color: #94a3b8; margin: 0; font-size: 13px; letter-spacing: 1px; text-transform: uppercase;">Gestión Profesional de Talleres</p>
+                                    </td>
+                                </tr>
+                            </table>
                         </td>
                     </tr>
-                    <tr>
-                        <td style="padding: 40px;">
-                            <h2 style="color: #1e293b; margin-top: 0;">¡Bienvenido a bordo, {{Nombre}}!</h2>
-                            <p style="font-size: 16px; line-height: 1.6; color: #4b5563;">
-                                Gracias por registrarte en la plataforma líder para la gestión de talleres. Estamos emocionados de ayudarte a llevar tu negocio al siguiente nivel.
-                            </p>
-                            <p style="font-size: 16px; line-height: 1.6; color: #4b5563;">
-                                Para empezar a configurar tu taller, primero debemos verificar que este es tu correo electrónico:
-                            </p>
 
-                            <div style="text-align: center; margin: 35px 0;">
-                                <a href="{{Link}}" style="background-color: #2563eb; color: #ffffff; padding: 15px 30px; text-decoration: none; border-radius: 5px; font-weight: bold; font-size: 16px; display: inline-block;">
-                                    Verificar mi cuenta
-                                </a>
+                    <!-- Badge -->
+                    <tr>
+                        <td align="center" style="background-color: #ffffff; padding-top: 0;">
+                            <div style="display: inline-block; background-color: #eff6ff; border: 1px solid #bfdbfe; border-radius: 20px; padding: 6px 18px; margin-top: -18px; position: relative;">
+                                <span style="color: #2563eb; font-size: 12px; font-weight: 600; letter-spacing: 0.5px;">✦ CUENTA NUEVA</span>
                             </div>
+                        </td>
+                    </tr>
 
-                            <p style="font-size: 14px; color: #9ca3af;">
-                                Si el botón no funciona, copia y pega este enlace en tu navegador:<br>
-                                <span style="color: #2563eb;">{{Link}}</span>
-                            </p>
-                        </td>
-                    </tr>
+                    <!-- Body -->
                     <tr>
-                        <td style="background-color: #f8fafc; padding: 20px; text-align: center; font-size: 12px; color: #64748b; border-top: 1px solid #e2e8f0;">
-                            © 2026 Talleres360 - Gestión Profesional de Talleres<br>
-                            Este es un correo automático, por favor no respondas.
+                        <td style="padding: 40px 48px 32px 48px;">
+                            <h2 style="color: #0f172a; margin: 0 0 16px 0; font-size: 24px; font-weight: 700;">¡Hola, {{Nombre}}! 👋</h2>
+                            <p style="font-size: 15px; line-height: 1.7; color: #475569; margin: 0 0 16px 0;">
+                                Te damos la bienvenida a <strong style="color: #0f172a;">Talleres360</strong>, la plataforma todo-en-uno para gestionar tu taller de forma profesional: clientes, vehículos, trabajos, inventario y mucho más.
+                            </p>
+                            <p style="font-size: 15px; line-height: 1.7; color: #475569; margin: 0 0 32px 0;">
+                                Para activar tu cuenta y empezar a usar la plataforma, confirma tu dirección de correo electrónico pulsando el botón:
+                            </p>
+
+                            <!-- CTA Button -->
+                            <table width="100%" cellpadding="0" cellspacing="0">
+                                <tr>
+                                    <td align="center" style="padding: 0 0 32px 0;">
+                                        <a href="{{Link}}" style="display: inline-block; background: linear-gradient(135deg, #2563eb, #1d4ed8); color: #ffffff; padding: 16px 40px; text-decoration: none; border-radius: 8px; font-weight: 700; font-size: 16px; letter-spacing: 0.3px; box-shadow: 0 4px 14px rgba(37,99,235,0.4);">
+                                            ✉ Verificar mi cuenta
+                                        </a>
+                                    </td>
+                                </tr>
+                            </table>
+
+                            <!-- Divider -->
+                            <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 0 0 24px 0;">
+
+                            <!-- Features -->
+                            <p style="font-size: 13px; font-weight: 600; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px; margin: 0 0 16px 0;">¿Qué puedes hacer con Talleres360?</p>
+                            <table width="100%" cellpadding="0" cellspacing="0">
+                                <tr>
+                                    <td width="50%" style="padding: 0 8px 12px 0; vertical-align: top;">
+                                        <table cellpadding="0" cellspacing="0">
+                                            <tr>
+                                                <td style="padding-right: 10px; vertical-align: top; padding-top: 2px;">
+                                                    <div style="width: 28px; height: 28px; background-color: #eff6ff; border-radius: 6px; text-align: center; line-height: 28px; font-size: 14px;">🔧</div>
+                                                </td>
+                                                <td>
+                                                    <p style="margin: 0; font-size: 13px; font-weight: 600; color: #0f172a;">Órdenes de trabajo</p>
+                                                    <p style="margin: 0; font-size: 12px; color: #94a3b8;">Gestiona trabajos y estados</p>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                    <td width="50%" style="padding: 0 0 12px 8px; vertical-align: top;">
+                                        <table cellpadding="0" cellspacing="0">
+                                            <tr>
+                                                <td style="padding-right: 10px; vertical-align: top; padding-top: 2px;">
+                                                    <div style="width: 28px; height: 28px; background-color: #f0fdf4; border-radius: 6px; text-align: center; line-height: 28px; font-size: 14px;">👥</div>
+                                                </td>
+                                                <td>
+                                                    <p style="margin: 0; font-size: 13px; font-weight: 600; color: #0f172a;">Clientes y vehículos</p>
+                                                    <p style="margin: 0; font-size: 12px; color: #94a3b8;">Historial completo</p>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td width="50%" style="padding: 0 8px 0 0; vertical-align: top;">
+                                        <table cellpadding="0" cellspacing="0">
+                                            <tr>
+                                                <td style="padding-right: 10px; vertical-align: top; padding-top: 2px;">
+                                                    <div style="width: 28px; height: 28px; background-color: #fefce8; border-radius: 6px; text-align: center; line-height: 28px; font-size: 14px;">📦</div>
+                                                </td>
+                                                <td>
+                                                    <p style="margin: 0; font-size: 13px; font-weight: 600; color: #0f172a;">Inventario</p>
+                                                    <p style="margin: 0; font-size: 12px; color: #94a3b8;">Productos y stock</p>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                    <td width="50%" style="padding: 0 0 0 8px; vertical-align: top;">
+                                        <table cellpadding="0" cellspacing="0">
+                                            <tr>
+                                                <td style="padding-right: 10px; vertical-align: top; padding-top: 2px;">
+                                                    <div style="width: 28px; height: 28px; background-color: #fdf4ff; border-radius: 6px; text-align: center; line-height: 28px; font-size: 14px;">🧾</div>
+                                                </td>
+                                                <td>
+                                                    <p style="margin: 0; font-size: 13px; font-weight: 600; color: #0f172a;">Facturación</p>
+                                                    <p style="margin: 0; font-size: 12px; color: #94a3b8;">Facturas y presupuestos</p>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                            </table>
                         </td>
                     </tr>
+
+                    <!-- Fallback link -->
+                    <tr>
+                        <td style="padding: 0 48px 32px 48px;">
+                            <table width="100%" cellpadding="0" cellspacing="0">
+                                <tr>
+                                    <td style="background-color: #f8fafc; border-radius: 8px; padding: 16px; border-left: 3px solid #e2e8f0;">
+                                        <p style="margin: 0 0 6px 0; font-size: 12px; color: #64748b;">Si el botón no funciona, copia y pega este enlace en tu navegador:</p>
+                                        <p style="margin: 0; font-size: 12px; color: #2563eb; word-break: break-all;">{{Link}}</p>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+
+                    <!-- Footer -->
+                    <tr>
+                        <td style="background-color: #f8fafc; padding: 24px 48px; border-top: 1px solid #e2e8f0; text-align: center;">
+                            <p style="margin: 0 0 8px 0; font-size: 12px; color: #94a3b8;">© 2026 Talleres360 · Todos los derechos reservados</p>
+                            <p style="margin: 0; font-size: 11px; color: #cbd5e1;">Este es un correo automático, por favor no respondas a este mensaje.</p>
+                        </td>
+                    </tr>
+
                 </table>
             </td>
         </tr>
