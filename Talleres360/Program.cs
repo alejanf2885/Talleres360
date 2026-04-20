@@ -138,7 +138,7 @@ builder.Services.AddScoped<INotaVehiculoService, NotaVehiculoService>();
 builder.Services.AddScoped<IProcesadorImagenService, ProcesadorImagenService>();
 builder.Services.AddScoped<IImagenService, ImagenService>();
 builder.Services.AddScoped<INombreArchivoService, NombreArchivoService>();
-builder.Services.AddScoped<IFileStorageService, FileStorageService>();
+builder.Services.AddScoped<IFileStorageService, AzureBlobStorageService>();
 builder.Services.AddScoped<IEmailService, ResendEmailService>();
 builder.Services.AddScoped<ITemplateService, TemplateService>();
 builder.Services.AddScoped<INotificacionService, NotificacionService>();
