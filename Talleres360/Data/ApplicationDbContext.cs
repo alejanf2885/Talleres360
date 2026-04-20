@@ -73,6 +73,14 @@ namespace Talleres360.Data
                 .Property(t => t.PrecioHora)
                 .HasPrecision(10, 2);
 
+            modelBuilder.Entity<DetalleTrabajo>()
+                .Property(d => d.PrecioHoraAplicado)
+                .HasPrecision(10, 2);
+
+            modelBuilder.Entity<DetalleTrabajo>()
+                .Property(d => d.HorasAplicadas)
+                .HasPrecision(6, 2);
+
             modelBuilder.Entity<Usuario>().HasQueryFilter(u => !u.Eliminado);
             modelBuilder.Entity<Credencial>().HasQueryFilter(c => !c.Eliminado);
             modelBuilder.Entity<Cliente>().HasQueryFilter(c => !c.Eliminado);

@@ -39,6 +39,15 @@ namespace Talleres360.Models
         [StringLength(50)]
         public string? EstadoMaterial { get; set; }
 
+        [Column("TarifaHoraId")]
+        public int? TarifaHoraId { get; set; }
+
+        [Column("PrecioHoraAplicado")]
+        public decimal? PrecioHoraAplicado { get; set; }
+
+        [Column("HorasAplicadas")]
+        public decimal? HorasAplicadas { get; set; }
+
         [Column("Eliminado")]
         public bool Eliminado { get; set; } = false;
     }
