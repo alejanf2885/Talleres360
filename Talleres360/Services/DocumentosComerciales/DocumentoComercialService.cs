@@ -32,7 +32,6 @@ namespace Talleres360.Services.DocumentosComerciales
             string numeroDocumento,
             DocumentoComercialInput input)
         {
-<<<<<<< HEAD
             Taller? taller = await _tallerRepository.GetByIdAsync(tallerId);
             if (taller == null)
             {
@@ -41,12 +40,8 @@ namespace Talleres360.Services.DocumentosComerciales
                     "Taller no encontrado.");
             }
 
-            Cliente? cliente = await _customerRepository.GetByIdAsync(input.ClienteId);
-            if (cliente == null || cliente.TallerId != tallerId)
-=======
             Cliente? cliente = await _customerRepository.GetByIdAsync(input.ClienteId, tallerId);
             if (cliente == null)
->>>>>>> 7fe896a1bea878f6c683cdb7560eea8ed547bfd9
             {
                 return ServiceResult<DocumentoComercialPreparado>.Fail(
                     ErrorCode.CUST_NO_ENCONTRADO.ToString(),
