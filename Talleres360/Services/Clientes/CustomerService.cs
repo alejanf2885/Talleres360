@@ -111,9 +111,9 @@ namespace Talleres360.Services.Clientes
 
         public async Task<Cliente?> ObtenerPorIdAsync(int tallerId, int clienteId)
         {
-            Cliente? cliente = await _customerRepo.GetByIdAsync(clienteId);
+            Cliente? cliente = await _customerRepo.GetByIdAsync(clienteId, tallerId);
 
-            if (cliente == null || cliente.TallerId != tallerId || cliente.Eliminado)
+            if (cliente == null || cliente.Eliminado)
                 return null;
 
             return cliente;

@@ -7,7 +7,7 @@ namespace Talleres360.Interfaces.Vehiculos
     public interface IModeloRepository : ITallerRecursoRepository
     {
         Task<List<ModeloVehiculoDto>> ObtenerModelosPorMarcaAsync(int tallerId, int marcaId);
-        Task<Modelo?> GetByIdAsync(int modeloId);
+        Task<Modelo?> GetByIdAsync(int modeloId, int tallerId);
         Task<bool> ExisteModeloOficialAsync(int marcaId, string nombre);
         Task<bool> ExisteModeloEnTallerAsync(int marcaId, string nombre, int tallerId);
         Task<bool> TieneDependenciasAsync(int modeloId);

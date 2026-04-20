@@ -34,11 +34,11 @@ namespace Talleres360.Repositories.Vehiculos
             return modelos;
         }
 
-        public async Task<Modelo?> GetByIdAsync(int modeloId)
+        public async Task<Modelo?> GetByIdAsync(int modeloId, int tallerId)
         {
             return await _context.Modelos
                 .AsNoTracking()
-                .FirstOrDefaultAsync(modelo => modelo.Id == modeloId);
+                .FirstOrDefaultAsync(modelo => modelo.Id == modeloId && (modelo.EsOficial || modelo.TallerId == tallerId));
         }
 
         public async Task<bool> ExisteModeloOficialAsync(int marcaId, string nombre)

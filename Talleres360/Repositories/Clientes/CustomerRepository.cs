@@ -70,10 +70,10 @@ namespace Talleres360.Repositories.Clientes
             };
         }
 
-        public async Task<Cliente?> GetByIdAsync(int id)
+        public async Task<Cliente?> GetByIdAsync(int id, int tallerId)
         {
             Cliente? cliente = await _context.Clientes
-                .FirstOrDefaultAsync(c => c.Id == id && !c.Eliminado);
+                .FirstOrDefaultAsync(c => c.Id == id && c.TallerId == tallerId && !c.Eliminado);
 
             return cliente;
         }
@@ -107,9 +107,9 @@ namespace Talleres360.Repositories.Clientes
             await _context.SaveChangesAsync();
         }
 
-        public async Task DeleteAsync(int id)
+        public async Task DeleteAsync(int id, int tallerId)
         {
-            Cliente? cliente = await GetByIdAsync(id);
+            Cliente? cliente = await GetByIdAsync(id, tallerId);
             if (cliente != null)
             {
                 cliente.Eliminado = true;

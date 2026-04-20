@@ -18,7 +18,9 @@ namespace Talleres360.Services.Seguridad
 
         public string GenerarJwtToken(UsuarioLoginDto usuario)
         {
-            var jwtKey = _config["Jwt:Key"] ?? "TuSuperClaveSecretaDeDesarrolloMuyLarga123456789!";
+            var jwtKey = _config["Jwt:Key"];
+            if (string.IsNullOrEmpty(jwtKey))
+                throw new InvalidOperationException("La clave JWT (Jwt:Key) no está configurada. Configúrala en variables de entorno.");
             var keyBytes = Encoding.UTF8.GetBytes(jwtKey);
 
             var claims = new[]

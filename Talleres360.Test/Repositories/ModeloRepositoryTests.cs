@@ -68,7 +68,7 @@ namespace Talleres360.Test.Repositories
             await context.SaveChangesAsync();
 
             ModeloRepository repository = new ModeloRepository(context);
-            Modelo? modelo = await repository.GetByIdAsync(50);
+            Modelo? modelo = await repository.GetByIdAsync(50, 1);
 
             Assert.NotNull(modelo);
             Assert.Equal("IBIZA", modelo!.Nombre);

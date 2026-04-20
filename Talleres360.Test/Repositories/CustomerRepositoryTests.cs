@@ -69,7 +69,7 @@ namespace Talleres360.Test.Repositories
             await context.SaveChangesAsync();
 
             CustomerRepository repository = new CustomerRepository(context);
-            Cliente? cliente = await repository.GetByIdAsync(7);
+            Cliente? cliente = await repository.GetByIdAsync(7, 1);
             bool pertenece = await repository.PerteneceATallerAsync(7, 1);
 
             Assert.NotNull(cliente);

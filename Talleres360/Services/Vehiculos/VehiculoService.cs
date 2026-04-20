@@ -61,9 +61,9 @@ namespace Talleres360.Services.Vehiculos
 
         public async Task<ServiceResult<VehiculoDetalle>> ActualizarVehiculoAsync(int tallerId, int id, ActualizarVehiculoRequest request)
         {
-            Vehiculo? existente = await _vehiculoRepository.GetByIdAsync(id);
+            Vehiculo? existente = await _vehiculoRepository.GetByIdAsync(id, tallerId);
 
-            if (existente == null || existente.TallerId != tallerId)
+            if (existente == null)
             {
                 return ServiceResult<VehiculoDetalle>.Fail(ErrorCode.SYS_ENTIDAD_NO_ENCONTRADA.ToString(), "Vehículo no encontrado.");
             }
@@ -126,9 +126,9 @@ namespace Talleres360.Services.Vehiculos
                     "El ID del taller y del vehículo deben ser mayores a 0");
             }
 
-            Vehiculo? existente = await _vehiculoRepository.GetByIdAsync(id);
+            Vehiculo? existente = await _vehiculoRepository.GetByIdAsync(id, tallerId);
 
-            if (existente == null || existente.TallerId != tallerId || existente.Eliminado)
+            if (existente == null || existente.Eliminado)
             {
                 return ServiceResult<bool>.Fail(
                     ErrorCode.SYS_ENTIDAD_NO_ENCONTRADA.ToString(),

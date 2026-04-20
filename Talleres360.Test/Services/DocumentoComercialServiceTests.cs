@@ -47,9 +47,11 @@ namespace Talleres360.Test.Services
         [Fact]
         public async Task PrepararDocumentoAsync_Debe_Fallar_Cuando_Cliente_No_Existe()
         {
-            Mock<ICustomerRepository> customerMock = new Mock<ICustomerRepository>();
-            Mock<IServicioRepository> servicioMock = new Mock<IServicioRepository>();
-            customerMock.Setup(r => r.GetByIdAsync(10)).ReturnsAsync((Cliente?)null);
+            Mock<ICustomerRepository> customerRepositoryMock = new Mock<ICustomerRepository>();
+            Mock<IServicioRepository> servicioRepositoryMock = new Mock<IServicioRepository>();
+            customerRepositoryMock
+                .Setup(repo => repo.GetByIdAsync(10))
+                .ReturnsAsync((Cliente?)null);
 
             DocumentoComercialService service = BuildService(customerMock, servicioMock);
 
@@ -79,9 +81,16 @@ namespace Talleres360.Test.Services
         [Fact]
         public async Task PrepararDocumentoAsync_Debe_Fallar_Cuando_No_Hay_Lineas()
         {
-            Mock<ICustomerRepository> customerMock = new Mock<ICustomerRepository>();
-            Mock<IServicioRepository> servicioMock = new Mock<IServicioRepository>();
-            customerMock.Setup(r => r.GetByIdAsync(10)).ReturnsAsync(new Cliente { Id = 10, TallerId = 1, Nombre = "Cliente" });
+            Mock<ICustomerRepository> customerRepositoryMock = new Mock<ICustomerRepository>();
+            Mock<IServicioRepository> servicioRepositoryMock = new Mock<IServicioRepository>();
+            customerRepositoryMock
+                .Setup(repo => repo.GetByIdAsync(10))
+                .ReturnsAsync(new Cliente
+                {
+                    Id = 10,
+                    TallerId = 1,
+                    Nombre = "Cliente"
+                });
 
             DocumentoComercialService service = BuildService(customerMock, servicioMock);
 
@@ -96,12 +105,18 @@ namespace Talleres360.Test.Services
         [Fact]
         public async Task PrepararDocumentoAsync_Debe_Calcular_Totales_Correctamente()
         {
-            Mock<ICustomerRepository> customerMock = new Mock<ICustomerRepository>();
-            Mock<IServicioRepository> servicioMock = new Mock<IServicioRepository>();
-            customerMock.Setup(r => r.GetByIdAsync(10)).ReturnsAsync(new Cliente
-            {
-                Id = 10, TallerId = 1, Nombre = "Ana", Apellidos = "L\u00f3pez", NifCif = "12345678A"
-            });
+            Mock<ICustomerRepository> customerRepositoryMock = new Mock<ICustomerRepository>();
+            Mock<IServicioRepository> servicioRepositoryMock = new Mock<IServicioRepository>();
+            customerRepositoryMock
+                .Setup(repo => repo.GetByIdAsync(10))
+                .ReturnsAsync(new Cliente
+                {
+                    Id = 10,
+                    TallerId = 1,
+                    Nombre = "Ana",
+                    Apellidos = "L�pez",
+                    NifCif = "12345678A"
+                });
 
             DocumentoComercialService service = BuildService(customerMock, servicioMock);
 
@@ -151,7 +166,11 @@ namespace Talleres360.Test.Services
 
             customerMock.Setup(r => r.GetByIdAsync(5)).ReturnsAsync(new Cliente
             {
-                Id = 5, TallerId = 1, Nombre = "Juan", Email = "juan@test.com", Telefono = "600111222"
+                Id = 5,
+                TallerId = 1,
+                Nombre = "Juan",
+                Email = "juan@test.com",
+                Telefono = "600111222"
             });
 
             DocumentoComercialService service = new DocumentoComercialService(
@@ -191,7 +210,9 @@ namespace Talleres360.Test.Services
             Mock<IServicioRepository> servicioMock = new Mock<IServicioRepository>();
             customerMock.Setup(r => r.GetByIdAsync(5)).ReturnsAsync(new Cliente
             {
-                Id = 5, TallerId = 1, Nombre = "Juan"
+                Id = 5,
+                TallerId = 1,
+                Nombre = "Juan"
             });
 
             DocumentoComercialService service = BuildService(customerMock, servicioMock);
@@ -241,8 +262,18 @@ namespace Talleres360.Test.Services
             Mock<ICustomerRepository> customerMock = new Mock<ICustomerRepository>();
             Mock<IServicioRepository> servicioMock = new Mock<IServicioRepository>();
 
-            customerMock.Setup(r => r.GetByIdAsync(10)).ReturnsAsync(new Cliente { Id = 10, TallerId = 1, Nombre = "Ana" });
-            servicioMock.Setup(r => r.ObtenerEntidadPorIdAsync(500)).ReturnsAsync((Servicio?)null);
+            customerRepositoryMock
+                .Setup(repo => repo.GetByIdAsync(10))
+                .ReturnsAsync(new Cliente
+                {
+                    Id = 10,
+                    TallerId = 1,
+                    Nombre = "Ana"
+                });
+
+            servicioRepositoryMock
+                .Setup(repo => repo.ObtenerEntidadPorIdAsync(500))
+                .ReturnsAsync((Servicio?)null);
 
             DocumentoComercialService service = BuildService(customerMock, servicioMock);
 
@@ -272,15 +303,24 @@ namespace Talleres360.Test.Services
             Mock<ICustomerRepository> customerMock = new Mock<ICustomerRepository>();
             Mock<IServicioRepository> servicioMock = new Mock<IServicioRepository>();
 
-            customerMock.Setup(r => r.GetByIdAsync(10)).ReturnsAsync(new Cliente
-            {
-                Id = 10, TallerId = 1, Nombre = "Ana", NifCif = "123"
-            });
+            customerRepositoryMock
+                .Setup(repo => repo.GetByIdAsync(10))
+                .ReturnsAsync(new Cliente
+                {
+                    Id = 10,
+                    TallerId = 1,
+                    Nombre = "Ana",
+                    NifCif = "123"
+                });
 
             servicioMock.Setup(r => r.ObtenerEntidadPorIdAsync(900)).ReturnsAsync(new Servicio
             {
-                Id = 900, TallerId = 1, Nombre = "ALINEACION", PrecioBase = 80,
-                Activo = true, Eliminado = false
+                Id = 900,
+                TallerId = 1,
+                Nombre = "ALINEACION",
+                PrecioBase = 80,
+                Activo = true,
+                Eliminado = false
             });
 
             DocumentoComercialService service = BuildService(customerMock, servicioMock);
