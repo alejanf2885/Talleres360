@@ -30,6 +30,7 @@ namespace Talleres360.Data
         public DbSet<CobroTrabajo> CobrosTrabajo { get; set; }
         public DbSet<Factura> Facturas { get; set; }
         public DbSet<LineaFactura> LineasFactura { get; set; }
+        public DbSet<TarifaHora> TarifasHora { get; set; } = null!;
         public DbSet<AuditLog> AuditLog { get; set; } = null!;
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -67,6 +68,10 @@ namespace Talleres360.Data
             modelBuilder.Entity<AuditLog>()
                 .Property(a => a.Operacion)
                 .HasConversion<string>();
+
+            modelBuilder.Entity<TarifaHora>()
+                .Property(t => t.PrecioHora)
+                .HasPrecision(10, 2);
 
             modelBuilder.Entity<Usuario>().HasQueryFilter(u => !u.Eliminado);
             modelBuilder.Entity<Credencial>().HasQueryFilter(c => !c.Eliminado);
