@@ -1,6 +1,5 @@
-﻿using Talleres360.Dtos.Responses;
+using Talleres360.Dtos.Responses;
 using Talleres360.Dtos.Talleres;
-using Talleres360.Models;
 
 namespace Talleres360.Interfaces.Talleres
 {

@@ -1,4 +1,4 @@
-ï»¿using Talleres360.Dtos;
+using Talleres360.Dtos;
 using Talleres360.Dtos.Clientes;
 using Talleres360.Dtos.Responses;
 using Talleres360.Enums;
@@ -6,7 +6,6 @@ using Talleres360.Enums.Errors;
 using Talleres360.Interfaces.Clientes;
 using Talleres360.Interfaces.Planes;
 using Talleres360.Interfaces.Talleres;
-using Talleres360.Models;
 
 namespace Talleres360.Services.Clientes
 {
@@ -42,15 +41,15 @@ namespace Talleres360.Services.Clientes
                     taller.PlanId ?? (int)PlanTipo.Basico);
 
                 // CAMBIO: LimiteClientes ya es int no nullable
-                // Convenio: 0 = sin lÃ­mite
+                // Convenio: 0 = sin límite
                 if (planActual != null
                     && planActual.LimiteClientes > 0
                     && totalClientes >= planActual.LimiteClientes)
                 {
                     return ServiceResult<Cliente>.Fail(
                         ErrorCode.CUST_LIMITE_PLAN_ALCANZADO.ToString(),
-                        $"LÃ­mite de {planActual.LimiteClientes} clientes alcanzado " +
-                        $"en tu plan {planActual.Nombre}. Â¡Sube a un plan superior!"
+                        $"Límite de {planActual.LimiteClientes} clientes alcanzado " +
+                        $"en tu plan {planActual.Nombre}. ¡Sube a un plan superior!"
                     );
                 }
             }
@@ -60,7 +59,7 @@ namespace Talleres360.Services.Clientes
             if (existeEmail)
                 return ServiceResult<Cliente>.Fail(
                     ErrorCode.CUST_EMAIL_DUPLICADO.ToString(),
-                    "Ya existe un cliente con ese correo electrÃ³nico en tu taller.");
+                    "Ya existe un cliente con ese correo electrónico en tu taller.");
 
             string? nifNormalizado = null;
             if (!string.IsNullOrWhiteSpace(request.NifCif))
@@ -135,7 +134,7 @@ namespace Talleres360.Services.Clientes
                 if (existeEmail)
                     return ServiceResult<Cliente>.Fail(
                         ErrorCode.CUST_EMAIL_DUPLICADO.ToString(),
-                        "El correo electrÃ³nico ya estÃ¡ en uso por otro cliente.");
+                        "El correo electrónico ya está en uso por otro cliente.");
             }
 
             string? nifNormalizado = null;
@@ -149,7 +148,7 @@ namespace Talleres360.Services.Clientes
                     if (existeNif)
                         return ServiceResult<Cliente>.Fail(
                             ErrorCode.CUST_DNI_DUPLICADO.ToString(),
-                            "El DNI/CIF ya estÃ¡ registrado en otro cliente.");
+                            "El DNI/CIF ya está registrado en otro cliente.");
                 }
             }
 

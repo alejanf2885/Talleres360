@@ -3,7 +3,6 @@ using Talleres360.Data;
 using Talleres360.Dtos;
 using Talleres360.Dtos.Inventario;
 using Talleres360.Interfaces.Inventario;
-using Talleres360.Models;
 
 namespace Talleres360.Repositories.Inventario
 {

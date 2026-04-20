@@ -1,6 +1,5 @@
 using Talleres360.Dtos.NotasVehiculo;
 using Talleres360.Interfaces.Talleres;
-using Talleres360.Models;
 
 namespace Talleres360.Interfaces.NotasVehiculo
 {

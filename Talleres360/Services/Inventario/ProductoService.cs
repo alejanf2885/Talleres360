@@ -3,7 +3,6 @@ using Talleres360.Dtos.Inventario;
 using Talleres360.Dtos.Responses;
 using Talleres360.Enums.Errors;
 using Talleres360.Interfaces.Inventario;
-using Talleres360.Models;
 
 namespace Talleres360.Services.Inventario
 {

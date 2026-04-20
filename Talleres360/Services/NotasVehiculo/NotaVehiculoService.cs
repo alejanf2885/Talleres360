@@ -3,7 +3,6 @@ using Talleres360.Dtos.Responses;
 using Talleres360.Enums.Errors;
 using Talleres360.Interfaces.NotasVehiculo;
 using Talleres360.Interfaces.Vehiculos;
-using Talleres360.Models;
 
 namespace Talleres360.Services.NotasVehiculo
 {

@@ -1,7 +1,6 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Talleres360.Data;
 using Talleres360.Interfaces.Seguridad;
-using Talleres360.Models;
 
 namespace Talleres360.Repositories.Seguridad
 {

@@ -1,5 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Talleres360.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace Talleres360.Data
 {

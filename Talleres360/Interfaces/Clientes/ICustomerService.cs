@@ -1,7 +1,6 @@
-ï»¿using Talleres360.Dtos;
+using Talleres360.Dtos;
 using Talleres360.Dtos.Clientes;
-using Talleres360.Dtos.Responses; // <-- AsegÃºrate de tener tu ServiceResult aquÃ­
-using Talleres360.Models;
+using Talleres360.Dtos.Responses; // <-- Asegúrate de tener tu ServiceResult aquí
 using System.Collections.Generic;
 using System.Threading.Tasks;
 

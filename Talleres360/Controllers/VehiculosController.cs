@@ -1,4 +1,4 @@
-ï»¿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Talleres360.API.Filters;
 using Talleres360.Dtos;
@@ -8,7 +8,6 @@ using Talleres360.Enums.Errors;
 using Talleres360.Filters;
 using Talleres360.Interfaces.Seguridad;
 using Talleres360.Interfaces.Vehiculos;
-using Talleres360.Models;
 
 namespace Talleres360.Controllers
 {
@@ -53,7 +52,7 @@ namespace Talleres360.Controllers
                     filtro);
 
             return Ok(ApiResponse<PagedResponse<VehiculoDetalle>>
-                .Ok(response, "Listado de vehÃ­culos recuperado correctamente."));
+                .Ok(response, "Listado de vehículos recuperado correctamente."));
         }
 
         [TallerAuthorize<IVehiculoRepository>]
@@ -69,7 +68,7 @@ namespace Talleres360.Controllers
             if (!resultado.Success)
                 return NotFound(new ApiErrorResponse(resultado.ErrorCode!, resultado.Message!));
 
-            return Ok(ApiResponse<VehiculoDetalle>.Ok(resultado.Data!, "Datos del vehÃ­culo obtenidos."));
+            return Ok(ApiResponse<VehiculoDetalle>.Ok(resultado.Data!, "Datos del vehículo obtenidos."));
         }
 
         [HttpGet("matricula/{matricula}")]
@@ -84,7 +83,7 @@ namespace Talleres360.Controllers
             if (!resultado.Success)
                 return NotFound(new ApiErrorResponse(resultado.ErrorCode!, resultado.Message!));
 
-            return Ok(ApiResponse<VehiculoDetalle>.Ok(resultado.Data!, "VehÃ­culo encontrado."));
+            return Ok(ApiResponse<VehiculoDetalle>.Ok(resultado.Data!, "Vehículo encontrado."));
         }
 
         [RequiereSuscripcionActiva]
@@ -102,7 +101,7 @@ namespace Talleres360.Controllers
 
             return CreatedAtAction(nameof(GetById),
                 new { id = resultado.Data!.Id },
-                ApiResponse<VehiculoDetalle>.Ok(resultado.Data!, "Â¡VehÃ­culo registrado con Ã©xito!"));
+                ApiResponse<VehiculoDetalle>.Ok(resultado.Data!, "¡Vehículo registrado con éxito!"));
         }
 
         [TallerAuthorize<IVehiculoRepository>]
@@ -119,7 +118,7 @@ namespace Talleres360.Controllers
             if (!resultado.Success)
                 return BadRequest(new ApiErrorResponse(resultado.ErrorCode!, resultado.Message!));
 
-            return Ok(ApiResponse<VehiculoDetalle>.Ok(resultado.Data!, "VehÃ­culo actualizado correctamente."));
+            return Ok(ApiResponse<VehiculoDetalle>.Ok(resultado.Data!, "Vehículo actualizado correctamente."));
         }
 
 
@@ -135,7 +134,7 @@ namespace Talleres360.Controllers
             if (!resultado.Success)
                 return BadRequest(new ApiErrorResponse(resultado.ErrorCode!, resultado.Message!));
 
-            return Ok(ApiResponse<bool>.Ok(true, "Â¡Vehiculo archivado con Ã©xito!"));
+            return Ok(ApiResponse<bool>.Ok(true, "¡Vehiculo archivado con éxito!"));
         }
     }
 }

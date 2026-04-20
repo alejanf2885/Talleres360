@@ -1,7 +1,6 @@
-﻿using Talleres360.Dtos.Responses;
+using Talleres360.Dtos.Responses;
 using Talleres360.Enums.Errors;
 using Talleres360.Interfaces.Emails;
-using Talleres360.Models;
 
 namespace Talleres360.Services.Emails
 {
@@ -32,7 +31,7 @@ namespace Talleres360.Services.Emails
             };
 
                 string html = await _templateService.ObtenerPlantillaAsync("EmailBienvenida", datos);
-                await _emailService.EnviarEmailAsync(usuario.Email, "¡Bienvenido a Talleres360!", html);
+                await _emailService.EnviarEmailAsync(usuario.Email, "�Bienvenido a Talleres360!", html);
 
                 return ServiceResult<bool>.Ok(true);
             }

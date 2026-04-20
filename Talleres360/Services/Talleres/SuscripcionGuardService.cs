@@ -1,8 +1,7 @@
-Ôªøusing Talleres360.Dtos.Seguridad;
+using Talleres360.Dtos.Seguridad;
 using Talleres360.Enums;
 using Talleres360.Interfaces.Seguridad;
 using Talleres360.Interfaces.Talleres;
-using Talleres360.Models;
 using Talleres360.Enums.Errors;
 
 namespace Talleres360.Services.Talleres
@@ -37,13 +36,13 @@ namespace Talleres360.Services.Talleres
                 DateTime fechaActual = DateTime.UtcNow;
                 if (fechaActual > fechaExpiracion)
                     return AccesoResult.Denegado(
-                        "Tu periodo de prueba de 30 d√≠as ha finalizado. Elige un plan para continuar.",
+                        "Tu periodo de prueba de 30 dÌas ha finalizado. Elige un plan para continuar.",
                         ErrorCode.SUBS_SIN_PLAN_ACTIVO.ToString());
             }
 
             if (!taller.Activo)
                 return AccesoResult.Denegado(
-                    "Tu cuenta de taller est√° desactivada. Contacta con soporte.",
+                    "Tu cuenta de taller est· desactivada. Contacta con soporte.",
                     ErrorCode.AUTH_CUENTA_INACTIVA.ToString());
 
             return AccesoResult.Permitido();
@@ -62,7 +61,7 @@ namespace Talleres360.Services.Talleres
 
             if (!taller.Activo)
                 return AccesoResult.Denegado(
-                    "Tu cuenta de taller est√° desactivada.",
+                    "Tu cuenta de taller est· desactivada.",
                     ErrorCode.AUTH_CUENTA_INACTIVA.ToString());
 
             if (!taller.PlanId.HasValue)
@@ -118,7 +117,7 @@ namespace Talleres360.Services.Talleres
                 }
                 else if (diasRestantes <= 5)
                 {
-                    response.Mensaje = $"¬°Atenci√≥n! Te quedan {diasRestantes} d√≠as de prueba.";
+                    response.Mensaje = $"°AtenciÛn! Te quedan {diasRestantes} dÌas de prueba.";
                 }
             }
 

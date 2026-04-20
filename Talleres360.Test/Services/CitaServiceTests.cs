@@ -6,7 +6,6 @@ using Talleres360.Interfaces.Citas;
 using Talleres360.Interfaces.Data;
 using Talleres360.Interfaces.Trabajos;
 using Talleres360.Interfaces.Vehiculos;
-using Talleres360.Models;
 using Talleres360.Services.Citas;
 
 namespace Talleres360.Test.Services
