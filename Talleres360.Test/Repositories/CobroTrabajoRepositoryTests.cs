@@ -3,7 +3,6 @@ using Talleres360.Data;
 using Talleres360.Dtos;
 using Talleres360.Dtos.Trabajos;
 using Talleres360.Enums;
-using Talleres360.Models;
 using Talleres360.Repositories.Trabajos;
 
 namespace Talleres360.Test.Repositories

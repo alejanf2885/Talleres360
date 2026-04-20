@@ -5,7 +5,6 @@ using Talleres360.Interfaces.Auth;
 using Talleres360.Interfaces.Password;
 using Talleres360.Interfaces.Talleres;
 using Talleres360.Interfaces.Usuarios;
-using Talleres360.Models;
 
 namespace Talleres360.Services.Auth
 {

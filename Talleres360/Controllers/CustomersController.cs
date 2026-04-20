@@ -1,4 +1,4 @@
-ï»¿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Talleres360.API.Filters;
 using Talleres360.Filters;
@@ -8,7 +8,6 @@ using Talleres360.Dtos.Responses;
 using Talleres360.Enums.Errors;
 using Talleres360.Interfaces.Clientes;
 using Talleres360.Interfaces.Seguridad;
-using Talleres360.Models;
 
 namespace Talleres360.Controllers
 {
@@ -77,7 +76,7 @@ namespace Talleres360.Controllers
 
             return CreatedAtAction(nameof(GetById),
                 new { id = resultado.Data?.Id },
-                ApiResponse<Cliente>.Ok(resultado.Data!, "Â¡Cliente registrado con Ã©xito!"));
+                ApiResponse<Cliente>.Ok(resultado.Data!, "¡Cliente registrado con éxito!"));
         }
 
         [TallerAuthorize<ICustomerRepository>]
@@ -126,7 +125,7 @@ namespace Talleres360.Controllers
             ClienteStatsResponse stats = await _customerService
                 .ObtenerEstadisticasAsync(tallerId.Value);
 
-            return Ok(ApiResponse<ClienteStatsResponse>.Ok(stats, "EstadÃ­sticas de clientes cargadas."));
+            return Ok(ApiResponse<ClienteStatsResponse>.Ok(stats, "Estadísticas de clientes cargadas."));
         }
     }
 }

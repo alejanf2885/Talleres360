@@ -1,4 +1,4 @@
-Ôªøusing System.Security.Cryptography;
+using System.Security.Cryptography;
 using Talleres360.Dtos.Responses;
 using Talleres360.Dtos.Seguridad;
 using Talleres360.Dtos.Usuarios;
@@ -7,7 +7,6 @@ using Talleres360.Enums.Errors;
 using Talleres360.Interfaces.Seguridad;
 using Talleres360.Interfaces.Talleres;
 using Talleres360.Interfaces.Usuarios;
-using Talleres360.Models;
 
 namespace Talleres360.Services.Seguridad
 {
@@ -55,7 +54,7 @@ namespace Talleres360.Services.Seguridad
             if (tokenEntity == null)
                 return ServiceResult<TokenResponseDto>.Fail(
                     ErrorCode.AUTH_TOKEN_INVALIDO.ToString(),
-                    "El token de refresco no es v√°lido.");
+                    "El token de refresco no es v·lido.");
 
             if (tokenEntity.Usado)
                 return ServiceResult<TokenResponseDto>.Fail(
@@ -65,7 +64,7 @@ namespace Talleres360.Services.Seguridad
             if (tokenEntity.FechaExpiracion < DateTime.UtcNow)
                 return ServiceResult<TokenResponseDto>.Fail(
                     ErrorCode.AUTH_REFRESH_TOKEN_EXPIRADO.ToString(),
-                    "La sesi√≥n ha expirado.");
+                    "La sesiÛn ha expirado.");
 
             if (!tokenEntity.UsuarioId.HasValue)
                 return ServiceResult<TokenResponseDto>.Fail(
@@ -76,7 +75,7 @@ namespace Talleres360.Services.Seguridad
             if (usuario == null || !usuario.Activo)
                 return ServiceResult<TokenResponseDto>.Fail(
                     ErrorCode.AUTH_CUENTA_INACTIVA.ToString(),
-                    "El usuario ya no est√° activo o no existe.");
+                    "El usuario ya no est· activo o no existe.");
 
             tokenEntity.Usado = true;
             await _refreshTokenRepo.ActualizarAsync(tokenEntity);
@@ -122,7 +121,7 @@ namespace Talleres360.Services.Seguridad
             catch (Exception)
             {
                 return ServiceResult<bool>.Fail(
-                    ErrorCode.AUTH_LOGOUT_FALLIDO.ToString(), "No se pudo invalidar la sesi√≥n en el servidor.");
+                    ErrorCode.AUTH_LOGOUT_FALLIDO.ToString(), "No se pudo invalidar la sesiÛn en el servidor.");
             }
         }
 

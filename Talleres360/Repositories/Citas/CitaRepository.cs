@@ -4,7 +4,6 @@ using Talleres360.Dtos;
 using Talleres360.Dtos.Citas;
 using Talleres360.Enums;
 using Talleres360.Interfaces.Citas;
-using Talleres360.Models;
 
 namespace Talleres360.Repositories.Citas
 {

@@ -1,4 +1,4 @@
-ï»¿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
 using Talleres360.Dtos.Emails;
 using Talleres360.Dtos.Responses;
@@ -6,7 +6,6 @@ using Talleres360.Enums.Errors;
 using Talleres360.Interfaces.Emails;
 using Talleres360.Interfaces.Seguridad;
 using Talleres360.Interfaces.Usuarios;
-using Talleres360.Models;
 
 namespace Talleres360.Controllers
 {
@@ -56,11 +55,11 @@ namespace Talleres360.Controllers
             {
                 return StatusCode(StatusCodes.Status500InternalServerError, new ApiErrorResponse(
                     codigo: resultadoActivacion.ErrorCode ?? ErrorCode.SYS_ERROR_GENERICO.ToString(),
-                    mensaje: resultadoActivacion.Message ?? "OcurriÃ³ un problema al activar la cuenta."
+                    mensaje: resultadoActivacion.Message ?? "Ocurrió un problema al activar la cuenta."
                 ));
             }
 
-            return Ok(ApiResponse<bool>.Ok(true, "Â¡Cuenta verificada! Ya puedes iniciar sesiÃ³n."));
+            return Ok(ApiResponse<bool>.Ok(true, "¡Cuenta verificada! Ya puedes iniciar sesión."));
         }
 
         [HttpPost("resend")]
@@ -77,7 +76,7 @@ namespace Talleres360.Controllers
 
             Usuario usuario = resultadoUser.Data!;
 
-            // Validar que no estÃ© ya activo ANTES de generar token
+            // Validar que no esté ya activo ANTES de generar token
             if (usuario.Activo)
             {
                 return Ok(ApiResponse<bool>.Ok(true, "Si el correo existe, se ha enviado un enlace."));
@@ -94,7 +93,7 @@ namespace Talleres360.Controllers
                 ));
             }
 
-            return Ok(ApiResponse<bool>.Ok(true, "Se ha enviado un nuevo enlace de activaciÃ³n."));
+            return Ok(ApiResponse<bool>.Ok(true, "Se ha enviado un nuevo enlace de activación."));
         }
     }
 }

@@ -1,4 +1,4 @@
-Ôªøusing Talleres360.Dtos.Auth;
+using Talleres360.Dtos.Auth;
 using Talleres360.Dtos.Responses;
 using Talleres360.Enums;
 using Talleres360.Enums.Errors;
@@ -7,7 +7,6 @@ using Talleres360.Interfaces.Imagenes;
 using Talleres360.Interfaces.Planes;
 using Talleres360.Interfaces.Talleres;
 using Talleres360.Interfaces.Usuarios;
-using Talleres360.Models;
 
 namespace Talleres360.Services.Talleres
 {
@@ -55,7 +54,7 @@ namespace Talleres360.Services.Talleres
                 {
                     return ServiceResult<bool>.Fail(
                         ErrorCode.REG_PLAN_NO_ENCONTRADO.ToString(),
-                        "El plan de suscripci√≥n no est√° configurado en el sistema.");
+                        "El plan de suscripciÛn no est· configurado en el sistema.");
                 }
 
                 string cifTemporal = $"TEMP{DateTime.UtcNow:yyyyMMddHHmmss}{Guid.NewGuid():N}".Substring(0, 20);
@@ -111,7 +110,7 @@ namespace Talleres360.Services.Talleres
                 await _unitOfWork.RollbackTransactionAsync();
                 return ServiceResult<bool>.Fail(
                     ErrorCode.SYS_ERROR_GENERICO.ToString(),
-                    "Ocurri√≥ un error cr√≠tico durante el registro.");
+                    "OcurriÛ un error crÌtico durante el registro.");
             }
         }
     }

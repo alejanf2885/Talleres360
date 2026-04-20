@@ -1,4 +1,4 @@
-Ôªøusing System.Security.Cryptography;
+using System.Security.Cryptography;
 using Microsoft.Extensions.Options;
 using Talleres360.Configuration;
 using Talleres360.Dtos.Responses;
@@ -6,7 +6,6 @@ using Talleres360.Enums;
 using Talleres360.Enums.Errors;
 using Talleres360.Interfaces.Seguridad;
 using Talleres360.Interfaces.Usuarios;
-using Talleres360.Models;
 
 namespace Talleres360.Services.Seguridad
 {
@@ -61,7 +60,7 @@ namespace Talleres360.Services.Seguridad
             {
                 return ServiceResult<int>.Fail(
                     ErrorCode.AUTH_TOKEN_INVALIDO.ToString(),
-                    "El enlace de verificaci√≥n no es v√°lido o ya ha sido usado.");
+                    "El enlace de verificaciÛn no es v·lido o ya ha sido usado.");
             }
 
             if (verificacion.FechaExpiracion < DateTime.UtcNow)

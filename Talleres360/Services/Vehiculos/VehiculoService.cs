@@ -1,9 +1,8 @@
-Ôªøusing Talleres360.Dtos;
+using Talleres360.Dtos;
 using Talleres360.Dtos.Vehiculos;
 using Talleres360.Dtos.Responses;
 using Talleres360.Enums.Errors;
 using Talleres360.Interfaces.Vehiculos;
-using Talleres360.Models;
 
 namespace Talleres360.Services.Vehiculos
 {
@@ -27,7 +26,7 @@ namespace Talleres360.Services.Vehiculos
             {
                 return ServiceResult<VehiculoDetalle>.Fail(
                     ErrorCode.VEH_MATRICULA_DUPLICADA.ToString(),
-                    $"La matr√≠cula {matriculaLimpia} ya est√° registrada en tu taller.");
+                    $"La matrÌcula {matriculaLimpia} ya est· registrada en tu taller.");
             }
 
             Vehiculo nuevoVehiculo = new Vehiculo
@@ -56,7 +55,7 @@ namespace Talleres360.Services.Vehiculos
 
             return detalle != null
                 ? ServiceResult<VehiculoDetalle>.Ok(detalle)
-                : ServiceResult<VehiculoDetalle>.Fail(ErrorCode.SYS_ERROR_GENERICO.ToString(), "Veh√≠culo guardado, pero error al recuperar vista de detalles.");
+                : ServiceResult<VehiculoDetalle>.Fail(ErrorCode.SYS_ERROR_GENERICO.ToString(), "VehÌculo guardado, pero error al recuperar vista de detalles.");
         }
 
         public async Task<ServiceResult<VehiculoDetalle>> ActualizarVehiculoAsync(int tallerId, int id, ActualizarVehiculoRequest request)
@@ -65,7 +64,7 @@ namespace Talleres360.Services.Vehiculos
 
             if (existente == null)
             {
-                return ServiceResult<VehiculoDetalle>.Fail(ErrorCode.SYS_ENTIDAD_NO_ENCONTRADA.ToString(), "Veh√≠culo no encontrado.");
+                return ServiceResult<VehiculoDetalle>.Fail(ErrorCode.SYS_ENTIDAD_NO_ENCONTRADA.ToString(), "VehÌculo no encontrado.");
             }
 
             existente.Matricula = request.Matricula.Trim().ToUpper().Replace("-", "").Replace(" ", "");
@@ -93,7 +92,7 @@ namespace Talleres360.Services.Vehiculos
 
             if (detalle == null || detalle.TallerId != tallerId)
             {
-                return ServiceResult<VehiculoDetalle>.Fail(ErrorCode.SYS_ENTIDAD_NO_ENCONTRADA.ToString(), "Veh√≠culo no encontrado.");
+                return ServiceResult<VehiculoDetalle>.Fail(ErrorCode.SYS_ENTIDAD_NO_ENCONTRADA.ToString(), "VehÌculo no encontrado.");
             }
 
             return ServiceResult<VehiculoDetalle>.Ok(detalle);
@@ -111,7 +110,7 @@ namespace Talleres360.Services.Vehiculos
 
             if (detalle == null || detalle.TallerId != tallerId)
             {
-                return ServiceResult<VehiculoDetalle>.Fail(ErrorCode.SYS_ENTIDAD_NO_ENCONTRADA.ToString(), "Veh√≠culo no encontrado.");
+                return ServiceResult<VehiculoDetalle>.Fail(ErrorCode.SYS_ENTIDAD_NO_ENCONTRADA.ToString(), "VehÌculo no encontrado.");
             }
 
             return ServiceResult<VehiculoDetalle>.Ok(detalle);
@@ -123,7 +122,7 @@ namespace Talleres360.Services.Vehiculos
             {
                 return ServiceResult<bool>.Fail(
                     ErrorCode.SYS_DATOS_INVALIDOS.ToString(),
-                    "El ID del taller y del veh√≠culo deben ser mayores a 0");
+                    "El ID del taller y del vehÌculo deben ser mayores a 0");
             }
 
             Vehiculo? existente = await _vehiculoRepository.GetByIdAsync(id, tallerId);
@@ -132,7 +131,7 @@ namespace Talleres360.Services.Vehiculos
             {
                 return ServiceResult<bool>.Fail(
                     ErrorCode.SYS_ENTIDAD_NO_ENCONTRADA.ToString(),
-                    "Veh√≠culo no encontrado.");
+                    "VehÌculo no encontrado.");
             }
 
             existente.Eliminado = true;

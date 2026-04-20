@@ -2,7 +2,6 @@ using Microsoft.EntityFrameworkCore;
 using Talleres360.Data;
 using Talleres360.Enums;
 using Talleres360.Repositories;
-using Talleres360.Models;
 
 namespace Talleres360.Test.Repositories
 {

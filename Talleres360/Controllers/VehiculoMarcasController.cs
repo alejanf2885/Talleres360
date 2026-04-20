@@ -10,7 +10,6 @@ using Talleres360.Filters;
 using Talleres360.Interfaces.Clientes;
 using Talleres360.Interfaces.Seguridad;
 using Talleres360.Interfaces.Vehiculos;
-using Talleres360.Models;
 using Talleres360.Repositories.Vehiculos;
 
 namespace Talleres360.Controllers

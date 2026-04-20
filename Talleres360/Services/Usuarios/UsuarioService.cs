@@ -1,4 +1,4 @@
-ï»¿using Talleres360.Dtos.Responses;
+using Talleres360.Dtos.Responses;
 using Talleres360.Enum;
 using Talleres360.Enums;
 using Talleres360.Enums.Errors;
@@ -6,7 +6,6 @@ using Talleres360.Interfaces.Emails;
 using Talleres360.Interfaces.Password;
 using Talleres360.Interfaces.Seguridad;
 using Talleres360.Interfaces.Usuarios;
-using Talleres360.Models;
 
 namespace Talleres360.Services.Usuarios
 {
@@ -102,7 +101,7 @@ namespace Talleres360.Services.Usuarios
                 if (usuarioPersistido == null)
                 {
                     _logger.LogWarning(
-                        "Post-save check: no se encontrÃ³ UsuarioId={UsuarioId} en BD (sin filtros).",
+                        "Post-save check: no se encontró UsuarioId={UsuarioId} en BD (sin filtros).",
                         usuario.Id);
                 }
                 else
@@ -152,12 +151,12 @@ namespace Talleres360.Services.Usuarios
             catch (Exception ex)
             {
                 _logger.LogError(ex,
-                    "Error crÃ­tico creando usuario admin para taller {TallerId}",
+                    "Error crítico creando usuario admin para taller {TallerId}",
                     tallerId);
 
                 return ServiceResult<Usuario>.Fail(
                     ErrorCode.SYS_ERROR_GENERICO.ToString(),
-                    "Fallo crÃ­tico en la base de datos.");
+                    "Fallo crítico en la base de datos.");
             }
         }
 
@@ -174,7 +173,7 @@ namespace Talleres360.Services.Usuarios
             if (existe)
                 return ServiceResult<bool>.Fail(
                     ErrorCode.REG_EMAIL_YA_REGISTRADO.ToString(),
-                    "El correo electrÃ³nico ya se encuentra registrado en el sistema.");
+                    "El correo electrónico ya se encuentra registrado en el sistema.");
 
             return ServiceResult<bool>.Ok(true);
         }

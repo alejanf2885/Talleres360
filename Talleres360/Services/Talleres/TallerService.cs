@@ -1,10 +1,9 @@
-﻿using Talleres360.Dtos.Responses;
+using Talleres360.Dtos.Responses;
 using Talleres360.Dtos.Talleres;
 using Talleres360.Enums;
 using Talleres360.Enums.Errors;
 using Talleres360.Interfaces.Imagenes;
 using Talleres360.Interfaces.Talleres;
-using Talleres360.Models;
 
 namespace Talleres360.Services.Talleres
 {
@@ -63,7 +62,7 @@ namespace Talleres360.Services.Talleres
             {
                 return ServiceResult<bool>.Fail(
                     ErrorCode.REG_CIF_DUPLICADO.ToString(),
-                    "El CIF introducido ya está registrado por otro taller."
+                    "El CIF introducido ya est� registrado por otro taller."
                 );
             }
 

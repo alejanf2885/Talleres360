@@ -1,5 +1,4 @@
-﻿using Talleres360.Dtos.Usuarios;
-using Talleres360.Models;
+using Talleres360.Dtos.Usuarios;
 
 namespace Talleres360.Interfaces.Seguridad
 {

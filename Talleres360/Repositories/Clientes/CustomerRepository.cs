@@ -1,8 +1,7 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Talleres360.Data;
 using Talleres360.Dtos;
 using Talleres360.Interfaces.Clientes;
-using Talleres360.Models;
 
 namespace Talleres360.Repositories.Clientes
 {
