@@ -1,6 +1,8 @@
 ﻿using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.Formats.Webp; 
 using SixLabors.ImageSharp.Processing;
 using Talleres360.Interfaces.SaneadorFotos;
+
 
 namespace Talleres360.Services.SaneadorFotos
 {
@@ -10,15 +12,14 @@ namespace Talleres360.Services.SaneadorFotos
         {
             if (inputStream == null || inputStream.Length == 0)
             {
-                throw new ArgumentException("El stream de la imagen no puede estar vacío.");
+                throw new ArgumentException("El stream de la imagen no puede estar vacío.", nameof(inputStream));
             }
 
-            var outputStream = new MemoryStream();
+            MemoryStream outputStream = new MemoryStream();
 
             try
             {
-                // Image.LoadAsync lee directamente de la memoria
-                using (var image = await Image.LoadAsync(inputStream))
+                using (Image image = await Image.LoadAsync(inputStream))
                 {
                     image.Mutate(x => x.Resize(new ResizeOptions
                     {
@@ -26,13 +27,17 @@ namespace Talleres360.Services.SaneadorFotos
                         Mode = ResizeMode.Crop
                     }));
 
-                    // Generamos el archivo nuevo y limpio en WEBP
-                    await image.SaveAsWebpAsync(outputStream);
+                    WebpEncoder encoder = new WebpEncoder
+                    {
+                        Quality = 80
+                    };
+
+                    await image.SaveAsWebpAsync(outputStream, encoder);
                 }
             }
-            catch (UnknownImageFormatException)
+            catch (UnknownImageFormatException ex)
             {
-                throw new InvalidOperationException("El texto Base64 enviado no es una imagen válida o está corrupto.");
+                throw new InvalidOperationException("El archivo enviado no es una imagen válida o está corrupto.", ex);
             }
 
             outputStream.Position = 0;
