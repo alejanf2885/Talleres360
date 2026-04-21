@@ -1,190 +1,202 @@
 using Moq;
-using Talleres360.Dtos.DocumentosComerciales;
-using Talleres360.Dtos.Presupuestos;
+using Talleres360.Dtos.Trabajos;
 using Talleres360.Enums;
 using Talleres360.Enums.Errors;
-using Talleres360.Interfaces.DocumentosComerciales;
-using Talleres360.Interfaces.Presupuestos;
+using Talleres360.Interfaces.Trabajos;
+using Talleres360.Interfaces.Vehiculos;
 using Talleres360.Services.Presupuestos;
 
 namespace Talleres360.Test.Services
 {
     public class PresupuestoServiceTests
     {
-        [Fact]
-        public async Task CrearAsync_Debe_Fallar_Cuando_No_Se_Puede_Generar_Numero()
+        private static PresupuestoService CrearService(
+            Mock<ITrabajoRepository>? trabajoRepo = null,
+            Mock<IVehiculoRepository>? vehiculoRepo = null)
         {
-            Mock<IPresupuestoRepository> presupuestoRepositoryMock = new Mock<IPresupuestoRepository>();
-            Mock<IDocumentoComercialService> documentoComercialServiceMock = new Mock<IDocumentoComercialService>();
-
-            presupuestoRepositoryMock
-                .Setup(repo => repo.GenerarNumeroDocumentoAsync(1, TipoDocumentoComercial.PRESUPUESTO))
-                .ReturnsAsync(string.Empty);
-
-            PresupuestoService service = new PresupuestoService(
-                presupuestoRepositoryMock.Object,
-                documentoComercialServiceMock.Object);
-
-            CrearPresupuestoRequest request = new CrearPresupuestoRequest
-            {
-                ClienteId = 10,
-                Lineas = new List<LineaPresupuestoRequest>
-                {
-                    new LineaPresupuestoRequest
-                    {
-                        Concepto = "Aceite",
-                        Cantidad = 1,
-                        PrecioUnitario = 10,
-                        DescuentoPorcentaje = 0,
-                        ImpuestoPorcentaje = 21
-                    }
-                }
-            };
-
-            Dtos.Responses.ServiceResult<PresupuestoDto> resultado = await service.CrearAsync(1, request);
-
-            Assert.False(resultado.Success);
-            Assert.Equal(ErrorCode.SYS_ERROR_BASE_DATOS.ToString(), resultado.ErrorCode);
+            return new PresupuestoService(
+                (trabajoRepo ?? new Mock<ITrabajoRepository>()).Object,
+                (vehiculoRepo ?? new Mock<IVehiculoRepository>()).Object);
         }
 
         [Fact]
-        public async Task CrearAsync_Debe_Fallar_Cuando_Preparacion_De_Documento_Falla()
+        public async Task CrearAsync_Debe_Forzar_Estado_PRESUPUESTO_Independientemente_Del_Request()
         {
-            Mock<IPresupuestoRepository> presupuestoRepositoryMock = new Mock<IPresupuestoRepository>();
-            Mock<IDocumentoComercialService> documentoComercialServiceMock = new Mock<IDocumentoComercialService>();
+            Mock<ITrabajoRepository> trabajoRepoMock = new Mock<ITrabajoRepository>();
+            Trabajo? trabajoCreado = null;
 
-            presupuestoRepositoryMock
-                .Setup(repo => repo.GenerarNumeroDocumentoAsync(1, TipoDocumentoComercial.PRESUPUESTO))
-                .ReturnsAsync("2026-000001");
+            trabajoRepoMock
+                .Setup(r => r.GenerarNumeroDocumentoTrabajoAsync(1))
+                .ReturnsAsync("TRAB-2026-000001");
 
-            documentoComercialServiceMock
-                .Setup(service => service.PrepararDocumentoAsync(
-                    1,
-                    TipoDocumentoComercial.PRESUPUESTO,
-                    "2026-000001",
-                    It.IsAny<DocumentoComercialInput>()))
-                .ReturnsAsync(Dtos.Responses.ServiceResult<DocumentoComercialPreparado>.Fail(
-                    ErrorCode.CUST_NO_ENCONTRADO.ToString(),
-                    "Cliente no encontrado"));
+            trabajoRepoMock
+                .Setup(r => r.AddAsync(It.IsAny<Trabajo>()))
+                .Callback<Trabajo>(t => { t.Id = 1; trabajoCreado = t; })
+                .Returns(Task.CompletedTask);
 
-            PresupuestoService service = new PresupuestoService(
-                presupuestoRepositoryMock.Object,
-                documentoComercialServiceMock.Object);
+            trabajoRepoMock
+                .Setup(r => r.ObtenerDetallePorIdAsync(1))
+                .ReturnsAsync(new TrabajoDto { Id = 1, Estado = TrabajoEstado.PRESUPUESTO });
 
-            CrearPresupuestoRequest request = new CrearPresupuestoRequest
+            PresupuestoService service = CrearService(trabajoRepoMock);
+
+            CrearTrabajoRequest request = new CrearTrabajoRequest
             {
-                ClienteId = 10,
-                Lineas = new List<LineaPresupuestoRequest>
-                {
-                    new LineaPresupuestoRequest
-                    {
-                        Concepto = "Aceite",
-                        Cantidad = 1,
-                        PrecioUnitario = 10,
-                        DescuentoPorcentaje = 0,
-                        ImpuestoPorcentaje = 21
-                    }
-                }
-            };
-
-            Dtos.Responses.ServiceResult<PresupuestoDto> resultado = await service.CrearAsync(1, request);
-
-            Assert.False(resultado.Success);
-            Assert.Equal(ErrorCode.CUST_NO_ENCONTRADO.ToString(), resultado.ErrorCode);
-            presupuestoRepositoryMock.Verify(repo => repo.AddAsync(It.IsAny<Factura>(), It.IsAny<List<LineaFactura>>(), It.IsAny<List<DesgloseIva>?>()), Times.Never);
-        }
-
-        [Fact]
-        public async Task CrearAsync_Debe_Completar_Flujo_Cuando_Datos_Son_Validos()
-        {
-            Mock<IPresupuestoRepository> presupuestoRepositoryMock = new Mock<IPresupuestoRepository>();
-            Mock<IDocumentoComercialService> documentoComercialServiceMock = new Mock<IDocumentoComercialService>();
-
-            Factura facturaPreparada = new Factura
-            {
-                Id = 0,
-                TallerId = 1,
-                ClienteId = 10,
-                NumeroFactura = "2026-000002",
-                TipoDocumento = TipoDocumentoComercial.PRESUPUESTO,
+                KmEntrada = 0,
                 Subtotal = 100,
                 ImporteImpuestos = 21,
                 Total = 121,
-                EstadoPago = "PENDIENTE",
-                ClienteNombre = "Ana"
+                DatosIncompletos = false
             };
 
-            List<LineaFactura> lineasPreparadas = new List<LineaFactura>
-            {
-                new LineaFactura
-                {
-                    Concepto = "Filtro",
-                    Cantidad = 1,
-                    PrecioUnitario = 100,
-                    DescuentoPorcentaje = 0,
-                    ImpuestoPorcentaje = 21,
-                    SubtotalLinea = 100,
-                    TotalLinea = 121
-                }
-            };
-
-            presupuestoRepositoryMock
-                .Setup(repo => repo.GenerarNumeroDocumentoAsync(1, TipoDocumentoComercial.PRESUPUESTO))
-                .ReturnsAsync("2026-000002");
-
-            documentoComercialServiceMock
-                .Setup(service => service.PrepararDocumentoAsync(
-                    1,
-                    TipoDocumentoComercial.PRESUPUESTO,
-                    "2026-000002",
-                    It.IsAny<DocumentoComercialInput>()))
-                .ReturnsAsync(Dtos.Responses.ServiceResult<DocumentoComercialPreparado>.Ok(new DocumentoComercialPreparado
-                {
-                    Documento = facturaPreparada,
-                    Lineas = lineasPreparadas
-                }));
-
-            presupuestoRepositoryMock
-                .Setup(repo => repo.AddAsync(It.IsAny<Factura>(), It.IsAny<List<LineaFactura>>(), It.IsAny<List<DesgloseIva>?>()))
-                .Callback<Factura, List<LineaFactura>, List<DesgloseIva>?>((factura, lineas, desglosesIva) => factura.Id = 300)
-                .Returns(Task.CompletedTask);
-
-            presupuestoRepositoryMock
-                .Setup(repo => repo.ObtenerDetallePorIdAsync(300))
-                .ReturnsAsync(new PresupuestoDto
-                {
-                    Id = 300,
-                    NumeroDocumento = "2026-000002",
-                    ClienteId = 10,
-                    Total = 121
-                });
-
-            PresupuestoService service = new PresupuestoService(
-                presupuestoRepositoryMock.Object,
-                documentoComercialServiceMock.Object);
-
-            CrearPresupuestoRequest request = new CrearPresupuestoRequest
-            {
-                ClienteId = 10,
-                Lineas = new List<LineaPresupuestoRequest>
-                {
-                    new LineaPresupuestoRequest
-                    {
-                        Concepto = "Filtro",
-                        Cantidad = 1,
-                        PrecioUnitario = 100,
-                        DescuentoPorcentaje = 0,
-                        ImpuestoPorcentaje = 21
-                    }
-                }
-            };
-
-            Dtos.Responses.ServiceResult<PresupuestoDto> resultado = await service.CrearAsync(1, request);
+            Dtos.Responses.ServiceResult<TrabajoDto> resultado = await service.CrearAsync(1, 5, request);
 
             Assert.True(resultado.Success);
-            Assert.NotNull(resultado.Data);
-            Assert.Equal(300, resultado.Data!.Id);
-            presupuestoRepositoryMock.Verify(repo => repo.AddAsync(It.IsAny<Factura>(), It.IsAny<List<LineaFactura>>(), It.IsAny<List<DesgloseIva>?>()), Times.Once);
+            Assert.NotNull(trabajoCreado);
+            Assert.Equal(TrabajoEstado.PRESUPUESTO, trabajoCreado!.Estado);
+            Assert.Equal(TrabajoEstadoPago.PENDIENTE, trabajoCreado.EstadoPago);
+        }
+
+        [Fact]
+        public async Task CrearAsync_Debe_Fallar_Cuando_Vehiculo_No_Pertenece_Al_Taller()
+        {
+            Mock<ITrabajoRepository> trabajoRepoMock = new Mock<ITrabajoRepository>();
+            Mock<IVehiculoRepository> vehiculoRepoMock = new Mock<IVehiculoRepository>();
+            vehiculoRepoMock
+                .Setup(r => r.PerteneceATallerAsync(99, 1))
+                .ReturnsAsync(false);
+
+            PresupuestoService service = CrearService(trabajoRepoMock, vehiculoRepoMock);
+
+            CrearTrabajoRequest request = new CrearTrabajoRequest
+            {
+                VehiculoId = 99,
+                KmEntrada = 0,
+                Subtotal = 0,
+                ImporteImpuestos = 0,
+                Total = 0,
+                DatosIncompletos = false
+            };
+
+            Dtos.Responses.ServiceResult<TrabajoDto> resultado = await service.CrearAsync(1, 5, request);
+
+            Assert.False(resultado.Success);
+            Assert.Equal(ErrorCode.VEH_NO_ENCONTRADO.ToString(), resultado.ErrorCode);
+            trabajoRepoMock.Verify(r => r.AddAsync(It.IsAny<Trabajo>()), Times.Never);
+        }
+
+        [Fact]
+        public async Task EnviarAsync_Debe_Cambiar_Estado_A_PRESUPUESTO_ENVIADO()
+        {
+            Mock<ITrabajoRepository> trabajoRepoMock = new Mock<ITrabajoRepository>();
+            Trabajo trabajo = new Trabajo { Id = 1, TallerId = 1, Estado = TrabajoEstado.PRESUPUESTO };
+
+            trabajoRepoMock.Setup(r => r.ObtenerEntidadPorIdAsync(1)).ReturnsAsync(trabajo);
+            trabajoRepoMock.Setup(r => r.ObtenerDetallePorIdAsync(1))
+                .ReturnsAsync(new TrabajoDto { Id = 1, Estado = TrabajoEstado.PRESUPUESTO_ENVIADO });
+
+            PresupuestoService service = CrearService(trabajoRepoMock);
+
+            Dtos.Responses.ServiceResult<TrabajoDto> resultado = await service.EnviarAsync(1, 1);
+
+            Assert.True(resultado.Success);
+            Assert.Equal(TrabajoEstado.PRESUPUESTO_ENVIADO, trabajo.Estado);
+            Assert.NotNull(trabajo.FechaEnvioPresupuesto);
+            Assert.NotNull(trabajo.ValidezHastaPresupuesto);
+            trabajoRepoMock.Verify(r => r.UpdateAsync(It.IsAny<Trabajo>()), Times.Once);
+        }
+
+        [Fact]
+        public async Task EnviarAsync_Debe_Fallar_Si_Estado_No_Es_PRESUPUESTO()
+        {
+            Mock<ITrabajoRepository> trabajoRepoMock = new Mock<ITrabajoRepository>();
+            Trabajo trabajo = new Trabajo { Id = 1, TallerId = 1, Estado = TrabajoEstado.ABIERTO };
+
+            trabajoRepoMock.Setup(r => r.ObtenerEntidadPorIdAsync(1)).ReturnsAsync(trabajo);
+
+            PresupuestoService service = CrearService(trabajoRepoMock);
+
+            Dtos.Responses.ServiceResult<TrabajoDto> resultado = await service.EnviarAsync(1, 1);
+
+            Assert.False(resultado.Success);
+            Assert.Equal(ErrorCode.TRA_TRANSICION_INVALIDA.ToString(), resultado.ErrorCode);
+            trabajoRepoMock.Verify(r => r.UpdateAsync(It.IsAny<Trabajo>()), Times.Never);
+        }
+
+        [Fact]
+        public async Task AceptarAsync_Debe_Cambiar_Estado_A_ABIERTO()
+        {
+            Mock<ITrabajoRepository> trabajoRepoMock = new Mock<ITrabajoRepository>();
+            Trabajo trabajo = new Trabajo { Id = 1, TallerId = 1, Estado = TrabajoEstado.PRESUPUESTO_ENVIADO };
+
+            trabajoRepoMock.Setup(r => r.ObtenerEntidadPorIdAsync(1)).ReturnsAsync(trabajo);
+            trabajoRepoMock.Setup(r => r.ObtenerDetallePorIdAsync(1))
+                .ReturnsAsync(new TrabajoDto { Id = 1, Estado = TrabajoEstado.ABIERTO });
+
+            PresupuestoService service = CrearService(trabajoRepoMock);
+
+            Dtos.Responses.ServiceResult<TrabajoDto> resultado = await service.AceptarAsync(1, 1, "https://firma.url");
+
+            Assert.True(resultado.Success);
+            Assert.Equal(TrabajoEstado.ABIERTO, trabajo.Estado);
+            Assert.Equal("https://firma.url", trabajo.FirmaAceptacionUrl);
+            Assert.NotNull(trabajo.FechaAceptacionPresupuesto);
+            trabajoRepoMock.Verify(r => r.UpdateAsync(It.IsAny<Trabajo>()), Times.Once);
+        }
+
+        [Fact]
+        public async Task RechazarAsync_Debe_Cambiar_Estado_A_RECHAZADO()
+        {
+            Mock<ITrabajoRepository> trabajoRepoMock = new Mock<ITrabajoRepository>();
+            Trabajo trabajo = new Trabajo { Id = 1, TallerId = 1, Estado = TrabajoEstado.PRESUPUESTO_ENVIADO };
+
+            trabajoRepoMock.Setup(r => r.ObtenerEntidadPorIdAsync(1)).ReturnsAsync(trabajo);
+            trabajoRepoMock.Setup(r => r.ObtenerDetallePorIdAsync(1))
+                .ReturnsAsync(new TrabajoDto { Id = 1, Estado = TrabajoEstado.RECHAZADO });
+
+            PresupuestoService service = CrearService(trabajoRepoMock);
+
+            Dtos.Responses.ServiceResult<TrabajoDto> resultado = await service.RechazarAsync(1, 1, "Precio demasiado alto");
+
+            Assert.True(resultado.Success);
+            Assert.Equal(TrabajoEstado.RECHAZADO, trabajo.Estado);
+            Assert.Equal("Precio demasiado alto", trabajo.MotivoRechazo);
+            Assert.NotNull(trabajo.FechaRechazo);
+            trabajoRepoMock.Verify(r => r.UpdateAsync(It.IsAny<Trabajo>()), Times.Once);
+        }
+
+        [Fact]
+        public async Task RechazarAsync_Debe_Fallar_Si_MotivoRechazo_Esta_Vacio()
+        {
+            Mock<ITrabajoRepository> trabajoRepoMock = new Mock<ITrabajoRepository>();
+            Trabajo trabajo = new Trabajo { Id = 1, TallerId = 1, Estado = TrabajoEstado.PRESUPUESTO_ENVIADO };
+
+            trabajoRepoMock.Setup(r => r.ObtenerEntidadPorIdAsync(1)).ReturnsAsync(trabajo);
+
+            PresupuestoService service = CrearService(trabajoRepoMock);
+
+            Dtos.Responses.ServiceResult<TrabajoDto> resultado = await service.RechazarAsync(1, 1, "   ");
+
+            Assert.False(resultado.Success);
+            Assert.Equal(ErrorCode.SYS_DATOS_INVALIDOS.ToString(), resultado.ErrorCode);
+            trabajoRepoMock.Verify(r => r.UpdateAsync(It.IsAny<Trabajo>()), Times.Never);
+        }
+
+        [Fact]
+        public async Task EliminarAsync_Debe_Fallar_Si_No_Es_Presupuesto()
+        {
+            Mock<ITrabajoRepository> trabajoRepoMock = new Mock<ITrabajoRepository>();
+            Trabajo trabajo = new Trabajo { Id = 1, TallerId = 1, Estado = TrabajoEstado.ABIERTO };
+
+            trabajoRepoMock.Setup(r => r.ObtenerEntidadPorIdAsync(1)).ReturnsAsync(trabajo);
+
+            PresupuestoService service = CrearService(trabajoRepoMock);
+
+            Dtos.Responses.ServiceResult<bool> resultado = await service.EliminarAsync(1, 1);
+
+            Assert.False(resultado.Success);
+            Assert.Equal(ErrorCode.TRA_ESTADO_INVALIDO.ToString(), resultado.ErrorCode);
+            trabajoRepoMock.Verify(r => r.UpdateAsync(It.IsAny<Trabajo>()), Times.Never);
         }
     }
 }

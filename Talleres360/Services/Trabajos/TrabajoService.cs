@@ -3,6 +3,7 @@ using Talleres360.Dtos.Responses;
 using Talleres360.Dtos.Trabajos;
 using Talleres360.Enums;
 using Talleres360.Enums.Errors;
+using Talleres360.Interfaces.Facturacion;
 using Talleres360.Interfaces.Trabajos;
 using Talleres360.Interfaces.Vehiculos;
 
@@ -12,11 +13,16 @@ namespace Talleres360.Services.Trabajos
     {
         private readonly ITrabajoRepository _trabajoRepository;
         private readonly IVehiculoRepository _vehiculoRepository;
+        private readonly IFacturacionService _facturacionService;
 
-        public TrabajoService(ITrabajoRepository trabajoRepository, IVehiculoRepository vehiculoRepository)
+        public TrabajoService(
+            ITrabajoRepository trabajoRepository,
+            IVehiculoRepository vehiculoRepository,
+            IFacturacionService facturacionService)
         {
             _trabajoRepository  = trabajoRepository;
             _vehiculoRepository = vehiculoRepository;
+            _facturacionService = facturacionService;
         }
 
         public async Task<PagedResponse<TrabajoDto>> ObtenerTodosAsync(int tallerId, PaginationParams paginacion, TrabajoEstado? estado = null, int? vehiculoId = null, bool? datosIncompletos = null)
@@ -27,13 +33,10 @@ namespace Talleres360.Services.Trabajos
             {
                 bool vehiculoPertenece = await _vehiculoRepository.PerteneceATallerAsync(vehiculoIdFiltrado.Value, tallerId);
                 if (!vehiculoPertenece)
-                {
                     vehiculoIdFiltrado = null;
-                }
             }
 
-            PagedResponse<TrabajoDto> trabajos = await _trabajoRepository.ObtenerTodosPagedAsync(tallerId, paginacion, estado, vehiculoIdFiltrado, datosIncompletos);
-            return trabajos;
+            return await _trabajoRepository.ObtenerTodosPagedAsync(tallerId, paginacion, estado, vehiculoIdFiltrado, datosIncompletos);
         }
 
         public async Task<ServiceResult<TrabajoDto>> ObtenerPorIdAsync(int tallerId, int trabajoId)
@@ -63,14 +66,14 @@ namespace Talleres360.Services.Trabajos
             {
                 return ServiceResult<TrabajoDto>.Fail(
                     ErrorCode.TRA_ESTADO_INVALIDO.ToString(),
-                    "El estado del trabajo no es v�lido.");
+                    "El estado del trabajo no es válido.");
             }
 
             if (!request.EstadoPago.HasValue)
             {
                 return ServiceResult<TrabajoDto>.Fail(
                     ErrorCode.TRA_ESTADO_PAGO_INVALIDO.ToString(),
-                    "El estado de pago del trabajo no es v�lido.");
+                    "El estado de pago del trabajo no es válido.");
             }
 
             TrabajoEstado estadoTrabajo = request.Estado.Value;
@@ -83,7 +86,7 @@ namespace Talleres360.Services.Trabajos
                 {
                     return ServiceResult<TrabajoDto>.Fail(
                         ErrorCode.VEH_NO_ENCONTRADO.ToString(),
-                        "El veh�culo indicado no existe en el taller.");
+                        "El vehículo indicado no existe en el taller.");
                 }
             }
 
@@ -138,18 +141,25 @@ namespace Talleres360.Services.Trabajos
             {
                 return ServiceResult<TrabajoDto>.Fail(
                     ErrorCode.TRA_ESTADO_INVALIDO.ToString(),
-                    "El estado del trabajo no es v�lido.");
+                    "El estado del trabajo no es válido.");
             }
 
             if (!request.EstadoPago.HasValue)
             {
                 return ServiceResult<TrabajoDto>.Fail(
                     ErrorCode.TRA_ESTADO_PAGO_INVALIDO.ToString(),
-                    "El estado de pago del trabajo no es v�lido.");
+                    "El estado de pago del trabajo no es válido.");
             }
 
             TrabajoEstado estadoTrabajo = request.Estado.Value;
             TrabajoEstadoPago estadoPagoTrabajo = request.EstadoPago.Value;
+
+            if (estadoTrabajo != trabajo.Estado && !trabajo.Estado.PuedeTransicionarA(estadoTrabajo))
+            {
+                return ServiceResult<TrabajoDto>.Fail(
+                    ErrorCode.TRA_TRANSICION_INVALIDA.ToString(),
+                    $"No se puede cambiar el estado de {trabajo.Estado} a {estadoTrabajo}.");
+            }
 
             if (request.VehiculoId.HasValue)
             {
@@ -158,11 +168,9 @@ namespace Talleres360.Services.Trabajos
                 {
                     return ServiceResult<TrabajoDto>.Fail(
                         ErrorCode.VEH_NO_ENCONTRADO.ToString(),
-                        "El veh�culo indicado no existe en el taller.");
+                        "El vehículo indicado no existe en el taller.");
                 }
             }
-
-            bool datosIncompletosFinal = request.DatosIncompletos || !request.VehiculoId.HasValue;
 
             if (request.KmSalida.HasValue && request.KmSalida.Value < request.KmEntrada)
             {
@@ -170,6 +178,8 @@ namespace Talleres360.Services.Trabajos
                     ErrorCode.SYS_DATOS_INVALIDOS.ToString(),
                     "El kilometraje de salida no puede ser menor al de entrada.");
             }
+
+            bool datosIncompletosFinal = request.DatosIncompletos || !request.VehiculoId.HasValue;
 
             trabajo.VehiculoId              = request.VehiculoId;
             trabajo.MecanicoAsignadoId      = request.MecanicoAsignadoId;
@@ -215,10 +225,23 @@ namespace Talleres360.Services.Trabajos
                     "Trabajo no encontrado.");
             }
 
+            if (trabajo.Estado == TrabajoEstado.FACTURADO)
+            {
+                return ServiceResult<bool>.Fail(
+                    ErrorCode.TRA_TRANSICION_INVALIDA.ToString(),
+                    "No se puede eliminar un trabajo que ya ha sido facturado.");
+            }
+
             trabajo.Eliminado = true;
+            trabajo.Estado = TrabajoEstado.CANCELADO;
             await _trabajoRepository.UpdateAsync(trabajo);
 
             return ServiceResult<bool>.Ok(true);
+        }
+
+        public Task<ServiceResult<TrabajoDto>> FacturarAsync(int tallerId, int trabajoId)
+        {
+            return _facturacionService.FacturarTrabajoAsync(tallerId, trabajoId);
         }
     }
 }

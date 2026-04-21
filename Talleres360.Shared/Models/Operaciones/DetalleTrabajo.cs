@@ -13,6 +13,9 @@ namespace Talleres360.Models.Operaciones
         [Column("TrabajoId")]
         public int TrabajoId { get; set; }
 
+        [Column("TallerId")]
+        public int TallerId { get; set; }
+
         [Column("ProductoId")]
         public int? ProductoId { get; set; }
 

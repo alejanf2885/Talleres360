@@ -36,6 +36,9 @@ namespace Talleres360.Models.Operaciones
         [Required]
         public CitaEstado Estado { get; set; } = CitaEstado.PENDIENTE;
 
+        [Column("TrabajoId")]
+        public int? TrabajoId { get; set; }
+
         [Column("Eliminado")]
         public bool Eliminado { get; set; }
     }

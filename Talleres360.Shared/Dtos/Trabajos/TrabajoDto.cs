@@ -7,6 +7,7 @@ namespace Talleres360.Dtos.Trabajos
         public int Id { get; set; }
         public int? VehiculoId { get; set; }
         public int? MecanicoAsignadoId { get; set; }
+        public int? CitaId { get; set; }
         public string? NumeroDocumento { get; set; }
         public string? TituloMantenimiento { get; set; }
         public string? TrabajoRealizado { get; set; }

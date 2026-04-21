@@ -22,6 +22,9 @@ namespace Talleres360.Repositories.Trabajos
                 .AsNoTracking()
                 .Where(trabajo => trabajo.TallerId == tallerId && !trabajo.Eliminado);
 
+            // Excluir estados de presupuesto del listado de trabajos
+            query = query.Where(trabajo => !TrabajoEstadoExtensions.EstadosPresupuesto.Contains(trabajo.Estado));
+
             if (estado.HasValue)
             {
                 query = query.Where(trabajo => trabajo.Estado == estado.Value);
@@ -48,6 +51,61 @@ namespace Talleres360.Repositories.Trabajos
                     Id                     = trabajo.Id,
                     VehiculoId             = trabajo.VehiculoId,
                     MecanicoAsignadoId     = trabajo.MecanicoAsignadoId,
+                    CitaId                 = trabajo.CitaId,
+                    NumeroDocumento        = trabajo.NumeroDocumento,
+                    TituloMantenimiento    = trabajo.TituloMantenimiento,
+                    TrabajoRealizado       = trabajo.TrabajoRealizado,
+                    KmEntrada              = trabajo.KmEntrada,
+                    Estado                 = trabajo.Estado,
+                    EstadoPago             = trabajo.EstadoPago,
+                    Subtotal               = trabajo.Subtotal,
+                    ImporteImpuestos       = trabajo.ImporteImpuestos,
+                    Total                  = trabajo.Total,
+                    CreadoPorId            = trabajo.CreadoPorId,
+                    FechaCreacion          = trabajo.FechaCreacion,
+                    ModificadoPorId        = trabajo.ModificadoPorId,
+                    FechaUltimaModificacion = trabajo.FechaUltimaModificacion,
+                    DatosIncompletos       = trabajo.DatosIncompletos,
+                    FechaCierre            = trabajo.FechaCierre,
+                    FechaEntregaEstimada   = trabajo.FechaEntregaEstimada,
+                    KmSalida               = trabajo.KmSalida,
+                    FotoEntradaUrl         = trabajo.FotoEntradaUrl,
+                    FotoSalidaUrl          = trabajo.FotoSalidaUrl,
+                    ObservacionesEntrega   = trabajo.ObservacionesEntrega
+                })
+                .ToListAsync();
+
+            PagedResponse<TrabajoDto> respuesta = new PagedResponse<TrabajoDto>
+            {
+                Data = data,
+                PageNumber = paginacion.PageNumber,
+                PageSize = paginacion.PageSize,
+                TotalCount = totalCount
+            };
+
+            return respuesta;
+        }
+
+        public async Task<PagedResponse<TrabajoDto>> ObtenerPresupuestosPagedAsync(int tallerId, PaginationParams paginacion)
+        {
+            IQueryable<Trabajo> query = _context.Trabajos
+                .AsNoTracking()
+                .Where(trabajo => trabajo.TallerId == tallerId
+                    && !trabajo.Eliminado
+                    && TrabajoEstadoExtensions.EstadosPresupuesto.Contains(trabajo.Estado));
+
+            int totalCount = await query.CountAsync();
+
+            List<TrabajoDto> data = await query
+                .OrderByDescending(trabajo => trabajo.Id)
+                .Skip((paginacion.PageNumber - 1) * paginacion.PageSize)
+                .Take(paginacion.PageSize)
+                .Select(trabajo => new TrabajoDto
+                {
+                    Id                     = trabajo.Id,
+                    VehiculoId             = trabajo.VehiculoId,
+                    MecanicoAsignadoId     = trabajo.MecanicoAsignadoId,
+                    CitaId                 = trabajo.CitaId,
                     NumeroDocumento        = trabajo.NumeroDocumento,
                     TituloMantenimiento    = trabajo.TituloMantenimiento,
                     TrabajoRealizado       = trabajo.TrabajoRealizado,
@@ -98,6 +156,7 @@ namespace Talleres360.Repositories.Trabajos
                     Id                     = t.Id,
                     VehiculoId             = t.VehiculoId,
                     MecanicoAsignadoId     = t.MecanicoAsignadoId,
+                    CitaId                 = t.CitaId,
                     NumeroDocumento        = t.NumeroDocumento,
                     TituloMantenimiento    = t.TituloMantenimiento,
                     TrabajoRealizado       = t.TrabajoRealizado,
@@ -143,6 +202,20 @@ namespace Talleres360.Repositories.Trabajos
                 .AnyAsync(trabajo => trabajo.Id == id && trabajo.TallerId == tallerId && !trabajo.Eliminado);
 
             return pertenece;
+        }
+
+        public async Task<string> GenerarNumeroDocumentoTrabajoAsync(int tallerId)
+        {
+            // Secuencia propia para trabajos/presupuestos (NO usa sp_SiguienteNumeroDocumento)
+            int ultimoNumero = await _context.Trabajos
+                .AsNoTracking()
+                .Where(t => t.TallerId == tallerId)
+                .OrderByDescending(t => t.Id)
+                .Select(t => t.Id)
+                .FirstOrDefaultAsync();
+
+            string numero = $"TRAB-{DateTime.UtcNow.Year}-{(ultimoNumero + 1):D6}";
+            return numero;
         }
     }
 }

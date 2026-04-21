@@ -141,5 +141,28 @@ namespace Talleres360.Controllers
 
             return Ok(ApiResponse<bool>.Ok(true, "Trabajo archivado correctamente."));
         }
+
+        /// <summary>Facturar un trabajo cerrado (CERRADO → FACTURADO). Genera snapshot inmutable de factura.</summary>
+        [TallerAuthorize<ITrabajoRepository>]
+        [RequiereSuscripcionActiva]
+        [HttpPost("{id:int:min(1)}/facturar")]
+        public async Task<IActionResult> Facturar(int id)
+        {
+            int? tallerId = _userContextService.GetTallerId();
+            if (!tallerId.HasValue)
+            {
+                return Unauthorized();
+            }
+
+            ServiceResult<TrabajoDto> resultado = await _trabajoService.FacturarAsync(tallerId.Value, id);
+            if (!resultado.Success)
+            {
+                return BadRequest(new ApiErrorResponse(
+                    codigo: resultado.ErrorCode ?? ErrorCode.TRA_NO_FACTURABLE.ToString(),
+                    mensaje: resultado.Message ?? "No se pudo facturar el trabajo."));
+            }
+
+            return Ok(ApiResponse<TrabajoDto>.Ok(resultado.Data!, "Trabajo facturado correctamente. Factura generada."));
+        }
     }
 }
