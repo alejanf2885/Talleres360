@@ -2,6 +2,7 @@ using Moq;
 using Talleres360.Dtos.Trabajos;
 using Talleres360.Enums;
 using Talleres360.Enums.Errors;
+using Talleres360.Interfaces.Facturacion;
 using Talleres360.Interfaces.Trabajos;
 using Talleres360.Interfaces.Vehiculos;
 using Talleres360.Services.Trabajos;
@@ -10,12 +11,23 @@ namespace Talleres360.Test.Services
 {
     public class TrabajoServiceTests
     {
+        private static TrabajoService CrearService(
+            Mock<ITrabajoRepository>? trabajoRepo = null,
+            Mock<IVehiculoRepository>? vehiculoRepo = null,
+            Mock<IFacturacionService>? facturacionService = null)
+        {
+            return new TrabajoService(
+                (trabajoRepo ?? new Mock<ITrabajoRepository>()).Object,
+                (vehiculoRepo ?? new Mock<IVehiculoRepository>()).Object,
+                (facturacionService ?? new Mock<IFacturacionService>()).Object);
+        }
+
         [Fact]
         public async Task CrearAsync_Debe_Fallar_Cuando_Estado_Es_Nulo()
         {
             Mock<ITrabajoRepository> trabajoRepositoryMock = new Mock<ITrabajoRepository>();
             Mock<IVehiculoRepository> vehiculoRepositoryMock = new Mock<IVehiculoRepository>();
-            TrabajoService service = new TrabajoService(trabajoRepositoryMock.Object, vehiculoRepositoryMock.Object);
+            TrabajoService service = CrearService(trabajoRepositoryMock, vehiculoRepositoryMock);
 
             CrearTrabajoRequest request = new CrearTrabajoRequest
             {
@@ -40,7 +52,7 @@ namespace Talleres360.Test.Services
         {
             Mock<ITrabajoRepository> trabajoRepositoryMock = new Mock<ITrabajoRepository>();
             Mock<IVehiculoRepository> vehiculoRepositoryMock = new Mock<IVehiculoRepository>();
-            TrabajoService service = new TrabajoService(trabajoRepositoryMock.Object, vehiculoRepositoryMock.Object);
+            TrabajoService service = CrearService(trabajoRepositoryMock, vehiculoRepositoryMock);
 
             CrearTrabajoRequest request = new CrearTrabajoRequest
             {
@@ -69,7 +81,7 @@ namespace Talleres360.Test.Services
                 .Setup(repo => repo.PerteneceATallerAsync(15, 1))
                 .ReturnsAsync(false);
 
-            TrabajoService service = new TrabajoService(trabajoRepositoryMock.Object, vehiculoRepositoryMock.Object);
+            TrabajoService service = CrearService(trabajoRepositoryMock, vehiculoRepositoryMock);
 
             CrearTrabajoRequest request = new CrearTrabajoRequest
             {
@@ -95,7 +107,6 @@ namespace Talleres360.Test.Services
         {
             Mock<ITrabajoRepository> trabajoRepositoryMock = new Mock<ITrabajoRepository>();
             Mock<IVehiculoRepository> vehiculoRepositoryMock = new Mock<IVehiculoRepository>();
-            TrabajoService service = new TrabajoService(trabajoRepositoryMock.Object, vehiculoRepositoryMock.Object);
 
             Trabajo? trabajoCreado = null;
 
@@ -117,6 +128,8 @@ namespace Talleres360.Test.Services
                     EstadoPago = TrabajoEstadoPago.PENDIENTE,
                     DatosIncompletos = true
                 });
+
+            TrabajoService service = CrearService(trabajoRepositoryMock, vehiculoRepositoryMock);
 
             CrearTrabajoRequest request = new CrearTrabajoRequest
             {

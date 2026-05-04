@@ -1,4 +1,4 @@
-﻿namespace Talleres360.Enums.Errors
+namespace Talleres360.Enums.Errors
 {
     public enum ErrorCode
     {
@@ -71,6 +71,8 @@
         TRA_NO_ENCONTRADO,
         TRA_ESTADO_INVALIDO,
         TRA_ESTADO_PAGO_INVALIDO,
+        TRA_TRANSICION_INVALIDA,
+        TRA_NO_FACTURABLE,
 
         // --- SYS: Sistema y Errores Globales ---
         SYS_DATOS_INVALIDOS,

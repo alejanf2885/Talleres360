@@ -25,12 +25,14 @@ using Talleres360.Interfaces.Imagenes;
 using Talleres360.Interfaces.Inventario;
 using Talleres360.Interfaces.NotasVehiculo;
 using Talleres360.Interfaces.Password;
-using Talleres360.Interfaces.Presupuestos;
+
 using Talleres360.Interfaces.Planes;
 using Talleres360.Interfaces.SaneadorFotos;
 using Talleres360.Interfaces.Seguridad;
 using Talleres360.Interfaces.Servicios;
 using Talleres360.Interfaces.Talleres;
+using Talleres360.Interfaces.Facturacion;
+using Talleres360.Interfaces.Presupuestos;
 using Talleres360.Interfaces.Trabajos;
 using Talleres360.Interfaces.Usuarios;
 using Talleres360.Interfaces.Vehiculos;
@@ -42,10 +44,11 @@ using Talleres360.Repositories.Data;
 using Talleres360.Repositories.Inventario;
 using Talleres360.Repositories.NotasVehiculo;
 using Talleres360.Repositories.Planes;
-using Talleres360.Repositories.Presupuestos;
+
 using Talleres360.Repositories.Seguridad;
 using Talleres360.Repositories.Servicios;
 using Talleres360.Repositories.Talleres;
+using Talleres360.Repositories.Facturas;
 using Talleres360.Repositories.Trabajos;
 using Talleres360.Repositories.Usuarios;
 using Talleres360.Repositories.Vehiculos;
@@ -61,11 +64,13 @@ using Talleres360.Services.Imagenes;
 using Talleres360.Services.Inventario;
 using Talleres360.Services.NotasVehiculo;
 using Talleres360.Services.Password;
-using Talleres360.Services.Presupuestos;
+
 using Talleres360.Services.SaneadorFotos;
 using Talleres360.Services.Seguridad;
 using Talleres360.Services.Servicios;
 using Talleres360.Services.Talleres;
+using Talleres360.Services.Facturacion;
+using Talleres360.Services.Presupuestos;
 using Talleres360.Services.Trabajos;
 using Talleres360.Services.Usuarios;
 using Talleres360.Services.Vehiculos;
@@ -112,7 +117,7 @@ builder.Services.AddScoped<ITrabajoRepository, TrabajoRepository>();
 builder.Services.AddScoped<ICobroTrabajoRepository, CobroTrabajoRepository>();
 builder.Services.AddScoped<ITarifaHoraRepository, TarifaHoraRepository>();
 builder.Services.AddScoped<IDetalleTrabajoRepository, DetalleTrabajoRepository>();
-builder.Services.AddScoped<IPresupuestoRepository, PresupuestoRepository>();
+
 builder.Services.AddScoped<INotaVehiculoRepository, NotaVehiculoRepository>();
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
@@ -128,10 +133,13 @@ builder.Services.AddScoped<ICategoriaProductoService, CategoriaProductoService>(
 builder.Services.AddScoped<IProductoService, ProductoService>();
 builder.Services.AddScoped<IServicioService, ServicioService>();
 builder.Services.AddScoped<ITrabajoService, TrabajoService>();
+builder.Services.AddScoped<IPresupuestoService, PresupuestoService>();
+builder.Services.AddScoped<IFacturacionService, FacturacionService>();
+builder.Services.AddScoped<IFacturaRepository, FacturaRepository>();
 builder.Services.AddScoped<ICobroTrabajoService, CobroTrabajoService>();
 builder.Services.AddScoped<ITarifaHoraService, TarifaHoraService>();
 builder.Services.AddScoped<IDetalleTrabajoService, DetalleTrabajoService>();
-builder.Services.AddScoped<IPresupuestoService, PresupuestoService>();
+
 builder.Services.AddScoped<IDocumentoComercialService, DocumentoComercialService>();
 builder.Services.AddScoped<INotaVehiculoService, NotaVehiculoService>();
 builder.Services.AddScoped<IProcesadorImagenService, ProcesadorImagenService>();

@@ -13,6 +13,9 @@ namespace Talleres360.Models.Facturacion
         [Column("FacturaId")]
         public int FacturaId { get; set; }
 
+        [Column("TallerId")]
+        public int TallerId { get; set; }
+
         [Column("TipoIvaPorcentaje")]
         public decimal TipoIvaPorcentaje { get; set; }
 

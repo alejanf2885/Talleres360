@@ -12,13 +12,16 @@ namespace Talleres360.Models.Operaciones
         public int Id { get; set; }
 
         [Column("TallerId")]
-        public int? TallerId { get; set; }
+        public int TallerId { get; set; }
 
         [Column("VehiculoId")]
         public int? VehiculoId { get; set; }
 
         [Column("MecanicoAsignadoId")]
         public int? MecanicoAsignadoId { get; set; }
+
+        [Column("CitaId")]
+        public int? CitaId { get; set; }
 
         [Column("NumeroDocumento")]
         [StringLength(50)]
@@ -68,6 +71,30 @@ namespace Talleres360.Models.Operaciones
 
         [Column("FechaEntregaEstimada")]
         public DateTime? FechaEntregaEstimada { get; set; }
+
+        // --- Campos de presupuesto ---
+
+        [Column("FechaEnvioPresupuesto")]
+        public DateTime? FechaEnvioPresupuesto { get; set; }
+
+        [Column("FechaAceptacionPresupuesto")]
+        public DateTime? FechaAceptacionPresupuesto { get; set; }
+
+        [Column("ValidezHastaPresupuesto")]
+        public DateTime? ValidezHastaPresupuesto { get; set; }
+
+        [Column("FirmaAceptacionUrl")]
+        [StringLength(500)]
+        public string? FirmaAceptacionUrl { get; set; }
+
+        [Column("MotivoRechazo")]
+        [StringLength(500)]
+        public string? MotivoRechazo { get; set; }
+
+        [Column("FechaRechazo")]
+        public DateTime? FechaRechazo { get; set; }
+
+        // --- Fin campos de presupuesto ---
 
         [Column("KmSalida")]
         public int? KmSalida { get; set; }
