@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Talleres360 — Logo Refinement · Concept A</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'DM Sans',sans-serif;background:#080E1A;min-height:100vh;color:#fff}
+.page{max-width:1080px;margin:0 auto;padding:52px 32px 96px}
+.back{font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#2E4060;margin-bottom:40px;display:flex;align-items:center;gap:6px}
+.hero{margin-bottom:56px}
+.hero-label{font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#2E4060;margin-bottom:8px}
+.hero-title{font-family:'Space Grotesk',sans-serif;font-size:32px;font-weight:800;color:#DCE6F5;letter-spacing:-.02em;line-height:1.1;margin-bottom:6px}
+.hero-sub{font-size:14px;color:#2E4060;line-height:1.6}
+
+/* ─ VARIANT GRID ─ */
+.variants{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:56px}
+.v-card{border-radius:16px;border:1px solid #131F33;overflow:hidden;display:flex;flex-direction:column;transition:border-color .2s}
+.v-card:hover{border-color:#2A4060}
+.v-card.selected{border-color:oklch(0.60 0.18 245);box-shadow:0 0 0 1px oklch(0.60 0.18 245 / 0.3)}
+.v-head{padding:13px 16px 10px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #131F33}
+.v-name{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#2E4060}
+.v-tag{font-size:10px;font-weight:600;color:#1A3050;background:#0F1928;padding:2px 8px;border-radius:99px;border:1px solid #131F33}
+
+/* ─ PREVIEW AREAS ─ */
+.prev-dark{background:#111B2E;display:flex;align-items:center;justify-content:center;padding:36px 28px;flex-direction:column;gap:28px}
+.prev-light{background:#F3F4F8;display:flex;align-items:center;justify-content:center;padding:24px;gap:20px;flex-wrap:wrap}
+.bg-strip{height:3px}
+
+/* ─ SIZE SAMPLES ─ */
+.sizes{display:flex;align-items:center;gap:16px;margin-top:4px}
+
+/* ─ SELECTED DETAIL ─ */
+.detail-section{margin-bottom:56px}
+.detail-label{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#2E4060;margin-bottom:20px;padding-bottom:10px;border-bottom:1px solid #131F33}
+.contexts{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.ctx{border-radius:12px;overflow:hidden;border:1px solid #131F33}
+.ctx-label{font-size:10px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:#2E4060;padding:10px 12px 8px;border-bottom:1px solid #131F33}
+.ctx-area{display:flex;align-items:center;justify-content:center;padding:28px 16px}
+</style>
+</head>
+<body>
+<div class="page">
+
+  <div class="back">← Talleres360 Brand Identity · Refinamiento Concepto A</div>
+
+  <div class="hero">
+    <div class="hero-label">Refinamiento de logo</div>
+    <div class="hero-title">Órbita + Herramienta</div>
+    <div class="hero-sub">6 variantes minimalistas · arco 360° + símbolo de taller distintivo</div>
+  </div>
+
+  <!-- ════════════════════════════════════════
+       6 VARIANTS
+  ════════════════════════════════════════ -->
+  <div class="variants">
+
+    <!-- V1 · HEX NUT -->
+    <div class="v-card">
+      <div class="v-head"><span class="v-name">V1 · Hexnut</span><span class="v-tag">Mecánico</span></div>
+      <div class="prev-dark">
+        <!-- ICON -->
+        <svg width="56" height="56" viewBox="0 0 56 56" fill="none">
+          <!-- Orbit arc - thin, elegant, almost complete -->
+          <circle cx="28" cy="28" r="24" stroke="#1A2D48" stroke-width="2.5"/>
+          <circle cx="28" cy="28" r="24" stroke="oklch(0.68 0.18 245)" stroke-width="2.5"
+            stroke-linecap="round" stroke-dasharray="138 12" transform="rotate(-105 28 28)"/>
+          <!-- Hex nut — open center -->
+          <polygon points="28,12 38.4,18 38.4,30 28,36 17.6,30 17.6,18"
+            fill="none" stroke="white" stroke-width="2.5" stroke-linejoin="round"/>
+          <!-- Inner hex small bolt hole -->
+          <circle cx="28" cy="24" r="4.5" fill="none" stroke="white" stroke-width="2"/>
+        </svg>
+        <!-- HORIZONTAL LOGO -->
+        <svg width="190" height="44" viewBox="0 0 190 44" fill="none">
+          <circle cx="22" cy="22" r="18" stroke="#1A2D48" stroke-width="2"/>
+          <circle cx="22" cy="22" r="18" stroke="oklch(0.68 0.18 245)" stroke-width="2"
+            stroke-linecap="round" stroke-dasharray="103 9" transform="rotate(-105 22 22)"/>
+          <polygon points="22,9 30,14 30,23 22,28 14,23 14,14"
+            fill="none" stroke="white" stroke-width="2" stroke-linejoin="round"/>
+          <circle cx="22" cy="18.5" r="3.5" fill="none" stroke="white" stroke-width="1.8"/>
+          <text x="50" y="17" font-family="Space Grotesk" font-size="13" font-weight="500" fill="#4A6080" letter-spacing="0.08em">TALLERES</text>
+          <text x="50" y="38" font-family="Space Grotesk" font-size="22" font-weight="800" fill="white" letter-spacing="-0.5">360<tspan fill="oklch(0.68 0.18 245)" font-size="16">°</tspan></text>
+        </svg>
+      </div>
+      <div class="prev-light">
+        <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
+          <circle cx="20" cy="20" r="16" stroke="#E4E7EE" stroke-width="2"/>
+          <circle cx="20" cy="20" r="16" stroke="oklch(0.60 0.18 245)" stroke-width="2"
+            stroke-linecap="round" stroke-dasharray="90 8" transform="rotate(-105 20 20)"/>
+          <polygon points="20,8 28,13 28,21 20,26 12,21 12,13"
+            fill="none" stroke="#1E2736" stroke-width="2" stroke-linejoin="round"/>
+          <circle cx="20" cy="17" r="3" fill="none" stroke="#1E2736" stroke-width="1.8"/>
+        </svg>
+        <svg width="130" height="30" viewBox="0 0 130 30" fill="none">
+          <text x="0" y="12" font-family="Space Grotesk" font-size="11" font-weight="600" fill="#9AA3B5" letter-spacing="0.08em">TALLERES</text>
+          <text x="0" y="30" font-family="Space Grotesk" font-size="20" font-weight="800" fill="#1E2736" letter-spacing="-0.5">360<tspan fill="oklch(0.60 0.18 245)" font-size="14">°</tspan></text>
+        </svg>
+      </div>
+    </div>
+
+    <!-- V2 · OPEN WRENCH -->
+    <div class="v-card">
+      <div class="v-head"><span class="v-name">V2 · Open Wrench</span><span class="v-tag">Clásico</span></div>
+      <div class="prev-dark">
+        <svg width="56" height="56" viewBox="0 0 56 56" fill="none">
+          <circle cx="28" cy="28" r="24" stroke="#1A2D48" stroke-width="2.5"/>
+          <circle cx="28" cy="28" r="24" stroke="oklch(0.68 0.18 245)" stroke-width="2.5"
+            stroke-linecap="round" stroke-dasharray="138 12" transform="rotate(-100 28 28)"/>
+          <!-- Open end wrench silhouette: handle + two jaws -->
+          <!-- Handle -->
+          <rect x="26" y="24" width="4" height="18" rx="2" fill="white"/>
+          <!-- Left jaw -->
+          <rect x="20" y="14" width="3.5" height="12" rx="1.75" fill="white"/>
+          <!-- Right jaw -->
+          <rect x="32.5" y="14" width="3.5" height="12" rx="1.75" fill="white"/>
+          <!-- Cross bar connecting handle to jaws -->
+          <rect x="20" y="23" width="16" height="3.5" rx="1.75" fill="white"/>
+        </svg>
+        <svg width="190" height="44" viewBox="0 0 190 44" fill="none">
+          <circle cx="22" cy="22" r="18" stroke="#1A2D48" stroke-width="2"/>
+          <circle cx="22" cy="22" r="18" stroke="oklch(0.68 0.18 245)" stroke-width="2"
+            stroke-linecap="round" stroke-dasharray="103 9" transform="rotate(-100 22 22)"/>
+          <rect x="20.5" y="19" width="3" height="13" rx="1.5" fill="white"/>
+          <rect x="15.5" y="11" width="2.5" height="9" rx="1.25" fill="white"/>
+          <rect x="26" y="11" width="2.5" height="9" rx="1.25" fill="white"/>
+          <rect x="15.5" y="18" width="13" height="3" rx="1.5" fill="white"/>
+          <text x="50" y="17" font-family="Space Grotesk" font-size="13" font-weight="500" fill="#4A6080" letter-spacing="0.08em">TALLERES</text>
+          <text x="50" y="38" font-family="Space Grotesk" font-size="22" font-weight="800" fill="white" letter-spacing="-0.5">360<tspan fill="oklch(0.68 0.18 245)" font-size="16">°</tspan></text>
+        </svg>
+      </div>
+      <div class="prev-light">
+        <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
+          <circle cx="20" cy="20" r="16" stroke="#E4E7EE" stroke-width="2"/>
+          <circle cx="20" cy="20" r="16" stroke="oklch(0.60 0.18 245)" stroke-width="2"
+            stroke-linecap="round" stroke-dasharray="90 8" transform="rotate(-100 20 20)"/>
+          <rect x="18.5" y="17" width="3" height="12" rx="1.5" fill="#1E2736"/>
+          <rect x="13.5" y="9" width="2.5" height="9" rx="1.25" fill="#1E2736"/>
+          <rect x="24" y="9" width="2.5" height="9" rx="1.25" fill="#1E2736"/>
+          <rect x="13.5" y="16" width="13" height="3" rx="1.5" fill="#1E2736"/>
+        </svg>
+        <svg width="130" height="30" viewBox="0 0 130 30" fill="none">
+          <text x="0" y="12" font-family="Space Grotesk" font-size="11" font-weight="600" fill="#9AA3B5" letter-spacing="0.08em">TALLERES</text>
+          <text x="0" y="30" font-family="Space Grotesk" font-size="20" font-weight="800" fill="#1E2736" letter-spacing="-0.5">360<tspan fill="oklch(0.60 0.18 245)" font-size="14">°</tspan></text>
+        </svg>
+      </div>
+    </div>
+
+    <!-- V3 · ARC AS JAW -->
+    <div class="v-card selected">
+      <div class="v-head"><span class="v-name">V3 · Arc Wrench ★</span><span class="v-tag" style="color:oklch(0.68 0.18 245);border-color:oklch(0.60 0.18 245 / 0.3);background:oklch(0.60 0.18 245 / 0.08)">Recomendado</span></div>
+      <div class="prev-dark">
+        <svg width="56" height="56" viewBox="0 0 56 56" fill="none">
+          <!-- Outer arc - the TOP becomes the wrench jaw opening -->
+          <!-- Arc bottom 200deg, gap at top = open wrench jaw -->
+          <path d="M28 4 A24 24 0 1 1 27.9 4" stroke="#1A2D48" stroke-width="2.5" stroke-linecap="round" fill="none" stroke-dasharray="0 4 140 10"/>
+          <!-- Arc cobalt - partial, represents the wrench body -->
+          <path d="M14 10 A24 24 0 1 0 42 10" stroke="oklch(0.68 0.18 245)" stroke-width="3" stroke-linecap="round" fill="none"/>
+          <!-- Two jaw tips at top of the arc -->
+          <circle cx="14" cy="10" r="3" fill="oklch(0.68 0.18 245)"/>
+          <circle cx="42" cy="10" r="3" fill="oklch(0.68 0.18 245)"/>
+          <!-- Handle - goes down from center-bottom of arc -->
+          <rect x="25.5" y="26" width="5" height="20" rx="2.5" fill="white"/>
+          <!-- Small cross guard -->
+          <rect x="20" y="25" width="16" height="4" rx="2" fill="white"/>
+        </svg>
+        <svg width="190" height="44" viewBox="0 0 190 44" fill="none">
+          <path d="M11 7.5 A18 18 0 1 0 33 7.5" stroke="oklch(0.68 0.18 245)" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+          <circle cx="11" cy="7.5" r="2.5" fill="oklch(0.68 0.18 245)"/>
+          <circle cx="33" cy="7.5" r="2.5" fill="oklch(0.68 0.18 245)"/>
+          <rect x="20.5" y="20" width="3" height="14" rx="1.5" fill="white"/>
+          <rect x="16" y="19" width="12" height="3" rx="1.5" fill="white"/>
+          <text x="50" y="17" font-family="Space Grotesk" font-size="13" font-weight="500" fill="#4A6080" letter-spacing="0.08em">TALLERES</text>
+          <text x="50" y="38" font-family="Space Grotesk" font-size="22" font-weight="800" fill="white" letter-spacing="-0.5">360<tspan fill="oklch(0.68 0.18 245)" font-size="16">°</tspan></text>
+        </svg>
+      </div>
+      <div class="prev-light">
+        <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
+          <path d="M8 5.5 A16 16 0 1 0 32 5.5" stroke="oklch(0.60 0.18 245)" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+          <circle cx="8" cy="5.5" r="2.2" fill="oklch(0.60 0.18 245)"/>
+          <circle cx="32" cy="5.5" r="2.2" fill="oklch(0.60 0.18 245)"/>
+          <rect x="18.5" y="18" width="3" height="14" rx="1.5" fill="#1E2736"/>
+          <rect x="14" y="17" width="12" height="3" rx="1.5" fill="#1E2736"/>
+        </svg>
+        <svg width="130" height="30" viewBox="0 0 130 30" fill="none">
+          <text x="0" y="12" font-family="Space Grotesk" font-size="11" font-weight="600" fill="#9AA3B5" letter-spacing="0.08em">TALLERES</text>
+          <text x="0" y="30" font-family="Space Grotesk" font-size="20" font-weight="800" fill="#1E2736" letter-spacing="-0.5">360<tspan fill="oklch(0.60 0.18 245)" font-size="14">°</tspan></text>
+        </svg>
+      </div>
+    </div>
+
+    <!-- V4 · SPARK PLUG -->
+    <div class="v-card">
+      <div class="v-head"><span class="v-name">V4 · Spark Plug</span><span class="v-tag">Automotriz</span></div>
+      <div class="prev-dark">
+        <svg width="56" height="56" viewBox="0 0 56 56" fill="none">
+          <circle cx="28" cy="28" r="24" stroke="#1A2D48" stroke-width="2.5"/>
+          <circle cx="28" cy="28" r="24" stroke="oklch(0.68 0.18 245)" stroke-width="2.5"
+            stroke-linecap="round" stroke-dasharray="120 30" transform="rotate(-105 28 28)"/>
+          <!-- Spark plug simplified: hex body + electrode -->
+          <!-- Hex top -->
+          <polygon points="28,10 33,13 33,19 28,22 23,19 23,13" fill="none" stroke="white" stroke-width="2" stroke-linejoin="round"/>
+          <!-- Ceramic insulator body -->
+          <rect x="26" y="22" width="4" height="10" rx="1" fill="white"/>
+          <!-- Thread body wider -->
+          <rect x="24.5" y="32" width="7" height="7" rx="1" fill="none" stroke="white" stroke-width="1.8"/>
+          <!-- Electrode / gap -->
+          <line x1="28" y1="39" x2="28" y2="43" stroke="white" stroke-width="2" stroke-linecap="round"/>
+          <!-- Spark -->
+          <path d="M30 41 L27 43 L29 44 L26 47" stroke="oklch(0.68 0.18 245)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <svg width="190" height="44" viewBox="0 0 190 44" fill="none">
+          <circle cx="22" cy="22" r="18" stroke="#1A2D48" stroke-width="2"/>
+          <circle cx="22" cy="22" r="18" stroke="oklch(0.68 0.18 245)" stroke-width="2"
+            stroke-linecap="round" stroke-dasharray="90 22" transform="rotate(-105 22 22)"/>
+          <polygon points="22,9 26,11.5 26,16.5 22,19 18,16.5 18,11.5" fill="none" stroke="white" stroke-width="1.8" stroke-linejoin="round"/>
+          <rect x="20.5" y="19" width="3" height="7" rx="0.8" fill="white"/>
+          <rect x="19.5" y="26" width="5" height="5" rx="0.8" fill="none" stroke="white" stroke-width="1.5"/>
+          <line x1="22" y1="31" x2="22" y2="34" stroke="white" stroke-width="1.8" stroke-linecap="round"/>
+          <path d="M23.5 32 L21 34 L22.5 34.5 L20 37" stroke="oklch(0.68 0.18 245)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <text x="50" y="17" font-family="Space Grotesk" font-size="13" font-weight="500" fill="#4A6080" letter-spacing="0.08em">TALLERES</text>
+          <text x="50" y="38" font-family="Space Grotesk" font-size="22" font-weight="800" fill="white" letter-spacing="-0.5">360<tspan fill="oklch(0.68 0.18 245)" font-size="16">°</tspan></text>
+        </svg>
+      </div>
+      <div class="prev-light">
+        <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
+          <circle cx="20" cy="20" r="16" stroke="#E4E7EE" stroke-width="2"/>
+          <circle cx="20" cy="20" r="16" stroke="oklch(0.60 0.18 245)" stroke-width="2"
+            stroke-linecap="round" stroke-dasharray="78 22" transform="rotate(-105 20 20)"/>
+          <polygon points="20,7 24,9.5 24,14 20,16.5 16,14 16,9.5" fill="none" stroke="#1E2736" stroke-width="1.8" stroke-linejoin="round"/>
+          <rect x="18.5" y="16.5" width="3" height="6" rx="0.8" fill="#1E2736"/>
+          <rect x="17.5" y="22.5" width="5" height="4.5" rx="0.8" fill="none" stroke="#1E2736" stroke-width="1.5"/>
+          <line x1="20" y1="27" x2="20" y2="30" stroke="#1E2736" stroke-width="1.8" stroke-linecap="round"/>
+          <path d="M21.5 28 L19 30 L20.5 30.5 L18 33" stroke="oklch(0.60 0.18 245)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <svg width="130" height="30" viewBox="0 0 130 30" fill="none">
+          <text x="0" y="12" font-family="Space Grotesk" font-size="11" font-weight="600" fill="#9AA3B5" letter-spacing="0.08em">TALLERES</text>
+          <text x="0" y="30" font-family="Space Grotesk" font-size="20" font-weight="800" fill="#1E2736" letter-spacing="-0.5">360<tspan fill="oklch(0.60 0.18 245)" font-size="14">°</tspan></text>
+        </svg>
+      </div>
+    </div>
+
+    <!-- V5 · DOUBLE RING -->
+    <div class="v-card">
+      <div class="v-head"><span class="v-name">V5 · Double Ring</span><span class="v-tag">Premium</span></div>
+      <div class="prev-dark">
+        <svg width="56" height="56" viewBox="0 0 56 56" fill="none">
+          <!-- Outer thin ring -->
+          <circle cx="28" cy="28" r="24" stroke="#1A2D48" stroke-width="1.5"/>
+          <!-- Inner accent ring - partial -->
+          <circle cx="28" cy="28" r="18" stroke="oklch(0.68 0.18 245)" stroke-width="2.5"
+            stroke-linecap="round" stroke-dasharray="100 13" transform="rotate(-110 28 28)"/>
+          <!-- Simple wrench: just handle + two prongs, very thin -->
+          <rect x="26.5" y="22" width="3" height="16" rx="1.5" fill="white"/>
+          <rect x="20.5" y="14" width="2.5" height="10" rx="1.25" fill="white"/>
+          <rect x="33" y="14" width="2.5" height="10" rx="1.25" fill="white"/>
+          <rect x="20.5" y="21" width="15" height="3" rx="1.5" fill="white"/>
+        </svg>
+        <svg width="190" height="44" viewBox="0 0 190 44" fill="none">
+          <circle cx="22" cy="22" r="18" stroke="#1A2D48" stroke-width="1.5"/>
+          <circle cx="22" cy="22" r="13" stroke="oklch(0.68 0.18 245)" stroke-width="2"
+            stroke-linecap="round" stroke-dasharray="72 10" transform="rotate(-110 22 22)"/>
+          <rect x="20.5" y="17" width="3" height="12" rx="1.5" fill="white"/>
+          <rect x="15.5" y="10" width="2.5" height="8" rx="1.25" fill="white"/>
+          <rect x="26" y="10" width="2.5" height="8" rx="1.25" fill="white"/>
+          <rect x="15.5" y="16" width="13" height="2.5" rx="1.25" fill="white"/>
+          <text x="50" y="17" font-family="Space Grotesk" font-size="13" font-weight="500" fill="#4A6080" letter-spacing="0.08em">TALLERES</text>
+          <text x="50" y="38" font-family="Space Grotesk" font-size="22" font-weight="800" fill="white" letter-spacing="-0.5">360<tspan fill="oklch(0.68 0.18 245)" font-size="16">°</tspan></text>
+        </svg>
+      </div>
+      <div class="prev-light">
+        <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
+          <circle cx="20" cy="20" r="16" stroke="#E4E7EE" stroke-width="1.5"/>
+          <circle cx="20" cy="20" r="11" stroke="oklch(0.60 0.18 245)" stroke-width="2"
+            stroke-linecap="round" stroke-dasharray="60 9" transform="rotate(-110 20 20)"/>
+          <rect x="18.5" y="14" width="3" height="14" rx="1.5" fill="#1E2736"/>
+          <rect x="13.5" y="8" width="2.5" height="7" rx="1.25" fill="#1E2736"/>
+          <rect x="24" y="8" width="2.5" height="7" rx="1.25" fill="#1E2736"/>
+          <rect x="13.5" y="13" width="13" height="2.5" rx="1.25" fill="#1E2736"/>
+        </svg>
+        <svg width="130" height="30" viewBox="0 0 130 30" fill="none">
+          <text x="0" y="12" font-family="Space Grotesk" font-size="11" font-weight="600" fill="#9AA3B5" letter-spacing="0.08em">TALLERES</text>
+          <text x="0" y="30" font-family="Space Grotesk" font-size="20" font-weight="800" fill="#1E2736" letter-spacing="-0.5">360<tspan fill="oklch(0.60 0.18 245)" font-size="14">°</tspan></text>
+        </svg>
+      </div>
+    </div>
+
+    <!-- V6 · NEGATIVE SPACE -->
+    <div class="v-card">
+      <div class="v-head"><span class="v-name">V6 · Negative Space</span><span class="v-tag">Bold</span></div>
+      <div class="prev-dark">
+        <svg width="56" height="56" viewBox="0 0 56 56" fill="none">
+          <!-- Filled circle cobalt -->
+          <circle cx="28" cy="28" r="24" fill="oklch(0.60 0.18 245)"/>
+          <!-- Arc gap in dark -->
+          <path d="M28 4 A24 24 0 0 1 51.07 36" stroke="#080E1A" stroke-width="4" stroke-linecap="round" fill="none"/>
+          <!-- Wrench cut out in white/negative -->
+          <rect x="26.5" y="22" width="3" height="18" rx="1.5" fill="white"/>
+          <rect x="20" y="13" width="3" height="11" rx="1.5" fill="white"/>
+          <rect x="33" y="13" width="3" height="11" rx="1.5" fill="white"/>
+          <rect x="20" y="21" width="16" height="3.5" rx="1.75" fill="white"/>
+        </svg>
+        <svg width="190" height="44" viewBox="0 0 190 44" fill="none">
+          <circle cx="22" cy="22" r="18" fill="oklch(0.60 0.18 245)"/>
+          <path d="M22 4 A18 18 0 0 1 38.55 31" stroke="#080E1A" stroke-width="3.5" stroke-linecap="round" fill="none"/>
+          <rect x="20.5" y="17" width="3" height="14" rx="1.5" fill="white"/>
+          <rect x="15.5" y="9" width="2.5" height="9" rx="1.25" fill="white"/>
+          <rect x="26" y="9" width="2.5" height="9" rx="1.25" fill="white"/>
+          <rect x="15.5" y="16" width="13" height="3" rx="1.5" fill="white"/>
+          <text x="50" y="17" font-family="Space Grotesk" font-size="13" font-weight="500" fill="#4A6080" letter-spacing="0.08em">TALLERES</text>
+          <text x="50" y="38" font-family="Space Grotesk" font-size="22" font-weight="800" fill="white" letter-spacing="-0.5">360<tspan fill="oklch(0.68 0.18 245)" font-size="16">°</tspan></text>
+        </svg>
+      </div>
+      <div class="prev-light">
+        <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
+          <circle cx="20" cy="20" r="16" fill="oklch(0.60 0.18 245)"/>
+          <path d="M20 4 A16 16 0 0 1 33.86 28" stroke="#F3F4F8" stroke-width="3" stroke-linecap="round" fill="none"/>
+          <rect x="18.5" y="15" width="3" height="14" rx="1.5" fill="white"/>
+          <rect x="13.5" y="8" width="2.5" height="8" rx="1.25" fill="white"/>
+          <rect x="24" y="8" width="2.5" height="8" rx="1.25" fill="white"/>
+          <rect x="13.5" y="14" width="13" height="3" rx="1.5" fill="white"/>
+        </svg>
+        <svg width="130" height="30" viewBox="0 0 130 30" fill="none">
+          <text x="0" y="12" font-family="Space Grotesk" font-size="11" font-weight="600" fill="#9AA3B5" letter-spacing="0.08em">TALLERES</text>
+          <text x="0" y="30" font-family="Space Grotesk" font-size="20" font-weight="800" fill="#1E2736" letter-spacing="-0.5">360<tspan fill="oklch(0.60 0.18 245)" font-size="14">°</tspan></text>
+        </svg>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ════════════════════════════════════════
+       V3 DETAIL — RECOMMENDED
+  ════════════════════════════════════════ -->
+  <div class="detail-section">
+    <div class="detail-label">Variante recomendada — V3 "Arc Wrench" en todos los contextos</div>
+    <div class="contexts">
+
+      <div class="ctx">
+        <div class="ctx-label">App · Sidebar colapsado</div>
+        <div class="ctx-area" style="background:#161D2D">
+          <svg width="36" height="36" viewBox="0 0 36 36" fill="none">
+            <path d="M7 4 A15 15 0 1 0 29 4" stroke="oklch(0.68 0.18 245)" stroke-width="2.2" stroke-linecap="round" fill="none"/>
+            <circle cx="7" cy="4" r="2" fill="oklch(0.68 0.18 245)"/>
+            <circle cx="29" cy="4" r="2" fill="oklch(0.68 0.18 245)"/>
+            <rect x="16.5" y="16" width="3" height="14" rx="1.5" fill="white"/>
+            <rect x="12" y="15" width="12" height="3" rx="1.5" fill="white"/>
+          </svg>
+        </div>
+      </div>
+
+      <div class="ctx">
+        <div class="ctx-label">App · Sidebar expandido</div>
+        <div class="ctx-area" style="background:#161D2D">
+          <svg width="140" height="32" viewBox="0 0 140 32" fill="none">
+            <path d="M6 3 A12 12 0 1 0 26 3" stroke="oklch(0.68 0.18 245)" stroke-width="2" stroke-linecap="round" fill="none"/>
+            <circle cx="6" cy="3" r="1.8" fill="oklch(0.68 0.18 245)"/>
+            <circle cx="26" cy="3" r="1.8" fill="oklch(0.68 0.18 245)"/>
+            <rect x="14.5" y="13" width="3" height="12" rx="1.5" fill="white"/>
+            <rect x="10" y="12" width="12" height="3" rx="1.5" fill="white"/>
+            <text x="36" y="13" font-family="Space Grotesk" font-size="11" font-weight="500" fill="#4A6080" letter-spacing="0.07em">TALLERES</text>
+            <text x="36" y="28" font-family="Space Grotesk" font-size="17" font-weight="800" fill="white" letter-spacing="-0.4">360°</text>
+          </svg>
+        </div>
+      </div>
+
+      <div class="ctx">
+        <div class="ctx-label">Fondo blanco · Impresión</div>
+        <div class="ctx-area" style="background:#fff">
+          <svg width="120" height="36" viewBox="0 0 120 36" fill="none">
+            <path d="M6 3 A13 13 0 1 0 28 3" stroke="oklch(0.60 0.18 245)" stroke-width="2" stroke-linecap="round" fill="none"/>
+            <circle cx="6" cy="3" r="1.8" fill="oklch(0.60 0.18 245)"/>
+            <circle cx="28" cy="3" r="1.8" fill="oklch(0.60 0.18 245)"/>
+            <rect x="15.5" y="14" width="3" height="14" rx="1.5" fill="#1E2736"/>
+            <rect x="11" y="13" width="12" height="3" rx="1.5" fill="#1E2736"/>
+            <text x="36" y="15" font-family="Space Grotesk" font-size="12" font-weight="500" fill="#9AA3B5" letter-spacing="0.06em">TALLERES</text>
+            <text x="36" y="32" font-family="Space Grotesk" font-size="19" font-weight="800" fill="#1E2736" letter-spacing="-0.4">360<tspan fill="oklch(0.60 0.18 245)">°</tspan></text>
+          </svg>
+        </div>
+      </div>
+
+      <div class="ctx">
+        <div class="ctx-label">Avatar · App icon 1024px</div>
+        <div class="ctx-area" style="background:#111B2E">
+          <svg width="80" height="80" viewBox="0 0 80 80" fill="none">
+            <rect width="80" height="80" rx="20" fill="#1E2736"/>
+            <path d="M16 10 A30 30 0 1 0 64 10" stroke="oklch(0.68 0.18 245)" stroke-width="4.5" stroke-linecap="round" fill="none"/>
+            <circle cx="16" cy="10" r="4" fill="oklch(0.68 0.18 245)"/>
+            <circle cx="64" cy="10" r="4" fill="oklch(0.68 0.18 245)"/>
+            <rect x="36.5" y="36" width="7" height="26" rx="3.5" fill="white"/>
+            <rect x="26" y="34" width="28" height="7" rx="3.5" fill="white"/>
+          </svg>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════
+       SIZE STRESS TEST
+  ════════════════════════════════════════ -->
+  <div class="detail-label" style="margin-bottom:20px">Test de escala — V3 "Arc Wrench"</div>
+  <div style="background:#111B2E;border:1px solid #131F33;border-radius:16px;padding:32px;display:flex;align-items:center;gap:36px;flex-wrap:wrap;margin-bottom:56px">
+    <!-- 16px -->
+    <div style="display:flex;flex-direction:column;align-items:center;gap:10px">
+      <svg width="16" height="16" viewBox="0 0 56 56" fill="none">
+        <path d="M14 10 A24 24 0 1 0 42 10" stroke="oklch(0.68 0.18 245)" stroke-width="4" stroke-linecap="round" fill="none"/>
+        <circle cx="14" cy="10" r="4" fill="oklch(0.68 0.18 245)"/>
+        <circle cx="42" cy="10" r="4" fill="oklch(0.68 0.18 245)"/>
+        <rect x="25.5" y="26" width="5" height="20" rx="2.5" fill="white"/>
+        <rect x="20" y="25" width="16" height="4" rx="2" fill="white"/>
+      </svg>
+      <span style="font-size:9px;color:#2E4060">16px</span>
+    </div>
+    <!-- 24px -->
+    <div style="display:flex;flex-direction:column;align-items:center;gap:10px">
+      <svg width="24" height="24" viewBox="0 0 56 56" fill="none">
+        <path d="M14 10 A24 24 0 1 0 42 10" stroke="oklch(0.68 0.18 245)" stroke-width="4" stroke-linecap="round" fill="none"/>
+        <circle cx="14" cy="10" r="4" fill="oklch(0.68 0.18 245)"/>
+        <circle cx="42" cy="10" r="4" fill="oklch(0.68 0.18 245)"/>
+        <rect x="25.5" y="26" width="5" height="20" rx="2.5" fill="white"/>
+        <rect x="20" y="25" width="16" height="4" rx="2" fill="white"/>
+      </svg>
+      <span style="font-size:9px;color:#2E4060">24px</span>
+    </div>
+    <!-- 36px -->
+    <div style="display:flex;flex-direction:column;align-items:center;gap:10px">
+      <svg width="36" height="36" viewBox="0 0 56 56" fill="none">
+        <path d="M14 10 A24 24 0 1 0 42 10" stroke="oklch(0.68 0.18 245)" stroke-width="4" stroke-linecap="round" fill="none"/>
+        <circle cx="14" cy="10" r="4" fill="oklch(0.68 0.18 245)"/>
+        <circle cx="42" cy="10" r="4" fill="oklch(0.68 0.18 245)"/>
+        <rect x="25.5" y="26" width="5" height="20" rx="2.5" fill="white"/>
+        <rect x="20" y="25" width="16" height="4" rx="2" fill="white"/>
+      </svg>
+      <span style="font-size:9px;color:#2E4060">36px</span>
+    </div>
+    <!-- 56px -->
+    <div style="display:flex;flex-direction:column;align-items:center;gap:10px">
+      <svg width="56" height="56" viewBox="0 0 56 56" fill="none">
+        <path d="M14 10 A24 24 0 1 0 42 10" stroke="oklch(0.68 0.18 245)" stroke-width="3" stroke-linecap="round" fill="none"/>
+        <circle cx="14" cy="10" r="4" fill="oklch(0.68 0.18 245)"/>
+        <circle cx="42" cy="10" r="4" fill="oklch(0.68 0.18 245)"/>
+        <rect x="25.5" y="26" width="5" height="20" rx="2.5" fill="white"/>
+        <rect x="20" y="25" width="16" height="4" rx="2" fill="white"/>
+      </svg>
+      <span style="font-size:9px;color:#2E4060">56px</span>
+    </div>
+    <!-- 80px -->
+    <div style="display:flex;flex-direction:column;align-items:center;gap:10px">
+      <svg width="80" height="80" viewBox="0 0 56 56" fill="none">
+        <path d="M14 10 A24 24 0 1 0 42 10" stroke="oklch(0.68 0.18 245)" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+        <circle cx="14" cy="10" r="4" fill="oklch(0.68 0.18 245)"/>
+        <circle cx="42" cy="10" r="4" fill="oklch(0.68 0.18 245)"/>
+        <rect x="25.5" y="26" width="5" height="20" rx="2.5" fill="white"/>
+        <rect x="20" y="25" width="16" height="4" rx="2" fill="white"/>
+      </svg>
+      <span style="font-size:9px;color:#2E4060">80px</span>
+    </div>
+    <!-- 120px -->
+    <div style="display:flex;flex-direction:column;align-items:center;gap:10px">
+      <svg width="120" height="120" viewBox="0 0 56 56" fill="none">
+        <path d="M14 10 A24 24 0 1 0 42 10" stroke="oklch(0.68 0.18 245)" stroke-width="2" stroke-linecap="round" fill="none"/>
+        <circle cx="14" cy="10" r="4" fill="oklch(0.68 0.18 245)"/>
+        <circle cx="42" cy="10" r="4" fill="oklch(0.68 0.18 245)"/>
+        <rect x="25.5" y="26" width="5" height="20" rx="2.5" fill="white"/>
+        <rect x="20" y="25" width="16" height="4" rx="2" fill="white"/>
+      </svg>
+      <span style="font-size:9px;color:#2E4060">120px</span>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

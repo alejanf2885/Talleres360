@@ -1,0 +1,868 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Talleres360 — Design System</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&display=swap" rel="stylesheet"/>
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body, #root { height: 100%; }
+  body { font-family: 'DM Sans', sans-serif; background: #F3F4F8; }
+
+  :root {
+    /* — BRAND — */
+    --c-primary:       #1E2736;
+    --c-primary-mid:   #2C3A52;
+    --c-primary-light: #3D5070;
+
+    /* Accent A: Naranja mecánico */
+    --c-accent:        oklch(0.64 0.18 40);
+    --c-accent-hover:  oklch(0.58 0.20 40);
+    --c-accent-soft:   oklch(0.96 0.04 40);
+
+    /* Accent B: Verde esmeralda */
+    --c-green:         oklch(0.65 0.18 150);
+    --c-green-soft:    oklch(0.96 0.05 150);
+
+    /* States */
+    --c-red:           oklch(0.58 0.22 25);
+    --c-red-soft:      oklch(0.97 0.04 25);
+    --c-yellow:        oklch(0.82 0.16 88);
+    --c-yellow-soft:   oklch(0.98 0.04 88);
+    --c-blue:          oklch(0.60 0.18 245);
+    --c-blue-soft:     oklch(0.95 0.04 245);
+
+    /* — NEUTRALS — */
+    --c-bg:            #F3F4F8;
+    --c-surface:       #FFFFFF;
+    --c-border:        #E4E7EE;
+    --c-border-mid:    #D0D5DF;
+    --c-text:          #1C2333;
+    --c-text-secondary:#5A6478;
+    --c-text-muted:    #9AA3B5;
+    --c-sidebar-bg:    #161D2D;
+    --c-sidebar-text:  #A8B3C8;
+    --c-sidebar-hover: rgba(255,255,255,0.06);
+    --c-sidebar-active:#2C3A52;
+    --c-topbar-bg:     #FFFFFF;
+
+    /* — SPACING SCALE — */
+    --sp-1: 4px;
+    --sp-2: 8px;
+    --sp-3: 12px;
+    --sp-4: 16px;
+    --sp-5: 20px;
+    --sp-6: 24px;
+    --sp-8: 32px;
+    --sp-10: 40px;
+    --sp-12: 48px;
+
+    /* — RADIUS — */
+    --r-sm: 4px;
+    --r-md: 8px;
+    --r-lg: 12px;
+    --r-xl: 16px;
+    --r-full: 9999px;
+
+    /* — SHADOWS — */
+    --shadow-xs: 0 1px 2px rgba(30,39,54,0.06);
+    --shadow-sm: 0 2px 6px rgba(30,39,54,0.08), 0 0 0 1px rgba(30,39,54,0.04);
+    --shadow-md: 0 4px 16px rgba(30,39,54,0.10), 0 0 0 1px rgba(30,39,54,0.04);
+    --shadow-lg: 0 8px 32px rgba(30,39,54,0.12), 0 0 0 1px rgba(30,39,54,0.04);
+
+    /* — LAYOUT — */
+    --sidebar-w: 224px;
+    --topbar-h: 56px;
+    --sidebar-collapsed-w: 64px;
+
+    /* — TYPOGRAPHY — */
+    --font-display: 'Space Grotesk', sans-serif;
+    --font-body:    'DM Sans', sans-serif;
+
+    /* — TRANSITIONS — */
+    --transition: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  /* DARK MODE via class */
+  .dark {
+    --c-bg:            #0F1420;
+    --c-surface:       #1A2235;
+    --c-border:        #252F44;
+    --c-border-mid:    #2E3A52;
+    --c-text:          #E8EDF5;
+    --c-text-secondary:#8A9BBB;
+    --c-text-muted:    #4A587A;
+    --c-sidebar-bg:    #0D1220;
+    --c-sidebar-active:#1E2D47;
+    --c-topbar-bg:     #1A2235;
+  }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--c-border-mid); border-radius: var(--r-full); }
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script type="text/babel">
+const { useState, useEffect, useRef } = React;
+
+/* ─── ICONS (inline SVG, minimal) ─────────────────────── */
+const Icon = ({ name, size = 18, color = 'currentColor', strokeWidth = 1.7 }) => {
+  const paths = {
+    dashboard:    <><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></>,
+    clients:      <><circle cx="9" cy="7" r="4"/><path d="M3 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/><path d="M21 21v-2a4 4 0 0 0-3-3.85"/></>,
+    vehicles:     <><rect x="1" y="3" width="15" height="13" rx="2"/><path d="M16 8h5l2 4v4h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></>,
+    orders:       <><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="13" y2="17"/></>,
+    billing:      <><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/><line x1="6" y1="15" x2="10" y2="15"/></>,
+    settings:     <><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></>,
+    search:       <><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></>,
+    bell:         <><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></>,
+    chevronDown:  <polyline points="6 9 12 15 18 9"/>,
+    chevronRight: <polyline points="9 18 15 12 9 6"/>,
+    chevronLeft:  <polyline points="15 18 9 12 15 6"/>,
+    menu:         <><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></>,
+    plus:         <><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></>,
+    check:        <polyline points="20 6 9 17 4 12"/>,
+    x:            <><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></>,
+    alertCircle:  <><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></>,
+    clock:        <><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></>,
+    tool:         <><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></>,
+    dollar:       <><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></>,
+    trendUp:      <><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></>,
+    eye:          <><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></>,
+    download:     <><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></>,
+    filter:       <><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></>,
+    sun:          <><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></>,
+    moon:         <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>,
+  };
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none"
+      stroke={color} strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round">
+      {paths[name]}
+    </svg>
+  );
+};
+
+/* ─── BADGE ───────────────────────────────────────────── */
+const badgeAppStyles = {
+  recibido:    { bg: 'var(--c-blue-soft)',   color: 'var(--c-blue)',   label: 'Recibido' },
+  presupuesto: { bg: 'var(--c-yellow-soft)', color: '#9A6800',         label: 'Presupuestado' },
+  en_curso:    { bg: 'var(--c-accent-soft)', color: 'var(--c-accent)', label: 'En Curso' },
+  listo:       { bg: 'var(--c-green-soft)',  color: 'var(--c-green)',  label: 'Listo' },
+  entregado:   { bg: '#F0F1F5',             color: 'var(--c-text-secondary)', label: 'Entregado' },
+  impagado:    { bg: 'var(--c-red-soft)',    color: 'var(--c-red)',    label: 'Impagado' },
+};
+
+const Badge = ({ status, custom }) => {
+  const s = custom || badgeAppStyles[status] || badgeAppStyles.recibido;
+  return (
+    <span style={{
+      display: 'inline-flex', alignItems: 'center', gap: 5,
+      padding: '3px 10px', borderRadius: 'var(--r-full)',
+      fontSize: 12, fontWeight: 600, letterSpacing: '0.01em',
+      background: s.bg, color: s.color, whiteSpace: 'nowrap',
+    }}>
+      <span style={{ width: 6, height: 6, borderRadius: '50%', background: s.color, flexShrink: 0 }}/>
+      {s.label}
+    </span>
+  );
+};
+
+/* ─── BUTTON ──────────────────────────────────────────── */
+const Btn = ({ children, variant='primary', size='md', icon, onClick, style: extraStyle }) => {
+  const [hov, setHov] = useState(false);
+  const sizes = { sm: { padding: '6px 12px', fontSize: 13 }, md: { padding: '9px 18px', fontSize: 14 }, lg: { padding: '12px 24px', fontSize: 15 } };
+  const variants = {
+    primary:   { bg: hov ? 'var(--c-accent-hover)' : 'var(--c-accent)', color: '#fff', border: 'none' },
+    secondary: { bg: hov ? 'var(--c-border)' : 'var(--c-surface)', color: 'var(--c-text)', border: '1px solid var(--c-border)' },
+    ghost:     { bg: hov ? 'var(--c-sidebar-hover)' : 'transparent', color: 'var(--c-text-secondary)', border: 'none' },
+    danger:    { bg: hov ? 'oklch(0.52 0.22 25)' : 'var(--c-red)', color: '#fff', border: 'none' },
+    success:   { bg: hov ? 'oklch(0.58 0.18 150)' : 'var(--c-green)', color: '#fff', border: 'none' },
+  };
+  const v = variants[variant];
+  const sz = sizes[size];
+  return (
+    <button onClick={onClick}
+      onMouseEnter={() => setHov(true)} onMouseLeave={() => setHov(false)}
+      style={{ display: 'inline-flex', alignItems: 'center', gap: 6, cursor: 'pointer',
+        fontFamily: 'var(--font-body)', fontWeight: 600, borderRadius: 'var(--r-md)',
+        transition: 'all var(--transition)', ...sz, ...v, ...(extraStyle||{}) }}>
+      {icon && <Icon name={icon} size={14}/>}
+      {children}
+    </button>
+  );
+};
+
+/* ─── INPUT ───────────────────────────────────────────── */
+const Input = ({ label, placeholder, type='text', icon, hint, error, value, onChange }) => {
+  const [focus, setFocus] = useState(false);
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+      {label && <label style={{ fontSize: 13, fontWeight: 600, color: 'var(--c-text)', letterSpacing: '0.01em' }}>{label}</label>}
+      <div style={{ position: 'relative' }}>
+        {icon && <span style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: 'var(--c-text-muted)', pointerEvents: 'none' }}><Icon name={icon} size={15}/></span>}
+        <input type={type} placeholder={placeholder} value={value} onChange={onChange}
+          onFocus={() => setFocus(true)} onBlur={() => setFocus(false)}
+          style={{
+            width: '100%', fontFamily: 'var(--font-body)', fontSize: 14,
+            padding: icon ? '9px 12px 9px 36px' : '9px 12px',
+            borderRadius: 'var(--r-md)', background: 'var(--c-surface)',
+            color: 'var(--c-text)',
+            border: `1.5px solid ${error ? 'var(--c-red)' : focus ? 'var(--c-accent)' : 'var(--c-border)'}`,
+            outline: 'none', transition: 'border-color var(--transition)',
+            boxShadow: focus ? `0 0 0 3px ${error ? 'oklch(0.58 0.22 25 / 0.12)' : 'oklch(0.64 0.18 40 / 0.14)'}` : 'none',
+          }}/>
+      </div>
+      {(hint || error) && <span style={{ fontSize: 12, color: error ? 'var(--c-red)' : 'var(--c-text-muted)' }}>{error || hint}</span>}
+    </div>
+  );
+};
+
+/* ─── CARD ────────────────────────────────────────────── */
+const Card = ({ children, style: s }) => (
+  <div style={{ background: 'var(--c-surface)', borderRadius: 'var(--r-lg)', border: '1px solid var(--c-border)', boxShadow: 'var(--shadow-xs)', padding: 'var(--sp-6)', ...s }}>
+    {children}
+  </div>
+);
+
+/* ─── STAT CARD ───────────────────────────────────────── */
+const StatCard = ({ label, value, delta, icon, accent }) => (
+  <Card>
+    <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 12 }}>
+      <span style={{ fontSize: 13, fontWeight: 500, color: 'var(--c-text-secondary)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>{label}</span>
+      <span style={{ width: 36, height: 36, borderRadius: 'var(--r-md)', background: accent || 'var(--c-accent-soft)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--c-accent)' }}>
+        <Icon name={icon} size={16}/>
+      </span>
+    </div>
+    <div style={{ fontFamily: 'var(--font-display)', fontSize: 28, fontWeight: 700, color: 'var(--c-text)', letterSpacing: '-0.02em', lineHeight: 1 }}>{value}</div>
+    {delta && <div style={{ marginTop: 8, fontSize: 12, color: delta.startsWith('+') ? 'var(--c-green)' : 'var(--c-red)', fontWeight: 600 }}>{delta} <span style={{ color: 'var(--c-text-muted)', fontWeight: 400 }}>vs mes anterior</span></div>}
+  </Card>
+);
+
+/* ─── SIDEBAR ─────────────────────────────────────────── */
+const navItems = [
+  { id: 'dashboard', label: 'Dashboard', icon: 'dashboard' },
+  { id: 'clientes',  label: 'Clientes',  icon: 'clients'  },
+  { id: 'vehiculos', label: 'Vehículos', icon: 'vehicles' },
+  { id: 'ordenes',   label: 'Órdenes',   icon: 'orders'   },
+  { id: 'facturacion', label: 'Facturación', icon: 'billing' },
+];
+
+const Sidebar = ({ active, onNav, collapsed, onToggle }) => (
+  <nav style={{
+    position: 'fixed', left: 0, top: 0, bottom: 0, zIndex: 100,
+    width: collapsed ? 'var(--sidebar-collapsed-w)' : 'var(--sidebar-w)',
+    background: 'var(--c-sidebar-bg)', display: 'flex', flexDirection: 'column',
+    transition: 'width var(--transition)',
+    boxShadow: '2px 0 12px rgba(0,0,0,0.18)',
+  }}>
+    {/* Logo */}
+    <div style={{ height: 'var(--topbar-h)', display: 'flex', alignItems: 'center', padding: '0 16px', borderBottom: '1px solid rgba(255,255,255,0.06)', gap: 10, overflow: 'hidden' }}>
+      <span style={{ width: 30, height: 30, borderRadius: 8, background: 'var(--c-accent)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+        <Icon name="tool" size={15} color="#fff"/>
+      </span>
+      {!collapsed && <span style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 16, color: '#fff', whiteSpace: 'nowrap' }}>Talleres<span style={{ color: 'var(--c-accent)' }}>360</span></span>}
+    </div>
+
+    {/* Nav items */}
+    <div style={{ flex: 1, padding: '12px 8px', display: 'flex', flexDirection: 'column', gap: 2, overflowY: 'auto' }}>
+      {navItems.map(item => {
+        const isActive = active === item.id;
+        return (
+          <button key={item.id} onClick={() => onNav(item.id)}
+            title={collapsed ? item.label : undefined}
+            style={{
+              display: 'flex', alignItems: 'center', gap: 10,
+              padding: collapsed ? '10px 0' : '10px 12px',
+              justifyContent: collapsed ? 'center' : 'flex-start',
+              borderRadius: 'var(--r-md)', border: 'none', cursor: 'pointer',
+              background: isActive ? 'var(--c-sidebar-active)' : 'transparent',
+              color: isActive ? '#fff' : 'var(--c-sidebar-text)',
+              transition: 'all var(--transition)', fontFamily: 'var(--font-body)',
+              fontSize: 14, fontWeight: isActive ? 600 : 400, whiteSpace: 'nowrap',
+              borderLeft: isActive ? '3px solid var(--c-accent)' : '3px solid transparent',
+            }}
+            onMouseEnter={e => { if (!isActive) e.currentTarget.style.background = 'var(--c-sidebar-hover)'; }}
+            onMouseLeave={e => { if (!isActive) e.currentTarget.style.background = 'transparent'; }}>
+            <Icon name={item.icon} size={18}/>
+            {!collapsed && item.label}
+          </button>
+        );
+      })}
+    </div>
+
+    {/* Settings + toggle */}
+    <div style={{ padding: '8px', borderTop: '1px solid rgba(255,255,255,0.06)', display: 'flex', flexDirection: 'column', gap: 2 }}>
+      <button onClick={() => onNav('config')}
+        style={{ display: 'flex', alignItems: 'center', gap: 10, padding: collapsed ? '10px 0' : '10px 12px',
+          justifyContent: collapsed ? 'center' : 'flex-start', borderRadius: 'var(--r-md)', border: 'none',
+          cursor: 'pointer', background: active === 'config' ? 'var(--c-sidebar-active)' : 'transparent',
+          color: active === 'config' ? '#fff' : 'var(--c-sidebar-text)', transition: 'all var(--transition)',
+          fontFamily: 'var(--font-body)', fontSize: 14, fontWeight: 400, whiteSpace: 'nowrap',
+          borderLeft: active === 'config' ? '3px solid var(--c-accent)' : '3px solid transparent' }}>
+        <Icon name="settings" size={18}/>
+        {!collapsed && 'Configuración'}
+      </button>
+      <button onClick={onToggle}
+        style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '10px',
+          borderRadius: 'var(--r-md)', border: 'none', cursor: 'pointer', background: 'transparent',
+          color: 'var(--c-sidebar-text)', transition: 'all var(--transition)' }}>
+        <Icon name={collapsed ? 'chevronRight' : 'chevronLeft'} size={16}/>
+      </button>
+    </div>
+  </nav>
+);
+
+/* ─── TOPBAR ──────────────────────────────────────────── */
+const Topbar = ({ sidebarW, darkMode, onToggleDark }) => {
+  const [search, setSearch] = useState('');
+  return (
+    <header style={{
+      position: 'fixed', top: 0, right: 0, left: sidebarW, zIndex: 90,
+      height: 'var(--topbar-h)', background: 'var(--c-topbar-bg)',
+      borderBottom: '1px solid var(--c-border)',
+      display: 'flex', alignItems: 'center', padding: '0 24px', gap: 16,
+      transition: 'left var(--transition)',
+    }}>
+      {/* Taller name */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginRight: 8 }}>
+        <span style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--c-green)', flexShrink: 0 }}/>
+        <span style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: 14, color: 'var(--c-text)', whiteSpace: 'nowrap' }}>Taller Martínez e Hijos</span>
+        <Icon name="chevronDown" size={14} color="var(--c-text-muted)"/>
+      </div>
+
+      {/* Search */}
+      <div style={{ flex: 1, maxWidth: 380, position: 'relative' }}>
+        <Icon name="search" size={15} color="var(--c-text-muted)"/>
+        <span style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }}><Icon name="search" size={15} color="var(--c-text-muted)"/></span>
+        <input value={search} onChange={e => setSearch(e.target.value)}
+          placeholder="Buscar matrícula, cliente, orden…"
+          style={{ width: '100%', padding: '7px 12px 7px 34px', border: '1.5px solid var(--c-border)',
+            borderRadius: 'var(--r-md)', background: 'var(--c-bg)', fontFamily: 'var(--font-body)',
+            fontSize: 13, color: 'var(--c-text)', outline: 'none', transition: 'border var(--transition)' }}
+          onFocus={e => e.target.style.borderColor = 'var(--c-accent)'}
+          onBlur={e => e.target.style.borderColor = 'var(--c-border)'}/>
+      </div>
+
+      <div style={{ flex: 1 }}/>
+
+      {/* Dark mode toggle */}
+      <button onClick={onToggleDark} style={{ width: 34, height: 34, borderRadius: 'var(--r-md)', border: '1px solid var(--c-border)', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--c-surface)', cursor: 'pointer', color: 'var(--c-text-secondary)', transition: 'all var(--transition)' }}>
+        <Icon name={darkMode ? 'sun' : 'moon'} size={15}/>
+      </button>
+
+      {/* Notifications */}
+      <button style={{ width: 34, height: 34, borderRadius: 'var(--r-md)', border: '1px solid var(--c-border)', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--c-surface)', cursor: 'pointer', color: 'var(--c-text-secondary)', position: 'relative', transition: 'all var(--transition)' }}>
+        <Icon name="bell" size={15}/>
+        <span style={{ position: 'absolute', top: 6, right: 6, width: 7, height: 7, borderRadius: '50%', background: 'var(--c-red)', border: '1.5px solid var(--c-topbar-bg)' }}/>
+      </button>
+
+      {/* Avatar */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
+        <div style={{ width: 32, height: 32, borderRadius: '50%', background: 'var(--c-primary-mid)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 13, color: '#fff' }}>JM</div>
+        <div style={{ display: 'flex', flexDirection: 'column' }}>
+          <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--c-text)', lineHeight: 1.2 }}>Javier M.</span>
+          <span style={{ fontSize: 11, color: 'var(--c-text-muted)', lineHeight: 1.2 }}>Administrador</span>
+        </div>
+        <Icon name="chevronDown" size={13} color="var(--c-text-muted)"/>
+      </div>
+    </header>
+  );
+};
+
+/* ─── TABLE ───────────────────────────────────────────── */
+const ordenes = [
+  { id: 'OT-2401', cliente: 'Pedro García', matricula: '1234-ABC', vehiculo: 'Seat Ibiza 2018', estado: 'en_curso', tecnico: 'Rafa', importe: '€ 380', fecha: '18 Abr' },
+  { id: 'OT-2402', cliente: 'María López',  matricula: '5678-DEF', vehiculo: 'Renault Clio 2020', estado: 'listo',   tecnico: 'Luis', importe: '€ 145', fecha: '18 Abr' },
+  { id: 'OT-2403', cliente: 'Carlos Ruiz',  matricula: '9012-GHI', vehiculo: 'Ford Focus 2016',  estado: 'presupuesto', tecnico: '—', importe: '€ 720', fecha: '17 Abr' },
+  { id: 'OT-2404', cliente: 'Ana Martínez', matricula: '3456-JKL', vehiculo: 'Peugeot 208 2021', estado: 'recibido', tecnico: 'Rafa', importe: '—',    fecha: '20 Abr' },
+  { id: 'OT-2405', cliente: 'Luis Torres',  matricula: '7890-MNO', vehiculo: 'VW Golf 2019',     estado: 'impagado', tecnico: 'Luis', importe: '€ 950', fecha: '14 Abr' },
+];
+
+const TableView = () => {
+  const [selected, setSelected] = useState(null);
+  const cols = ['OT', 'Cliente', 'Matrícula', 'Vehículo', 'Estado', 'Técnico', 'Importe', 'Fecha', ''];
+  return (
+    <div style={{ overflowX: 'auto' }}>
+      <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
+        <thead>
+          <tr style={{ borderBottom: '2px solid var(--c-border)' }}>
+            {cols.map(c => (
+              <th key={c} style={{ padding: '10px 14px', textAlign: 'left', fontFamily: 'var(--font-body)', fontSize: 11, fontWeight: 700, color: 'var(--c-text-muted)', textTransform: 'uppercase', letterSpacing: '0.07em', whiteSpace: 'nowrap' }}>{c}</th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {ordenes.map((o, i) => (
+            <tr key={o.id}
+              onClick={() => setSelected(selected === o.id ? null : o.id)}
+              style={{ borderBottom: '1px solid var(--c-border)', cursor: 'pointer', transition: 'background var(--transition)', background: selected === o.id ? 'var(--c-accent-soft)' : 'transparent' }}
+              onMouseEnter={e => { if (selected !== o.id) e.currentTarget.style.background = 'var(--c-bg)'; }}
+              onMouseLeave={e => { if (selected !== o.id) e.currentTarget.style.background = 'transparent'; }}>
+              <td style={{ padding: '12px 14px', fontFamily: 'var(--font-display)', fontWeight: 600, color: 'var(--c-accent)', fontSize: 12 }}>{o.id}</td>
+              <td style={{ padding: '12px 14px', fontWeight: 500, color: 'var(--c-text)' }}>{o.cliente}</td>
+              <td style={{ padding: '12px 14px' }}><code style={{ background: 'var(--c-bg)', padding: '2px 7px', borderRadius: 4, fontSize: 12, fontWeight: 600, letterSpacing: '0.04em', color: 'var(--c-text)' }}>{o.matricula}</code></td>
+              <td style={{ padding: '12px 14px', color: 'var(--c-text-secondary)' }}>{o.vehiculo}</td>
+              <td style={{ padding: '12px 14px' }}><Badge status={o.estado}/></td>
+              <td style={{ padding: '12px 14px', color: 'var(--c-text-secondary)' }}>{o.tecnico}</td>
+              <td style={{ padding: '12px 14px', fontWeight: 600, color: 'var(--c-text)', fontFamily: 'var(--font-display)' }}>{o.importe}</td>
+              <td style={{ padding: '12px 14px', color: 'var(--c-text-muted)', fontSize: 12 }}>{o.fecha}</td>
+              <td style={{ padding: '12px 14px' }}>
+                <button style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--c-text-muted)', borderRadius: 4, padding: '2px 6px', transition: 'color var(--transition)' }}>
+                  <Icon name="eye" size={14}/>
+                </button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+};
+
+/* ─── SECTION VIEWS ───────────────────────────────────── */
+const DashboardView = () => (
+  <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+    {/* Page header */}
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+      <div>
+        <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 22, fontWeight: 700, color: 'var(--c-text)', letterSpacing: '-0.02em' }}>Dashboard</h1>
+        <p style={{ fontSize: 13, color: 'var(--c-text-secondary)', marginTop: 2 }}>Domingo, 20 de abril de 2026</p>
+      </div>
+      <Btn icon="plus" variant="primary">Nueva Orden</Btn>
+    </div>
+
+    {/* KPIs */}
+    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 16 }}>
+      <StatCard label="Órdenes activas" value="24" delta="+4" icon="orders"/>
+      <StatCard label="Listas hoy" value="7" delta="+2" icon="check" accent="var(--c-green-soft)"/>
+      <StatCard label="Facturado (abril)" value="€ 8.240" delta="+12%" icon="dollar" accent="var(--c-blue-soft)"/>
+      <StatCard label="Impagadas" value="3" delta="-1" icon="alertCircle" accent="var(--c-red-soft)"/>
+    </div>
+
+    {/* Main table */}
+    <Card style={{ padding: 0 }}>
+      <div style={{ padding: '16px 20px 14px', borderBottom: '1px solid var(--c-border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
+        <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 15, fontWeight: 600, color: 'var(--c-text)' }}>Órdenes de Trabajo</h2>
+        <div style={{ display: 'flex', gap: 8 }}>
+          <Btn variant="secondary" size="sm" icon="filter">Filtrar</Btn>
+          <Btn variant="secondary" size="sm" icon="download">Exportar</Btn>
+        </div>
+      </div>
+      <TableView/>
+      <div style={{ padding: '12px 20px', borderTop: '1px solid var(--c-border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <span style={{ fontSize: 12, color: 'var(--c-text-muted)' }}>Mostrando 5 de 24 órdenes</span>
+        <div style={{ display: 'flex', gap: 4 }}>
+          {[1,2,3,'…',8].map((p,i) => (
+            <button key={i} style={{ width: 28, height: 28, borderRadius: 'var(--r-sm)', border: '1px solid var(--c-border)', background: p===1 ? 'var(--c-accent)' : 'var(--c-surface)', color: p===1 ? '#fff' : 'var(--c-text-secondary)', fontSize: 12, cursor: 'pointer', fontWeight: p===1 ? 700 : 400 }}>{p}</button>
+          ))}
+        </div>
+      </div>
+    </Card>
+
+    {/* Bottom row */}
+    <div style={{ display: 'grid', gridTemplateColumns: '1fr 320px', gap: 16 }}>
+      {/* Recent activity */}
+      <Card>
+        <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 14, fontWeight: 600, color: 'var(--c-text)', marginBottom: 16 }}>Actividad Reciente</h3>
+        {[
+          { text: 'OT-2402 marcada como Lista', time: 'Hace 10 min', icon: 'check', color: 'var(--c-green)' },
+          { text: 'Nuevo vehículo: VW Golf 7890-MNO', time: 'Hace 32 min', icon: 'vehicles', color: 'var(--c-blue)' },
+          { text: 'Factura #F-0198 enviada a María L.', time: 'Hace 1 h', icon: 'billing', color: 'var(--c-accent)' },
+          { text: 'OT-2401 asignada a Rafa', time: 'Hace 2 h', icon: 'orders', color: 'var(--c-text-muted)' },
+        ].map((a, i) => (
+          <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 12, paddingBottom: 14, marginBottom: 14, borderBottom: i < 3 ? '1px solid var(--c-border)' : 'none' }}>
+            <span style={{ width: 28, height: 28, borderRadius: 'var(--r-md)', background: 'var(--c-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, color: a.color }}>
+              <Icon name={a.icon} size={13}/>
+            </span>
+            <div>
+              <div style={{ fontSize: 13, color: 'var(--c-text)', fontWeight: 500 }}>{a.text}</div>
+              <div style={{ fontSize: 11, color: 'var(--c-text-muted)', marginTop: 2 }}>{a.time}</div>
+            </div>
+          </div>
+        ))}
+      </Card>
+
+      {/* State summary */}
+      <Card>
+        <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 14, fontWeight: 600, color: 'var(--c-text)', marginBottom: 16 }}>Órdenes por Estado</h3>
+        {[
+          { label: 'En Curso', count: 9, pct: 38, status: 'en_curso' },
+          { label: 'Listo',    count: 7, pct: 29, status: 'listo' },
+          { label: 'Recibido', count: 5, pct: 21, status: 'recibido' },
+          { label: 'Impagado', count: 3, pct: 12, status: 'impagado' },
+        ].map(s => (
+          <div key={s.label} style={{ marginBottom: 14 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+              <Badge status={s.status}/>
+              <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--c-text)', fontFamily: 'var(--font-display)' }}>{s.count}</span>
+            </div>
+            <div style={{ height: 4, borderRadius: 2, background: 'var(--c-border)' }}>
+              <div style={{ height: '100%', borderRadius: 2, width: `${s.pct}%`, background: badgeAppStyles[s.status].color, transition: 'width 0.6s ease' }}/>
+            </div>
+          </div>
+        ))}
+      </Card>
+    </div>
+  </div>
+);
+
+/* Design System doc view */
+const DSView = () => (
+  <div style={{ display: 'flex', flexDirection: 'column', gap: 32, maxWidth: 900 }}>
+    <div>
+      <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 24, fontWeight: 700, color: 'var(--c-text)', letterSpacing: '-0.02em' }}>Design System</h1>
+      <p style={{ fontSize: 14, color: 'var(--c-text-secondary)', marginTop: 4 }}>Guía de estilos y componentes — Talleres360 v1.0</p>
+    </div>
+
+    {/* COLOR TOKENS */}
+    <Card>
+      <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 16, fontWeight: 700, color: 'var(--c-text)', marginBottom: 20 }}>Paleta de Color</h2>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12 }}>
+        {[
+          { label: 'Primary',        val: '#1E2736', varName: '--c-primary' },
+          { label: 'Primary Mid',    val: '#2C3A52', varName: '--c-primary-mid' },
+          { label: 'Primary Light',  val: '#3D5070', varName: '--c-primary-light' },
+          { label: 'Accent (Orange)',val: 'oklch(0.64 0.18 40)', varName: '--c-accent' },
+          { label: 'Green',          val: 'oklch(0.65 0.18 150)', varName: '--c-green' },
+          { label: 'Red',            val: 'oklch(0.58 0.22 25)', varName: '--c-red' },
+          { label: 'Yellow',         val: 'oklch(0.82 0.16 88)', varName: '--c-yellow' },
+          { label: 'Blue',           val: 'oklch(0.60 0.18 245)', varName: '--c-blue' },
+          { label: 'BG',             val: '#F3F4F8', varName: '--c-bg', dark: true },
+          { label: 'Surface',        val: '#FFFFFF', varName: '--c-surface', dark: true },
+          { label: 'Border',         val: '#E4E7EE', varName: '--c-border', dark: true },
+          { label: 'Text',           val: '#1C2333', varName: '--c-text' },
+          { label: 'Text Secondary', val: '#5A6478', varName: '--c-text-secondary' },
+          { label: 'Text Muted',     val: '#9AA3B5', varName: '--c-text-muted' },
+          { label: 'Sidebar BG',     val: '#161D2D', varName: '--c-sidebar-bg' },
+        ].map(c => (
+          <div key={c.label} style={{ display: 'flex', flexDirection: 'column', gap: 6, width: 110 }}>
+            <div style={{ height: 52, borderRadius: 'var(--r-md)', background: `var(${c.varName})`, border: '1px solid var(--c-border)' }}/>
+            <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--c-text)', fontFamily: 'var(--font-display)' }}>{c.label}</div>
+            <div style={{ fontSize: 10, color: 'var(--c-text-muted)', fontFamily: 'monospace', wordBreak: 'break-all' }}>{c.varName}</div>
+          </div>
+        ))}
+      </div>
+    </Card>
+
+    {/* TYPOGRAPHY */}
+    <Card>
+      <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 16, fontWeight: 700, color: 'var(--c-text)', marginBottom: 20 }}>Tipografía</h2>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+        {[
+          { tag: 'H1 — Display', font: 'var(--font-display)', size: '28px', weight: 700, text: 'Diagnóstico del Vehículo', spacing: '-0.02em' },
+          { tag: 'H2 — Section', font: 'var(--font-display)', size: '22px', weight: 700, text: 'Órdenes de Trabajo activas', spacing: '-0.02em' },
+          { tag: 'H3 — Card title', font: 'var(--font-display)', size: '15px', weight: 600, text: 'Resumen de facturación', spacing: '0' },
+          { tag: 'Body — Base', font: 'var(--font-body)', size: '14px', weight: 400, text: 'Vehículo revisado, cambio de aceite y filtro realizado. Próxima revisión en 10.000 km.', spacing: '0' },
+          { tag: 'Body — Strong', font: 'var(--font-body)', size: '14px', weight: 600, text: 'Importe total: € 380,00', spacing: '0' },
+          { tag: 'Caption', font: 'var(--font-body)', size: '12px', weight: 400, text: 'Última actualización hace 5 minutos', spacing: '0', color: 'var(--c-text-secondary)' },
+          { tag: 'Label / Overline', font: 'var(--font-body)', size: '11px', weight: 700, text: 'ESTADO DE LA ORDEN', spacing: '0.07em', color: 'var(--c-text-muted)', transform: 'uppercase' },
+          { tag: 'Code / Matrícula', font: 'monospace', size: '13px', weight: 700, text: '1234-ABC', spacing: '0.04em', bg: 'var(--c-bg)', padding: '3px 8px', radius: 4 },
+        ].map(t => (
+          <div key={t.tag} style={{ display: 'flex', alignItems: 'baseline', gap: 24, paddingBottom: 20, borderBottom: '1px solid var(--c-border)' }}>
+            <div style={{ width: 140, flexShrink: 0 }}>
+              <div style={{ fontSize: 11, color: 'var(--c-text-muted)', fontWeight: 600, letterSpacing: '0.05em' }}>{t.tag}</div>
+              <div style={{ fontSize: 10, color: 'var(--c-text-muted)', marginTop: 2, fontFamily: 'monospace' }}>{t.size} / {t.weight}</div>
+            </div>
+            <span style={{ fontFamily: t.font, fontSize: t.size, fontWeight: t.weight, letterSpacing: t.spacing, color: t.color || 'var(--c-text)', textTransform: t.transform, background: t.bg, padding: t.padding, borderRadius: t.radius }}>{t.text}</span>
+          </div>
+        ))}
+      </div>
+    </Card>
+
+    {/* BADGES */}
+    <Card>
+      <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 16, fontWeight: 700, color: 'var(--c-text)', marginBottom: 20 }}>Badges de Estado</h2>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10 }}>
+        {Object.keys(badgeAppStyles).map(s => <Badge key={s} status={s}/>)}
+      </div>
+      <div style={{ marginTop: 16, padding: 12, background: 'var(--c-bg)', borderRadius: 'var(--r-md)', fontSize: 12, color: 'var(--c-text-secondary)', fontFamily: 'monospace' }}>
+        {'<Badge status="en_curso" />'}  —  Color indicator dot + etiqueta. Background soft de cada estado.
+      </div>
+    </Card>
+
+    {/* BUTTONS */}
+    <Card>
+      <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 16, fontWeight: 700, color: 'var(--c-text)', marginBottom: 20 }}>Botones</h2>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, alignItems: 'center', marginBottom: 16 }}>
+        <Btn variant="primary" icon="plus">Nueva Orden</Btn>
+        <Btn variant="secondary" icon="download">Exportar</Btn>
+        <Btn variant="ghost">Cancelar</Btn>
+        <Btn variant="success" icon="check">Confirmar</Btn>
+        <Btn variant="danger">Eliminar</Btn>
+      </div>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, alignItems: 'center' }}>
+        <Btn variant="primary" size="sm">Pequeño</Btn>
+        <Btn variant="primary" size="md">Mediano</Btn>
+        <Btn variant="primary" size="lg">Grande</Btn>
+      </div>
+      <div style={{ marginTop: 16, padding: 12, background: 'var(--c-bg)', borderRadius: 'var(--r-md)', fontSize: 12, color: 'var(--c-text-secondary)' }}>
+        border-radius: 8px · transition: 150ms ease · hover: darkened accent · focus ring: 3px accent/14%
+      </div>
+    </Card>
+
+    {/* INPUTS */}
+    <Card>
+      <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 16, fontWeight: 700, color: 'var(--c-text)', marginBottom: 20 }}>Inputs de Formulario</h2>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
+        <Input label="Matrícula" placeholder="1234-ABC" icon="search" hint="Búsqueda por matrícula exacta"/>
+        <Input label="Cliente" placeholder="Nombre o DNI" icon="clients"/>
+        <Input label="Importe" placeholder="€ 0,00" icon="dollar"/>
+        <Input label="Campo con error" placeholder="Fecha inválida" error="La fecha no puede ser anterior a hoy"/>
+      </div>
+      <div style={{ marginTop: 20, padding: 12, background: 'var(--c-bg)', borderRadius: 'var(--r-md)', fontSize: 12, color: 'var(--c-text-secondary)' }}>
+        Focus ring: 3px · border active: --c-accent · border error: --c-red · border-radius: 8px · padding: 9px 12px
+      </div>
+    </Card>
+
+    {/* SPACING */}
+    <Card>
+      <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 16, fontWeight: 700, color: 'var(--c-text)', marginBottom: 20 }}>Escala de Espaciado</h2>
+      <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', alignItems: 'flex-end' }}>
+        {[4,8,12,16,20,24,32,40,48].map(v => (
+          <div key={v} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
+            <div style={{ width: v, height: v, background: 'var(--c-accent)', borderRadius: 2, opacity: 0.8 }}/>
+            <span style={{ fontSize: 10, color: 'var(--c-text-muted)', fontFamily: 'monospace' }}>{v}px</span>
+            <span style={{ fontSize: 9, color: 'var(--c-text-muted)', fontFamily: 'monospace' }}>--sp-{v/4}</span>
+          </div>
+        ))}
+      </div>
+    </Card>
+
+    {/* SHADOWS & RADIUS */}
+    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+      <Card>
+        <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 16, fontWeight: 700, color: 'var(--c-text)', marginBottom: 20 }}>Sombras</h2>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+          {[
+            { label: '--shadow-xs', shadow: '0 1px 2px rgba(30,39,54,0.06)', desc: 'Controles internos' },
+            { label: '--shadow-sm', shadow: '0 2px 6px rgba(30,39,54,0.08), 0 0 0 1px rgba(30,39,54,0.04)', desc: 'Cards base' },
+            { label: '--shadow-md', shadow: '0 4px 16px rgba(30,39,54,0.10), 0 0 0 1px rgba(30,39,54,0.04)', desc: 'Modales y dropdowns' },
+            { label: '--shadow-lg', shadow: '0 8px 32px rgba(30,39,54,0.12), 0 0 0 1px rgba(30,39,54,0.04)', desc: 'Overlays flotantes' },
+          ].map(s => (
+            <div key={s.label} style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+              <div style={{ width: 48, height: 36, background: 'var(--c-surface)', borderRadius: 'var(--r-md)', boxShadow: s.shadow, flexShrink: 0 }}/>
+              <div>
+                <div style={{ fontSize: 12, fontFamily: 'monospace', color: 'var(--c-text)', fontWeight: 600 }}>{s.label}</div>
+                <div style={{ fontSize: 11, color: 'var(--c-text-muted)' }}>{s.desc}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </Card>
+      <Card>
+        <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 16, fontWeight: 700, color: 'var(--c-text)', marginBottom: 20 }}>Border Radius</h2>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+          {[
+            { label: '--r-sm', r: 4, desc: 'Tags, código, pequeños' },
+            { label: '--r-md', r: 8, desc: 'Botones, inputs, cards' },
+            { label: '--r-lg', r: 12, desc: 'Cards principales' },
+            { label: '--r-xl', r: 16, desc: 'Modales, panels grandes' },
+            { label: '--r-full', r: 9999, desc: 'Badges, avatares, pills' },
+          ].map(r => (
+            <div key={r.label} style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+              <div style={{ width: 48, height: 32, background: 'var(--c-accent-soft)', border: '2px solid var(--c-accent)', borderRadius: r.r, flexShrink: 0 }}/>
+              <div>
+                <div style={{ fontSize: 12, fontFamily: 'monospace', color: 'var(--c-text)', fontWeight: 600 }}>{r.label} ({r.r === 9999 ? '∞' : `${r.r}px`})</div>
+                <div style={{ fontSize: 11, color: 'var(--c-text-muted)' }}>{r.desc}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </Card>
+    </div>
+
+    {/* LAYOUT SPECS */}
+    <Card>
+      <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 16, fontWeight: 700, color: 'var(--c-text)', marginBottom: 20 }}>Proporciones de Layout</h2>
+      <div style={{ position: 'relative', background: 'var(--c-bg)', borderRadius: 'var(--r-md)', overflow: 'hidden', height: 280, border: '1px solid var(--c-border)' }}>
+        {/* Sidebar */}
+        <div style={{ position: 'absolute', left: 0, top: 0, width: 80, bottom: 0, background: 'var(--c-sidebar-bg)', display: 'flex', flexDirection: 'column', alignItems: 'center', paddingTop: 10, gap: 4 }}>
+          <span style={{ fontSize: 8, color: 'rgba(255,255,255,0.4)', fontFamily: 'monospace', marginBottom: 6 }}>224px</span>
+          {[0,1,2,3,4].map(i => <div key={i} style={{ width: 32, height: 5, borderRadius: 2, background: i===0 ? 'var(--c-accent)' : 'rgba(255,255,255,0.15)', marginBottom: 8 }}/>)}
+        </div>
+        {/* Topbar */}
+        <div style={{ position: 'absolute', left: 80, top: 0, right: 0, height: 32, background: 'var(--c-surface)', borderBottom: '1px solid var(--c-border)', display: 'flex', alignItems: 'center', paddingLeft: 12 }}>
+          <span style={{ fontSize: 8, color: 'var(--c-text-muted)', fontFamily: 'monospace' }}>topbar h=56px · padding 0 24px</span>
+        </div>
+        {/* Content area */}
+        <div style={{ position: 'absolute', left: 80, top: 32, right: 0, bottom: 0, padding: 12 }}>
+          <span style={{ fontSize: 8, color: 'var(--c-text-muted)', fontFamily: 'monospace', display: 'block', marginBottom: 6 }}>content padding: 24px · gap entre cards: 16-24px</span>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: 6, marginBottom: 8 }}>
+            {[0,1,2,3].map(i => <div key={i} style={{ height: 36, background: 'var(--c-surface)', borderRadius: 6, border: '1px solid var(--c-border)' }}/>)}
+          </div>
+          <div style={{ height: 90, background: 'var(--c-surface)', borderRadius: 6, border: '1px solid var(--c-border)' }}/>
+        </div>
+        {/* Annotations */}
+        <div style={{ position: 'absolute', left: 0, bottom: 8, right: 0, display: 'flex', justifyContent: 'center' }}>
+          <div style={{ background: 'rgba(0,0,0,0.6)', borderRadius: 20, padding: '4px 12px', display: 'flex', gap: 16 }}>
+            {[['Sidebar', '224px (collapsed 64px)'], ['Topbar', '56px'], ['Content pad', '24px'], ['Card gap', '16px']].map(([k,v]) => (
+              <span key={k} style={{ fontSize: 9, color: 'rgba(255,255,255,0.8)', fontFamily: 'monospace' }}><b style={{ color: 'var(--c-accent)' }}>{k}</b> {v}</span>
+            ))}
+          </div>
+        </div>
+      </div>
+    </Card>
+  </div>
+);
+
+const GenericView = ({ name }) => (
+  <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+      <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 22, fontWeight: 700, color: 'var(--c-text)', letterSpacing: '-0.02em' }}>{name}</h1>
+      <Btn icon="plus" variant="primary">Nuevo</Btn>
+    </div>
+    <Card style={{ minHeight: 300, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <div style={{ textAlign: 'center' }}>
+        <div style={{ width: 48, height: 48, borderRadius: 'var(--r-lg)', background: 'var(--c-bg)', border: '1px solid var(--c-border)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 12px', color: 'var(--c-text-muted)' }}>
+          <Icon name="tool" size={20}/>
+        </div>
+        <p style={{ color: 'var(--c-text-muted)', fontSize: 14 }}>Vista de {name} — en desarrollo</p>
+      </div>
+    </Card>
+  </div>
+);
+
+/* ─── TWEAKS PANEL ───────────────────────────────────── */
+const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
+  "darkMode": false,
+  "accentColor": "cobalt",
+  "sidebarCollapsed": false,
+  "dsView": false
+}/*EDITMODE-END*/;
+
+/* ─── APP SHELL ──────────────────────────────────────── */
+const App = () => {
+  const [tweaks, setTweaks] = useState(TWEAK_DEFAULTS);
+  const [activeNav, setActiveNav] = useState('dashboard');
+  const [showTweaks, setShowTweaks] = useState(false);
+  const [collapsed, setCollapsed] = useState(TWEAK_DEFAULTS.sidebarCollapsed);
+  const [darkMode, setDarkMode] = useState(TWEAK_DEFAULTS.darkMode);
+
+  const sidebarW = collapsed ? 'var(--sidebar-collapsed-w)' : 'var(--sidebar-w)';
+
+  // Sync dark mode CSS class
+  useEffect(() => {
+    document.documentElement.classList.toggle('dark', darkMode);
+  }, [darkMode]);
+
+  // accent color themes
+  const accentMap = {
+    orange:   { accent: 'oklch(0.64 0.18 40)',  hover: 'oklch(0.58 0.20 40)',  soft: 'oklch(0.96 0.04 40)' },
+    emerald:  { accent: 'oklch(0.65 0.18 150)', hover: 'oklch(0.58 0.18 150)', soft: 'oklch(0.96 0.05 150)' },
+    cobalt:   { accent: 'oklch(0.60 0.18 245)', hover: 'oklch(0.54 0.20 245)', soft: 'oklch(0.95 0.04 245)' },
+  };
+  useEffect(() => {
+    const acc = accentMap[tweaks.accentColor] || accentMap.orange;
+    document.documentElement.style.setProperty('--c-accent', acc.accent);
+    document.documentElement.style.setProperty('--c-accent-hover', acc.hover);
+    document.documentElement.style.setProperty('--c-accent-soft', acc.soft);
+  }, [tweaks.accentColor]);
+
+  // Tweaks protocol
+  useEffect(() => {
+    const handler = (e) => {
+      if (e.data?.type === '__activate_edit_mode')   setShowTweaks(true);
+      if (e.data?.type === '__deactivate_edit_mode') setShowTweaks(false);
+    };
+    window.addEventListener('message', handler);
+    window.parent.postMessage({ type: '__edit_mode_available' }, '*');
+    return () => window.removeEventListener('message', handler);
+  }, []);
+
+  const updateTweak = (key, val) => {
+    const next = { ...tweaks, [key]: val };
+    setTweaks(next);
+    window.parent.postMessage({ type: '__edit_mode_set_keys', edits: { [key]: val } }, '*');
+    if (key === 'darkMode') setDarkMode(val);
+    if (key === 'sidebarCollapsed') setCollapsed(val);
+  };
+
+  const views = { dashboard: <DashboardView/>, clientes: <GenericView name="Clientes"/>, vehiculos: <GenericView name="Vehículos"/>, ordenes: <GenericView name="Órdenes de Trabajo"/>, facturacion: <GenericView name="Facturación"/>, config: <GenericView name="Configuración"/>, ds: <DSView/> };
+
+  return (
+    <div style={{ minHeight: '100vh', background: 'var(--c-bg)' }}>
+      <Sidebar active={activeNav} onNav={setActiveNav} collapsed={collapsed} onToggle={() => setCollapsed(!collapsed)}/>
+      <Topbar sidebarW={sidebarW} darkMode={darkMode} onToggleDark={() => setDarkMode(!darkMode)}/>
+
+      {/* Main content */}
+      <main style={{
+        marginLeft: sidebarW, paddingTop: 'var(--topbar-h)',
+        transition: 'margin-left var(--transition)',
+      }}>
+        {/* DS sub-nav */}
+        <div style={{ background: 'var(--c-surface)', borderBottom: '1px solid var(--c-border)', padding: '0 24px', display: 'flex', gap: 0 }}>
+          {[['dashboard', 'Dashboard'], ['ordenes', 'Órdenes'], ['ds', 'Design System ↗']].map(([id, label]) => (
+            <button key={id} onClick={() => setActiveNav(id)}
+              style={{ padding: '10px 16px', border: 'none', background: 'none', cursor: 'pointer', fontSize: 13, fontWeight: activeNav === id ? 600 : 400, color: activeNav === id ? 'var(--c-accent)' : 'var(--c-text-secondary)', borderBottom: activeNav === id ? '2px solid var(--c-accent)' : '2px solid transparent', transition: 'all var(--transition)', fontFamily: 'var(--font-body)' }}>
+              {label}
+            </button>
+          ))}
+        </div>
+
+        <div style={{ padding: '28px 24px 48px' }}>
+          {views[activeNav] || <DashboardView/>}
+        </div>
+      </main>
+
+      {/* TWEAKS PANEL */}
+      {showTweaks && (
+        <div style={{ position: 'fixed', bottom: 24, right: 24, zIndex: 9999, background: 'var(--c-surface)', border: '1px solid var(--c-border)', borderRadius: 'var(--r-xl)', boxShadow: 'var(--shadow-lg)', padding: 20, width: 260, fontFamily: 'var(--font-body)' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+            <span style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 14, color: 'var(--c-text)' }}>Tweaks</span>
+            <button onClick={() => setShowTweaks(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--c-text-muted)' }}><Icon name="x" size={14}/></button>
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+            <div>
+              <label style={{ fontSize: 11, fontWeight: 700, color: 'var(--c-text-muted)', letterSpacing: '0.06em', textTransform: 'uppercase', display: 'block', marginBottom: 8 }}>Modo</label>
+              <div style={{ display: 'flex', gap: 8 }}>
+                {[['light', 'Claro'], ['dark', 'Oscuro']].map(([val, lbl]) => (
+                  <button key={val} onClick={() => updateTweak('darkMode', val === 'dark')}
+                    style={{ flex: 1, padding: '7px', borderRadius: 'var(--r-md)', border: `1.5px solid ${(val === 'dark') === darkMode ? 'var(--c-accent)' : 'var(--c-border)'}`, background: (val === 'dark') === darkMode ? 'var(--c-accent-soft)' : 'var(--c-bg)', color: 'var(--c-text)', fontSize: 12, fontWeight: 600, cursor: 'pointer' }}>
+                    {lbl}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div>
+              <label style={{ fontSize: 11, fontWeight: 700, color: 'var(--c-text-muted)', letterSpacing: '0.06em', textTransform: 'uppercase', display: 'block', marginBottom: 8 }}>Color Acento</label>
+              <div style={{ display: 'flex', gap: 8 }}>
+                {[['orange', 'Naranja', 'oklch(0.64 0.18 40)'], ['emerald', 'Verde', 'oklch(0.65 0.18 150)'], ['cobalt', 'Azul', 'oklch(0.60 0.18 245)']].map(([val, lbl, clr]) => (
+                  <button key={val} onClick={() => updateTweak('accentColor', val)}
+                    style={{ flex: 1, padding: '7px 4px', borderRadius: 'var(--r-md)', border: `1.5px solid ${tweaks.accentColor === val ? clr : 'var(--c-border)'}`, background: 'var(--c-bg)', fontSize: 11, fontWeight: 600, cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, color: 'var(--c-text)' }}>
+                    <span style={{ width: 16, height: 16, borderRadius: '50%', background: clr }}/>
+                    {lbl}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div>
+              <label style={{ fontSize: 11, fontWeight: 700, color: 'var(--c-text-muted)', letterSpacing: '0.06em', textTransform: 'uppercase', display: 'block', marginBottom: 8 }}>Sidebar</label>
+              <div style={{ display: 'flex', gap: 8 }}>
+                {[['Expandido', false], ['Colapsado', true]].map(([lbl, val]) => (
+                  <button key={lbl} onClick={() => { updateTweak('sidebarCollapsed', val); setCollapsed(val); }}
+                    style={{ flex: 1, padding: '7px', borderRadius: 'var(--r-md)', border: `1.5px solid ${collapsed === val ? 'var(--c-accent)' : 'var(--c-border)'}`, background: collapsed === val ? 'var(--c-accent-soft)' : 'var(--c-bg)', color: 'var(--c-text)', fontSize: 12, fontWeight: 600, cursor: 'pointer' }}>
+                    {lbl}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+</script>
+</body>
+</html>

@@ -1,0 +1,132 @@
+@model Talleres360_front.Models.Auth.RegisterViewModel
+@{
+    ViewData["Title"] = "Registrar taller";
+    Layout = "_LayoutAuth";
+}
+
+<div class="auth-card auth-card-wide">
+
+    <div class="auth-logo">
+        <svg width="40" height="40" viewBox="0 0 56 56" fill="none">
+            <path d="M14 10 A24 24 0 1 0 42 10" stroke="oklch(0.68 0.18 245)" stroke-width="3" stroke-linecap="round" fill="none"/>
+            <circle cx="14" cy="10" r="4" fill="oklch(0.68 0.18 245)"/>
+            <circle cx="42" cy="10" r="4" fill="oklch(0.68 0.18 245)"/>
+            <rect x="25.5" y="26" width="5" height="20" rx="2.5" fill="white"/>
+            <rect x="20" y="25" width="16" height="4" rx="2" fill="white"/>
+        </svg>
+        <div>
+            <div class="auth-logo-name">Talleres<span>360</span></div>
+            <div class="auth-logo-sub">Gestión de talleres</div>
+        </div>
+    </div>
+
+    <h1 class="auth-title">Registra tu taller</h1>
+    <p class="auth-subtitle">Crea tu cuenta y empieza a gestionar en minutos</p>
+
+    @if (!Html.ViewData.ModelState.IsValid && Html.ViewData.ModelState.ContainsKey(string.Empty))
+    {
+        <div class="auth-error-box" style="margin-bottom:16px;">
+            @Html.ValidationSummary(true)
+        </div>
+    }
+
+    <form method="post" class="auth-form" asp-antiforgery="true">
+
+        <div class="auth-divider">Datos del taller</div>
+
+        <div class="auth-form-group">
+            <label asp-for="NombreTaller" class="auth-label">Nombre del taller</label>
+            <div class="auth-input-wrap">
+                <span class="auth-input-icon">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="4" y="2" width="16" height="20" rx="2"/>
+                        <path d="M9 22v-4h6v4"/>
+                        <path d="M8 6h.01M16 6h.01M8 10h.01M16 10h.01M8 14h.01M16 14h.01"/>
+                    </svg>
+                </span>
+                <input asp-for="NombreTaller" type="text" class="auth-input"
+                       placeholder="Taller Mecánico López" autofocus />
+            </div>
+            <span asp-validation-for="NombreTaller" class="field-error"></span>
+        </div>
+
+        <div class="auth-divider">Tu cuenta de acceso</div>
+
+        <div class="auth-form-group">
+            <label asp-for="NombreAdmin" class="auth-label">Tu nombre</label>
+            <div class="auth-input-wrap">
+                <span class="auth-input-icon">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+                    </svg>
+                </span>
+                <input asp-for="NombreAdmin" type="text" class="auth-input" placeholder="Juan García" />
+            </div>
+            <span asp-validation-for="NombreAdmin" class="field-error"></span>
+        </div>
+
+        <div class="auth-form-group">
+            <label asp-for="Email" class="auth-label">Correo electrónico</label>
+            <div class="auth-input-wrap">
+                <span class="auth-input-icon">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+                        <polyline points="22,6 12,13 2,6"/>
+                    </svg>
+                </span>
+                <input asp-for="Email" type="email" class="auth-input"
+                       placeholder="juan@taller.com" autocomplete="email" />
+            </div>
+            <span asp-validation-for="Email" class="field-error"></span>
+        </div>
+
+        <div class="auth-form-group">
+            <label asp-for="Password" class="auth-label">Contraseña</label>
+            <div class="auth-input-wrap">
+                <span class="auth-input-icon">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                        <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                    </svg>
+                </span>
+                <input asp-for="Password" type="password" class="auth-input"
+                       placeholder="Mín. 8 caracteres, mayúscula y número"
+                       autocomplete="new-password" />
+            </div>
+            <span asp-validation-for="Password" class="field-error"></span>
+        </div>
+
+        <div class="auth-form-group">
+            <label asp-for="ConfirmPassword" class="auth-label">Confirmar contraseña</label>
+            <div class="auth-input-wrap">
+                <span class="auth-input-icon">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                        <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                    </svg>
+                </span>
+                <input asp-for="ConfirmPassword" type="password" class="auth-input"
+                       placeholder="Repite la contraseña"
+                       autocomplete="new-password" />
+            </div>
+            <span asp-validation-for="ConfirmPassword" class="field-error"></span>
+        </div>
+
+        <button type="submit" class="auth-btn" style="margin-top:4px;">
+            Crear cuenta
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
+            </svg>
+        </button>
+
+    </form>
+
+    <div class="auth-footer">
+        ¿Ya tienes cuenta? <a asp-controller="Auth" asp-action="Login">Inicia sesión</a>
+    </div>
+
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

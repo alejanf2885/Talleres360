@@ -1,0 +1,1356 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Talleres360</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&display=swap" rel="stylesheet"/>
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body,#root{height:100%}
+body{font-family:'DM Sans',sans-serif;background:var(--c-bg)}
+:root{
+  --c-primary:#1E2736;--c-primary-mid:#2C3A52;--c-primary-light:#3D5070;
+  --c-accent:oklch(0.60 0.18 245);--c-accent-hover:oklch(0.54 0.20 245);--c-accent-soft:oklch(0.95 0.04 245);
+  --c-green:oklch(0.65 0.18 150);--c-green-soft:oklch(0.96 0.05 150);
+  --c-red:oklch(0.58 0.22 25);--c-red-soft:oklch(0.97 0.04 25);
+  --c-yellow:oklch(0.82 0.16 88);--c-yellow-soft:oklch(0.98 0.04 88);--c-yellow-text:oklch(0.50 0.16 75);
+  --c-blue:oklch(0.60 0.18 245);--c-blue-soft:oklch(0.95 0.04 245);
+  --c-bg:#F3F4F8;--c-surface:#FFFFFF;--c-border:#E4E7EE;--c-border-mid:#D0D5DF;
+  --c-text:#1C2333;--c-text-secondary:#5A6478;--c-text-muted:#9AA3B5;
+  --c-sidebar-bg:#161D2D;--c-sidebar-text:#A8B3C8;--c-sidebar-hover:rgba(255,255,255,0.06);--c-sidebar-active:#2C3A52;
+  --c-topbar-bg:#FFFFFF;
+  --sp-1:4px;--sp-2:8px;--sp-3:12px;--sp-4:16px;--sp-5:20px;--sp-6:24px;--sp-8:32px;
+  --r-sm:4px;--r-md:8px;--r-lg:12px;--r-xl:16px;--r-full:9999px;
+  --shadow-xs:0 1px 2px rgba(30,39,54,0.06);
+  --shadow-sm:0 2px 6px rgba(30,39,54,0.08),0 0 0 1px rgba(30,39,54,0.04);
+  --shadow-md:0 4px 16px rgba(30,39,54,0.10),0 0 0 1px rgba(30,39,54,0.04);
+  --shadow-lg:0 8px 32px rgba(30,39,54,0.14),0 0 0 1px rgba(30,39,54,0.05);
+  --shadow-panel:−24px 0 60px rgba(30,39,54,0.18);
+  --sidebar-w:224px;--topbar-h:56px;--sidebar-collapsed-w:64px;
+  --font-display:'Space Grotesk',sans-serif;--font-body:'DM Sans',sans-serif;
+  --transition:150ms cubic-bezier(0.4,0,0.2,1);
+}
+.dark{
+  --c-bg:#0B1121;--c-surface:#111B2E;--c-border:#1E2C44;--c-border-mid:#263550;
+  --c-text:#DCE6F5;--c-text-secondary:#6E88AB;--c-text-muted:#374F6E;
+  --c-sidebar-bg:#080F1C;--c-sidebar-active:#172236;--c-topbar-bg:#0F1928;
+  --shadow-xs:0 1px 3px rgba(0,0,0,0.4);
+  --shadow-sm:0 2px 8px rgba(0,0,0,0.45),0 0 0 1px rgba(255,255,255,0.04);
+  --shadow-md:0 4px 20px rgba(0,0,0,0.55),0 0 0 1px rgba(255,255,255,0.05);
+  --shadow-lg:0 8px 40px rgba(0,0,0,0.65),0 0 0 1px rgba(255,255,255,0.06);
+}
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--c-border-mid);border-radius:99px}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+@keyframes modalIn{from{opacity:0;transform:translateY(16px) scale(0.98)}to{opacity:1;transform:translateY(0) scale(1)}}
+@keyframes backdropIn{from{opacity:0}to{opacity:1}}
+.page-enter{animation:fadeUp 200ms ease forwards}
+input,textarea,select{color-scheme:light dark}
+</style>
+</head>
+<body>
+<template id="__bundler_thumbnail" data-bg-color="#0B1121">
+  <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+    <rect width="200" height="200" fill="#0B1121"/>
+    <path d="M60 70 A40 40 0 1 0 140 70" stroke="oklch(0.68 0.18 245)" stroke-width="6" stroke-linecap="round" fill="none"/>
+    <circle cx="60" cy="70" r="5" fill="oklch(0.68 0.18 245)"/>
+    <circle cx="140" cy="70" r="5" fill="oklch(0.68 0.18 245)"/>
+    <rect x="93" y="100" width="14" height="40" rx="3" fill="white"/>
+    <rect x="80" y="98" width="40" height="8" rx="3" fill="white"/>
+  </svg>
+</template>
+<div id="root"></div>
+<script type="text/babel">
+const {useState,useEffect,useRef,useMemo}=React;
+
+/* ── DATA ─────────────────────────────────────────────── */
+const CLIENTES=[
+  {id:'C001',nombre:'Pedro García',   tel:'612 345 678',email:'pedro.garcia@email.com',   vehiculos:2,ultimaVisita:'18 Abr 2026',totalGastado:'€ 1.840',ordenes:8, activo:true},
+  {id:'C002',nombre:'María López',    tel:'623 456 789',email:'maria.lopez@email.com',    vehiculos:1,ultimaVisita:'15 Abr 2026',totalGastado:'€ 520', ordenes:3, activo:true},
+  {id:'C003',nombre:'Carlos Ruiz',    tel:'634 567 890',email:'carlos.ruiz@email.com',    vehiculos:3,ultimaVisita:'17 Abr 2026',totalGastado:'€ 3.290',ordenes:12,activo:true},
+  {id:'C004',nombre:'Ana Martínez',   tel:'645 678 901',email:'ana.martinez@email.com',   vehiculos:1,ultimaVisita:'20 Abr 2026',totalGastado:'€ 210', ordenes:2, activo:true},
+  {id:'C005',nombre:'Luis Torres',    tel:'656 789 012',email:'luis.torres@email.com',    vehiculos:2,ultimaVisita:'14 Abr 2026',totalGastado:'€ 2.150',ordenes:7, activo:false},
+  {id:'C006',nombre:'Sofía Herrera',  tel:'667 890 123',email:'sofia.herrera@email.com',  vehiculos:1,ultimaVisita:'10 Abr 2026',totalGastado:'€ 780', ordenes:4, activo:true},
+  {id:'C007',nombre:'Miguel Sanz',    tel:'678 901 234',email:'miguel.sanz@email.com',    vehiculos:1,ultimaVisita:'5 Abr 2026', totalGastado:'€ 440', ordenes:3, activo:true},
+  {id:'C008',nombre:'Laura Vidal',    tel:'689 012 345',email:'laura.vidal@email.com',    vehiculos:2,ultimaVisita:'2 Abr 2026', totalGastado:'€ 1.120',ordenes:5, activo:true},
+];
+const VEHICULOS=[
+  {id:'V001',matricula:'1234-ABC',marca:'Seat',   modelo:'Ibiza',   anio:2018,propietario:'Pedro García', propId:'C001',km:'89.400',servicio:'Cambio de aceite',    itv:'Nov 2025',itvSt:'pronto'},
+  {id:'V002',matricula:'5678-DEF',marca:'Renault',modelo:'Clio',    anio:2020,propietario:'María López',  propId:'C002',km:'45.200',servicio:'Revisión de frenos',   itv:'Mar 2027',itvSt:'ok'},
+  {id:'V003',matricula:'9012-GHI',marca:'Ford',   modelo:'Focus',   anio:2016,propietario:'Carlos Ruiz', propId:'C003',km:'124.300',servicio:'Correa distribución', itv:'Jun 2025',itvSt:'caducada'},
+  {id:'V004',matricula:'3456-JKL',marca:'Peugeot',modelo:'208',     anio:2021,propietario:'Ana Martínez',propId:'C004',km:'28.100',servicio:'Revisión general',      itv:'Ago 2026',itvSt:'ok'},
+  {id:'V005',matricula:'7890-MNO',marca:'VW',     modelo:'Golf',    anio:2019,propietario:'Luis Torres', propId:'C005',km:'76.500',servicio:'Cambio embrague',       itv:'Dic 2025',itvSt:'pronto'},
+  {id:'V006',matricula:'2345-PQR',marca:'Toyota', modelo:'Corolla', anio:2022,propietario:'Pedro García',propId:'C001',km:'18.200',servicio:'Revisión 20.000 km',    itv:'Ene 2027',itvSt:'ok'},
+  {id:'V007',matricula:'6789-STU',marca:'BMW',    modelo:'320d',    anio:2017,propietario:'Sofía Herrera',propId:'C006',km:'98.700',servicio:'Reparación motor',     itv:'Sep 2025',itvSt:'caducada'},
+  {id:'V008',matricula:'4567-VWX',marca:'Citroën',modelo:'C3',      anio:2020,propietario:'Miguel Sanz', propId:'C007',km:'52.800',servicio:'Cambio neumáticos',     itv:'May 2026',itvSt:'ok'},
+];
+const ORDENES=[
+  {id:'OT-2404',cliente:'Ana Martínez',  cId:'C004',matricula:'3456-JKL',vehiculo:'Peugeot 208 2021',   estado:'recibido',   tecnico:'—',   importe:'—',    fecha:'20 Abr',descripcion:'Revisión general solicitada por cliente'},
+  {id:'OT-2410',cliente:'Laura Vidal',   cId:'C008',matricula:'4321-LMN',vehiculo:'Toyota Yaris 2019',  estado:'recibido',   tecnico:'—',   importe:'—',    fecha:'20 Abr',descripcion:'Ruido en el motor al acelerar'},
+  {id:'OT-2403',cliente:'Carlos Ruiz',   cId:'C003',matricula:'9012-GHI',vehiculo:'Ford Focus 2016',    estado:'presupuesto',tecnico:'—',   importe:'€ 720',fecha:'17 Abr',descripcion:'Cambio correa distribución + tensor'},
+  {id:'OT-2407',cliente:'Miguel Sanz',   cId:'C007',matricula:'6789-STU',vehiculo:'BMW 320d 2017',      estado:'presupuesto',tecnico:'Rafa',importe:'€ 1.200',fecha:'16 Abr',descripcion:'Reparación motor, diagnóstico completo'},
+  {id:'OT-2401',cliente:'Pedro García',  cId:'C001',matricula:'1234-ABC',vehiculo:'Seat Ibiza 2018',    estado:'en_curso',   tecnico:'Rafa',importe:'€ 380', fecha:'18 Abr',descripcion:'Cambio pastillas freno y discos delanteros'},
+  {id:'OT-2408',cliente:'Sofía Herrera', cId:'C006',matricula:'7890-MNO',vehiculo:'VW Golf 2019',       estado:'en_curso',   tecnico:'Luis',importe:'€ 650', fecha:'17 Abr',descripcion:'Embrague completo'},
+  {id:'OT-2402',cliente:'María López',   cId:'C002',matricula:'5678-DEF',vehiculo:'Renault Clio 2020',  estado:'listo',      tecnico:'Luis',importe:'€ 145', fecha:'18 Abr',descripcion:'Frenos revisados, líquido de frenos cambiado'},
+  {id:'OT-2409',cliente:'Luis Torres',   cId:'C005',matricula:'2345-PQR',vehiculo:'Toyota Corolla 2022',estado:'listo',      tecnico:'Rafa',importe:'€ 95',  fecha:'15 Abr',descripcion:'Revisión 20.000 km completada'},
+  {id:'OT-2400',cliente:'Pedro García',  cId:'C001',matricula:'2345-PQR',vehiculo:'Toyota Corolla 2022',estado:'entregado',  tecnico:'Luis',importe:'€ 280', fecha:'12 Abr',descripcion:'Cambio de aceite y filtros'},
+  {id:'OT-2405',cliente:'Luis Torres',   cId:'C005',matricula:'7890-MNO',vehiculo:'VW Golf 2019',       estado:'impagado',   tecnico:'Luis',importe:'€ 950', fecha:'14 Abr',descripcion:'Embrague + diagnosis'},
+];
+
+/* ── ICONS ────────────────────────────────────────────── */
+const I=({n,s=18,c='currentColor',w=1.7})=>{
+  const d={
+    dashboard:<><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></>,
+    clients:<><circle cx="9" cy="7" r="4"/><path d="M3 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/><path d="M21 21v-2a4 4 0 0 0-3-3.85"/></>,
+    vehicles:<><rect x="1" y="3" width="15" height="13" rx="2"/><path d="M16 8h5l2 4v4h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></>,
+    orders:<><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="13" y2="17"/></>,
+    billing:<><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/><line x1="6" y1="15" x2="10" y2="15"/></>,
+    settings:<><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></>,
+    search:<><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></>,
+    bell:<><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></>,
+    chevronDown:<polyline points="6 9 12 15 18 9"/>,
+    chevronRight:<polyline points="9 18 15 12 9 6"/>,
+    chevronLeft:<polyline points="15 18 9 12 15 6"/>,
+    plus:<><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></>,
+    check:<polyline points="20 6 9 17 4 12"/>,
+    x:<><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></>,
+    alert:<><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></>,
+    clock:<><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></>,
+    tool:<><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></>,
+    dollar:<><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></>,
+    trendUp:<><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></>,
+    eye:<><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></>,
+    download:<><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></>,
+    filter:<><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></>,
+    sun:<><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></>,
+    moon:<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>,
+    grid:<><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></>,
+    list:<><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></>,
+    phone:<><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.38 2 2 0 0 1 3.6 1.17h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.82a16 16 0 0 0 6.29 6.29l.95-.95a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></>,
+    mail:<><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></>,
+    car:<><rect x="1" y="3" width="15" height="13" rx="2"/><path d="M16 8h5l2 4v4h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></>,
+    calendar:<><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></>,
+    edit:<><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></>,
+    user:<><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></>,
+    moreV:<><circle cx="12" cy="5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="19" r="1"/></>,
+    warn:<><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></>,
+  };
+  return <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth={w} strokeLinecap="round" strokeLinejoin="round">{d[n]}</svg>;
+};
+
+/* ── BADGE ────────────────────────────────────────────── */
+const BS={
+  recibido:   {bg:'var(--c-blue-soft)',  color:'var(--c-blue)',  label:'Recibido'},
+  presupuesto:{bg:'var(--c-yellow-soft)',color:'var(--c-yellow-text)',label:'Presupuestado'},
+  en_curso:   {bg:'var(--c-accent-soft)',color:'var(--c-accent)',label:'En Curso'},
+  listo:      {bg:'var(--c-green-soft)', color:'var(--c-green)', label:'Listo'},
+  entregado:  {bg:'#F0F1F5',            color:'var(--c-text-secondary)',label:'Entregado'},
+  impagado:   {bg:'var(--c-red-soft)',   color:'var(--c-red)',   label:'Impagado'},
+};
+const Badge=({status,size='sm'})=>{
+  const s=BS[status]||BS.recibido;
+  return <span style={{display:'inline-flex',alignItems:'center',gap:5,padding:size==='lg'?'5px 12px':'3px 10px',borderRadius:'var(--r-full)',fontSize:size==='lg'?13:12,fontWeight:600,background:s.bg,color:s.color,whiteSpace:'nowrap'}}>
+    <span style={{width:6,height:6,borderRadius:'50%',background:s.color,flexShrink:0}}/>
+    {s.label}
+  </span>;
+};
+
+/* ── BUTTON ───────────────────────────────────────────── */
+const Btn=({children,variant='primary',size='md',icon,onClick,style:sx,disabled})=>{
+  const [h,sh]=useState(false);
+  const sz={sm:{padding:'6px 12px',fontSize:13},md:{padding:'9px 18px',fontSize:14},lg:{padding:'12px 24px',fontSize:15}};
+  const v={
+    primary:  {bg:h?'var(--c-accent-hover)':'var(--c-accent)',color:'#fff',border:'none'},
+    secondary:{bg:h?'var(--c-border)':'var(--c-surface)',color:'var(--c-text)',border:'1px solid var(--c-border)'},
+    ghost:    {bg:h?'rgba(0,0,0,0.04)':'transparent',color:'var(--c-text-secondary)',border:'none'},
+    danger:   {bg:h?'oklch(0.52 0.22 25)':'var(--c-red)',color:'#fff',border:'none'},
+    success:  {bg:h?'oklch(0.58 0.18 150)':'var(--c-green)',color:'#fff',border:'none'},
+    outline:  {bg:'transparent',color:'var(--c-accent)',border:'1.5px solid var(--c-accent)'},
+  }[variant];
+  return <button onClick={onClick} disabled={disabled} onMouseEnter={()=>sh(true)} onMouseLeave={()=>sh(false)}
+    style={{display:'inline-flex',alignItems:'center',gap:6,cursor:disabled?'not-allowed':'pointer',opacity:disabled?0.5:1,fontFamily:'var(--font-body)',fontWeight:600,borderRadius:'var(--r-md)',transition:'all var(--transition)',...sz[size],...v,...(sx||{})}}>{icon&&<I n={icon} s={14}/>}{children}</button>;
+};
+
+/* ── AVATAR ───────────────────────────────────────────── */
+const AVATARCOLORS=['#3B5998','#E2703A','#2E8B57','#7B68EE','#CD5C5C','#4682B4','#9370DB','#20B2AA'];
+const Avatar=({name,size=32})=>{
+  const initials=name.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+  const color=AVATARCOLORS[name.charCodeAt(0)%AVATARCOLORS.length];
+  return <div style={{width:size,height:size,borderRadius:'50%',background:color,display:'flex',alignItems:'center',justifyContent:'center',fontFamily:'var(--font-display)',fontWeight:700,fontSize:size*0.35,color:'#fff',flexShrink:0}}>{initials}</div>;
+};
+
+/* ── PLATE ────────────────────────────────────────────── */
+const Plate=({value})=><code style={{background:'var(--c-bg)',padding:'3px 8px',borderRadius:'var(--r-sm)',fontSize:12,fontWeight:700,letterSpacing:'0.05em',color:'var(--c-text)',border:'1px solid var(--c-border)',fontFamily:'monospace'}}>{value}</code>;
+
+/* ── CARD ─────────────────────────────────────────────── */
+const Card=({children,style:s,onClick})=><div onClick={onClick} style={{background:'var(--c-surface)',borderRadius:'var(--r-lg)',border:'1px solid var(--c-border)',boxShadow:'var(--shadow-xs)',padding:'var(--sp-6)',...(s||{}),cursor:onClick?'pointer':undefined}}>{children}</div>;
+
+/* ── STAT CARD ────────────────────────────────────────── */
+const StatCard=({label,value,delta,icon,accentBg,accentColor})=>(
+  <Card>
+    <div style={{display:'flex',alignItems:'flex-start',justifyContent:'space-between',marginBottom:12}}>
+      <span style={{fontSize:11,fontWeight:700,color:'var(--c-text-muted)',textTransform:'uppercase',letterSpacing:'0.07em'}}>{label}</span>
+      <span style={{width:34,height:34,borderRadius:'var(--r-md)',background:accentBg||'var(--c-accent-soft)',display:'flex',alignItems:'center',justifyContent:'center',color:accentColor||'var(--c-accent)'}}><I n={icon} s={15}/></span>
+    </div>
+    <div style={{fontFamily:'var(--font-display)',fontSize:26,fontWeight:700,color:'var(--c-text)',letterSpacing:'-0.02em',lineHeight:1}}>{value}</div>
+    {delta&&<div style={{marginTop:8,fontSize:12,color:delta.startsWith('+')?'var(--c-green)':'var(--c-red)',fontWeight:600}}>{delta} <span style={{color:'var(--c-text-muted)',fontWeight:400}}>vs mes anterior</span></div>}
+  </Card>
+);
+
+/* ── PAGE HEADER ──────────────────────────────────────── */
+const PageHeader=({title,subtitle,action,actionIcon,actionLabel})=>(
+  <div style={{display:'flex',alignItems:'flex-start',justifyContent:'space-between',marginBottom:20}}>
+    <div>
+      <h1 style={{fontFamily:'var(--font-display)',fontSize:21,fontWeight:700,color:'var(--c-text)',letterSpacing:'-0.02em'}}>{title}</h1>
+      {subtitle&&<p style={{fontSize:13,color:'var(--c-text-secondary)',marginTop:2}}>{subtitle}</p>}
+    </div>
+    {actionLabel&&<Btn icon={actionIcon||'plus'} variant="primary" onClick={action}>{actionLabel}</Btn>}
+  </div>
+);
+
+/* ── SEARCH BAR ───────────────────────────────────────── */
+const SearchBar=({placeholder,value,onChange})=>{
+  const [f,sf]=useState(false);
+  return <div style={{position:'relative',flex:1,maxWidth:340}}>
+    <span style={{position:'absolute',left:10,top:'50%',transform:'translateY(-50%)',pointerEvents:'none',color:'var(--c-text-muted)'}}><I n="search" s={14}/></span>
+    <input value={value} onChange={e=>onChange(e.target.value)} placeholder={placeholder}
+      onFocus={()=>sf(true)} onBlur={()=>sf(false)}
+      style={{width:'100%',padding:'8px 12px 8px 34px',border:`1.5px solid ${f?'var(--c-accent)':'var(--c-border)'}`,borderRadius:'var(--r-md)',background:'var(--c-surface)',fontFamily:'var(--font-body)',fontSize:13,color:'var(--c-text)',outline:'none',transition:'border var(--transition)',boxShadow:f?'0 0 0 3px oklch(0.60 0.18 245 / 0.12)':'none'}}/>
+  </div>;
+};
+
+/* ── FILTER CHIP ──────────────────────────────────────── */
+const Chip=({label,active,onClick,dot})=>(
+  <button onClick={onClick} style={{display:'inline-flex',alignItems:'center',gap:5,padding:'5px 12px',borderRadius:'var(--r-full)',border:`1.5px solid ${active?'var(--c-accent)':'var(--c-border)'}`,background:active?'var(--c-accent-soft)':'var(--c-surface)',color:active?'var(--c-accent)':'var(--c-text-secondary)',fontSize:12,fontWeight:active?700:500,cursor:'pointer',transition:'all var(--transition)',whiteSpace:'nowrap'}}>
+    {dot&&<span style={{width:6,height:6,borderRadius:'50%',background:dot,flexShrink:0}}/>}
+    {label}
+  </button>
+);
+
+/* ── DETAIL PANEL (slide-in) ──────────────────────────── */
+const Panel=({open,onClose,children,width=420})=>(
+  <>
+    {open&&<div onClick={onClose} style={{position:'fixed',inset:0,background:'rgba(15,20,32,0.35)',zIndex:200,backdropFilter:'blur(2px)'}}/>}
+    <div style={{position:'fixed',top:0,right:0,bottom:0,width,background:'var(--c-surface)',zIndex:201,boxShadow:'-8px 0 40px rgba(15,20,32,0.18)',transform:open?'translateX(0)':'translateX(100%)',transition:'transform 280ms cubic-bezier(0.4,0,0.2,1)',display:'flex',flexDirection:'column',overflowY:'auto'}}>
+      {children}
+    </div>
+  </>
+);
+
+/* ═══════════════════════════════════════════════════════
+   CLIENTES VIEW
+═══════════════════════════════════════════════════════ */
+const ClientesView=()=>{
+  const [search,setSearch]=useState('');
+  const [filter,setFilter]=useState('todos');
+  const [selected,setSelected]=useState(null);
+  const [tab,setTab]=useState('datos');
+
+  const filtered=CLIENTES.filter(c=>{
+    const q=search.toLowerCase();
+    const match=!q||c.nombre.toLowerCase().includes(q)||c.email.toLowerCase().includes(q)||c.tel.includes(q);
+    const f=filter==='todos'||(filter==='activo'&&c.activo)||(filter==='inactivo'&&!c.activo);
+    return match&&f;
+  });
+
+  const cliente=CLIENTES.find(c=>c.id===selected);
+  const clienteVehiculos=VEHICULOS.filter(v=>v.propId===selected);
+  const clienteOrdenes=ORDENES.filter(o=>o.cId===selected);
+
+  const cols=['Cliente','Teléfono','Vehículos','Última visita','Total gastado','Estado',''];
+  return (
+    <div className="page-enter">
+      <PageHeader title="Clientes" subtitle={`${CLIENTES.length} clientes registrados`} actionLabel="Nuevo cliente" actionIcon="plus" action={()=>window.__openCliente&&window.__openCliente()}/>
+
+      {/* Stats */}
+      <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:14,marginBottom:20}}>
+        <StatCard label="Total clientes" value={CLIENTES.length} icon="clients" accentBg="var(--c-accent-soft)" accentColor="var(--c-accent)"/>
+        <StatCard label="Activos" value={CLIENTES.filter(c=>c.activo).length} delta="+2" icon="check" accentBg="var(--c-green-soft)" accentColor="var(--c-green)"/>
+        <StatCard label="Nuevos (abril)" value="3" delta="+1" icon="trendUp" accentBg="var(--c-blue-soft)" accentColor="var(--c-blue)"/>
+        <StatCard label="Con deuda" value="1" icon="alert" accentBg="var(--c-red-soft)" accentColor="var(--c-red)"/>
+      </div>
+
+      {/* Table card */}
+      <Card style={{padding:0}}>
+        {/* Toolbar */}
+        <div style={{padding:'14px 18px',borderBottom:'1px solid var(--c-border)',display:'flex',alignItems:'center',gap:10,flexWrap:'wrap'}}>
+          <SearchBar placeholder="Buscar por nombre, email o teléfono…" value={search} onChange={setSearch}/>
+          <div style={{display:'flex',gap:6,marginLeft:4}}>
+            {[['todos','Todos'],['activo','Activos'],['inactivo','Inactivos']].map(([v,l])=>(
+              <Chip key={v} label={l} active={filter===v} onClick={()=>setFilter(v)}/>
+            ))}
+          </div>
+          <div style={{marginLeft:'auto',display:'flex',gap:8}}>
+            <Btn variant="secondary" size="sm" icon="download">Exportar</Btn>
+          </div>
+        </div>
+
+        {/* Table */}
+        <div style={{overflowX:'auto'}}>
+          <table style={{width:'100%',borderCollapse:'collapse',fontSize:13}}>
+            <thead>
+              <tr style={{borderBottom:'1px solid var(--c-border)'}}>
+                {cols.map(c=><th key={c} style={{padding:'10px 16px',textAlign:'left',fontSize:11,fontWeight:700,color:'var(--c-text-muted)',textTransform:'uppercase',letterSpacing:'0.07em',whiteSpace:'nowrap'}}>{c}</th>)}
+              </tr>
+            </thead>
+            <tbody>
+              {filtered.map(c=>(
+                <tr key={c.id} onClick={()=>{setSelected(c.id);setTab('datos');}}
+                  style={{borderBottom:'1px solid var(--c-border)',cursor:'pointer',transition:'background var(--transition)',background:selected===c.id?'var(--c-accent-soft)':'transparent'}}
+                  onMouseEnter={e=>{if(selected!==c.id)e.currentTarget.style.background='var(--c-bg)'}}
+                  onMouseLeave={e=>{if(selected!==c.id)e.currentTarget.style.background='transparent'}}>
+                  <td style={{padding:'13px 16px'}}>
+                    <div style={{display:'flex',alignItems:'center',gap:10}}>
+                      <Avatar name={c.nombre} size={32}/>
+                      <div>
+                        <div style={{fontWeight:600,color:'var(--c-text)'}}>{c.nombre}</div>
+                        <div style={{fontSize:11,color:'var(--c-text-muted)',marginTop:1}}>{c.email}</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td style={{padding:'13px 16px',color:'var(--c-text-secondary)'}}>{c.tel}</td>
+                  <td style={{padding:'13px 16px'}}>
+                    <span style={{display:'inline-flex',alignItems:'center',gap:5,background:'var(--c-bg)',padding:'2px 8px',borderRadius:'var(--r-full)',fontSize:12,fontWeight:600,color:'var(--c-text)'}}><I n="car" s={12} c="var(--c-text-muted)"/>{c.vehiculos}</span>
+                  </td>
+                  <td style={{padding:'13px 16px',color:'var(--c-text-secondary)',fontSize:12}}>{c.ultimaVisita}</td>
+                  <td style={{padding:'13px 16px',fontFamily:'var(--font-display)',fontWeight:700,color:'var(--c-text)'}}>{c.totalGastado}</td>
+                  <td style={{padding:'13px 16px'}}>
+                    <span style={{display:'inline-flex',alignItems:'center',gap:5,padding:'3px 10px',borderRadius:'var(--r-full)',fontSize:11,fontWeight:700,background:c.activo?'var(--c-green-soft)':'var(--c-bg)',color:c.activo?'var(--c-green)':'var(--c-text-muted)'}}>
+                      <span style={{width:5,height:5,borderRadius:'50%',background:c.activo?'var(--c-green)':'var(--c-text-muted)'}}/>
+                      {c.activo?'Activo':'Inactivo'}
+                    </span>
+                  </td>
+                  <td style={{padding:'13px 16px'}}><button style={{background:'none',border:'none',cursor:'pointer',color:'var(--c-text-muted)',padding:'2px 4px'}}><I n="chevronRight" s={14}/></button></td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          {filtered.length===0&&<div style={{padding:'48px',textAlign:'center',color:'var(--c-text-muted)',fontSize:14}}>No se encontraron clientes con ese criterio</div>}
+        </div>
+
+        {/* Footer */}
+        <div style={{padding:'10px 18px',borderTop:'1px solid var(--c-border)',fontSize:12,color:'var(--c-text-muted)'}}>Mostrando {filtered.length} de {CLIENTES.length} clientes</div>
+      </Card>
+
+      {/* Detail panel */}
+      <Panel open={!!selected} onClose={()=>setSelected(null)}>
+        {cliente&&<>
+          {/* Panel header */}
+          <div style={{padding:'24px 24px 0',background:'var(--c-primary)',color:'#fff',flexShrink:0}}>
+            <div style={{display:'flex',alignItems:'flex-start',justifyContent:'space-between',marginBottom:16}}>
+              <button onClick={()=>setSelected(null)} style={{background:'rgba(255,255,255,0.12)',border:'none',borderRadius:'var(--r-md)',width:30,height:30,display:'flex',alignItems:'center',justifyContent:'center',cursor:'pointer',color:'#fff'}}><I n="x" s={14}/></button>
+              <Btn variant="outline" size="sm" icon="edit" style={{borderColor:'rgba(255,255,255,0.3)',color:'#fff'}}>Editar</Btn>
+            </div>
+            <div style={{display:'flex',alignItems:'center',gap:14,paddingBottom:20}}>
+              <Avatar name={cliente.nombre} size={52}/>
+              <div>
+                <div style={{fontFamily:'var(--font-display)',fontSize:18,fontWeight:700}}>{cliente.nombre}</div>
+                <div style={{fontSize:12,color:'rgba(255,255,255,0.6)',marginTop:2}}>{cliente.email}</div>
+                <div style={{marginTop:8}}>
+                  <span style={{display:'inline-flex',alignItems:'center',gap:5,padding:'3px 10px',borderRadius:'var(--r-full)',fontSize:11,fontWeight:700,background:cliente.activo?'rgba(52,211,153,0.25)':'rgba(255,255,255,0.1)',color:cliente.activo?'#6ee7b7':'rgba(255,255,255,0.6)'}}>
+                    <span style={{width:5,height:5,borderRadius:'50%',background:cliente.activo?'#6ee7b7':'rgba(255,255,255,0.4)'}}/>
+                    {cliente.activo?'Activo':'Inactivo'}
+                  </span>
+                </div>
+              </div>
+            </div>
+            {/* Tabs */}
+            <div style={{display:'flex',gap:0,marginTop:4}}>
+              {[['datos','Datos'],['vehiculos','Vehículos'],['historial','Historial']].map(([id,lbl])=>(
+                <button key={id} onClick={()=>setTab(id)} style={{padding:'8px 16px',border:'none',background:'none',cursor:'pointer',fontSize:13,fontWeight:tab===id?700:400,color:tab===id?'#fff':'rgba(255,255,255,0.5)',borderBottom:tab===id?'2px solid var(--c-accent)':'2px solid transparent',transition:'all var(--transition)'}}>
+                  {lbl}{id==='vehiculos'?` (${clienteVehiculos.length})`:id==='historial'?` (${clienteOrdenes.length})`:''}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Panel body */}
+          <div style={{padding:24,flex:1}}>
+            {tab==='datos'&&<div style={{display:'flex',flexDirection:'column',gap:16}}>
+              {/* Quick stats */}
+              <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:10}}>
+                {[['Órdenes',cliente.ordenes,'orders'],['Vehículos',cliente.vehiculos,'car'],['Gastado',cliente.totalGastado,'dollar']].map(([l,v,ic])=>(
+                  <div key={l} style={{background:'var(--c-bg)',borderRadius:'var(--r-md)',padding:'12px',textAlign:'center'}}>
+                    <I n={ic} s={16} c="var(--c-accent)"/><div style={{fontFamily:'var(--font-display)',fontWeight:700,fontSize:16,color:'var(--c-text)',marginTop:4}}>{v}</div>
+                    <div style={{fontSize:10,color:'var(--c-text-muted)',textTransform:'uppercase',letterSpacing:'0.06em',marginTop:2}}>{l}</div>
+                  </div>
+                ))}
+              </div>
+              <div style={{height:1,background:'var(--c-border)'}}/>
+              {/* Contact info */}
+              {[['phone',cliente.tel,'Teléfono'],['mail',cliente.email,'Email'],['calendar',cliente.ultimaVisita,'Última visita']].map(([ic,val,lbl])=>(
+                <div key={lbl} style={{display:'flex',alignItems:'center',gap:12}}>
+                  <span style={{width:34,height:34,borderRadius:'var(--r-md)',background:'var(--c-bg)',display:'flex',alignItems:'center',justifyContent:'center',color:'var(--c-text-muted)',flexShrink:0}}><I n={ic} s={15}/></span>
+                  <div><div style={{fontSize:11,color:'var(--c-text-muted)',textTransform:'uppercase',letterSpacing:'0.06em',fontWeight:700}}>{lbl}</div><div style={{fontSize:14,color:'var(--c-text)',marginTop:1}}>{val}</div></div>
+                </div>
+              ))}
+            </div>}
+
+            {tab==='vehiculos'&&<div style={{display:'flex',flexDirection:'column',gap:10}}>
+              {clienteVehiculos.length===0&&<p style={{color:'var(--c-text-muted)',fontSize:14}}>Sin vehículos registrados</p>}
+              {clienteVehiculos.map(v=>(
+                <div key={v.id} style={{padding:14,borderRadius:'var(--r-md)',border:'1px solid var(--c-border)',background:'var(--c-bg)'}}>
+                  <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:8}}>
+                    <Plate value={v.matricula}/>
+                    <span style={{fontSize:11,padding:'2px 8px',borderRadius:'var(--r-full)',background:v.itvSt==='caducada'?'var(--c-red-soft)':v.itvSt==='pronto'?'var(--c-yellow-soft)':'var(--c-green-soft)',color:v.itvSt==='caducada'?'var(--c-red)':v.itvSt==='pronto'?'var(--c-yellow-text)':'var(--c-green)',fontWeight:700}}>ITV {v.itv}</span>
+                  </div>
+                  <div style={{fontWeight:600,color:'var(--c-text)',fontSize:14}}>{v.marca} {v.modelo} <span style={{fontWeight:400,color:'var(--c-text-muted)'}}>{v.anio}</span></div>
+                  <div style={{fontSize:12,color:'var(--c-text-secondary)',marginTop:4}}>{v.km} km · Último: {v.servicio}</div>
+                </div>
+              ))}
+            </div>}
+
+            {tab==='historial'&&<div style={{display:'flex',flexDirection:'column',gap:8}}>
+              {clienteOrdenes.length===0&&<p style={{color:'var(--c-text-muted)',fontSize:14}}>Sin historial de órdenes</p>}
+              {clienteOrdenes.map(o=>(
+                <div key={o.id} style={{padding:12,borderRadius:'var(--r-md)',border:'1px solid var(--c-border)',background:'var(--c-bg)'}}>
+                  <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:6}}>
+                    <span style={{fontFamily:'var(--font-display)',fontWeight:700,fontSize:12,color:'var(--c-accent)'}}>{o.id}</span>
+                    <Badge status={o.estado}/>
+                  </div>
+                  <div style={{fontSize:13,color:'var(--c-text)',fontWeight:500,marginBottom:4}}>{o.descripcion}</div>
+                  <div style={{display:'flex',justifyContent:'space-between',fontSize:11,color:'var(--c-text-muted)'}}>
+                    <span><Plate value={o.matricula}/></span>
+                    <span style={{fontFamily:'var(--font-display)',fontWeight:700,color:'var(--c-text)',fontSize:13}}>{o.importe}</span>
+                  </div>
+                </div>
+              ))}
+            </div>}
+          </div>
+        </>}
+      </Panel>
+    </div>
+  );
+};
+
+/* ═══════════════════════════════════════════════════════
+   VEHÍCULOS VIEW
+═══════════════════════════════════════════════════════ */
+const VehiculosView=()=>{
+  const [search,setSearch]=useState('');
+  const [itvFilter,setItvFilter]=useState('todos');
+  const [selected,setSelected]=useState(null);
+
+  const caducadas=VEHICULOS.filter(v=>v.itvSt==='caducada');
+  const proximas=VEHICULOS.filter(v=>v.itvSt==='pronto');
+
+  const filtered=VEHICULOS.filter(v=>{
+    const q=search.toLowerCase();
+    const match=!q||v.matricula.toLowerCase().includes(q)||v.marca.toLowerCase().includes(q)||v.modelo.toLowerCase().includes(q)||v.propietario.toLowerCase().includes(q);
+    const f=itvFilter==='todos'||v.itvSt===itvFilter;
+    return match&&f;
+  });
+
+  const vehiculo=VEHICULOS.find(v=>v.id===selected);
+
+  const itvCfg={caducada:{bg:'var(--c-red-soft)',color:'var(--c-red)',icon:'alert',label:'Caducada'},pronto:{bg:'var(--c-yellow-soft)',color:'var(--c-yellow-text)',icon:'warn',label:'Próxima'},ok:{bg:'var(--c-green-soft)',color:'var(--c-green)',icon:'check',label:'Vigente'}};
+
+  return (
+    <div className="page-enter">
+      <PageHeader title="Vehículos" subtitle={`${VEHICULOS.length} vehículos registrados`} actionLabel="Nuevo vehículo"/>
+
+      {/* ITV Alert banner */}
+      {caducadas.length>0&&<div style={{marginBottom:14,padding:'12px 16px',borderRadius:'var(--r-md)',background:'var(--c-red-soft)',border:'1px solid var(--c-red)',display:'flex',alignItems:'center',gap:10,color:'var(--c-red)'}}>
+        <I n="alert" s={16}/><span style={{fontSize:13,fontWeight:600}}>{caducadas.length} vehículo{caducadas.length>1?'s':''} con ITV caducada: {caducadas.map(v=>v.matricula).join(', ')}</span>
+      </div>}
+      {proximas.length>0&&<div style={{marginBottom:14,padding:'12px 16px',borderRadius:'var(--r-md)',background:'var(--c-yellow-soft)',border:'1px solid var(--c-yellow)',display:'flex',alignItems:'center',gap:10,color:'var(--c-yellow-text)'}}>
+        <I n="warn" s={16}/><span style={{fontSize:13,fontWeight:600}}>{proximas.length} vehículo{proximas.length>1?'s':''} con ITV próxima a vencer: {proximas.map(v=>v.matricula).join(', ')}</span>
+      </div>}
+
+      {/* Stats */}
+      <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:14,marginBottom:20}}>
+        <StatCard label="Total vehículos" value={VEHICULOS.length} icon="vehicles" accentBg="var(--c-accent-soft)" accentColor="var(--c-accent)"/>
+        <StatCard label="ITV vigente" value={VEHICULOS.filter(v=>v.itvSt==='ok').length} icon="check" accentBg="var(--c-green-soft)" accentColor="var(--c-green)"/>
+        <StatCard label="ITV próxima" value={proximas.length} icon="warn" accentBg="var(--c-yellow-soft)" accentColor="var(--c-yellow-text)"/>
+        <StatCard label="ITV caducada" value={caducadas.length} icon="alert" accentBg="var(--c-red-soft)" accentColor="var(--c-red)"/>
+      </div>
+
+      <Card style={{padding:0}}>
+        {/* Toolbar */}
+        <div style={{padding:'14px 18px',borderBottom:'1px solid var(--c-border)',display:'flex',alignItems:'center',gap:10,flexWrap:'wrap'}}>
+          <SearchBar placeholder="Buscar matrícula, marca o propietario…" value={search} onChange={setSearch}/>
+          <div style={{display:'flex',gap:6,marginLeft:4}}>
+            {[['todos','Todos'],['ok','ITV Vigente','var(--c-green)'],['pronto','ITV Próxima','var(--c-yellow)'],['caducada','ITV Caducada','var(--c-red)']].map(([v,l,dot])=>(
+              <Chip key={v} label={l} active={itvFilter===v} onClick={()=>setItvFilter(v)} dot={dot}/>
+            ))}
+          </div>
+          <Btn variant="secondary" size="sm" icon="download" style={{marginLeft:'auto'}}>Exportar</Btn>
+        </div>
+
+        <div style={{overflowX:'auto'}}>
+          <table style={{width:'100%',borderCollapse:'collapse',fontSize:13}}>
+            <thead>
+              <tr style={{borderBottom:'1px solid var(--c-border)'}}>
+                {['Matrícula','Vehículo','Propietario','Km actuales','Último servicio','ITV',''].map(c=>(
+                  <th key={c} style={{padding:'10px 16px',textAlign:'left',fontSize:11,fontWeight:700,color:'var(--c-text-muted)',textTransform:'uppercase',letterSpacing:'0.07em',whiteSpace:'nowrap'}}>{c}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {filtered.map(v=>{
+                const itv=itvCfg[v.itvSt];
+                return <tr key={v.id} onClick={()=>setSelected(selected===v.id?null:v.id)}
+                  style={{borderBottom:'1px solid var(--c-border)',cursor:'pointer',transition:'background var(--transition)',background:selected===v.id?'var(--c-accent-soft)':'transparent'}}
+                  onMouseEnter={e=>{if(selected!==v.id)e.currentTarget.style.background='var(--c-bg)'}}
+                  onMouseLeave={e=>{if(selected!==v.id)e.currentTarget.style.background='transparent'}}>
+                  <td style={{padding:'13px 16px'}}><Plate value={v.matricula}/></td>
+                  <td style={{padding:'13px 16px'}}>
+                    <div style={{fontWeight:600,color:'var(--c-text)'}}>{v.marca} {v.modelo}</div>
+                    <div style={{fontSize:11,color:'var(--c-text-muted)',marginTop:1}}>{v.anio}</div>
+                  </td>
+                  <td style={{padding:'13px 16px'}}>
+                    <div style={{display:'flex',alignItems:'center',gap:8}}>
+                      <Avatar name={v.propietario} size={26}/>
+                      <span style={{fontSize:13,color:'var(--c-text)'}}>{v.propietario}</span>
+                    </div>
+                  </td>
+                  <td style={{padding:'13px 16px',fontFamily:'var(--font-display)',fontWeight:600,color:'var(--c-text)'}}>{v.km} km</td>
+                  <td style={{padding:'13px 16px',color:'var(--c-text-secondary)',maxWidth:180}}>{v.servicio}</td>
+                  <td style={{padding:'13px 16px'}}>
+                    <div style={{display:'inline-flex',alignItems:'center',gap:5,padding:'4px 10px',borderRadius:'var(--r-full)',background:itv.bg,color:itv.color,fontSize:11,fontWeight:700}}>
+                      <I n={itv.icon} s={11} c={itv.color}/>{v.itv}
+                    </div>
+                  </td>
+                  <td style={{padding:'13px 16px'}}><button style={{background:'none',border:'none',cursor:'pointer',color:'var(--c-text-muted)'}}><I n="chevronRight" s={14}/></button></td>
+                </tr>;
+              })}
+            </tbody>
+          </table>
+          {filtered.length===0&&<div style={{padding:'48px',textAlign:'center',color:'var(--c-text-muted)',fontSize:14}}>No se encontraron vehículos</div>}
+        </div>
+        <div style={{padding:'10px 18px',borderTop:'1px solid var(--c-border)',fontSize:12,color:'var(--c-text-muted)'}}>Mostrando {filtered.length} de {VEHICULOS.length} vehículos</div>
+      </Card>
+
+      {/* Vehicle detail panel */}
+      <Panel open={!!selected} onClose={()=>setSelected(null)} width={380}>
+        {vehiculo&&<>
+          <div style={{padding:'20px 20px 0',background:'var(--c-primary)',flexShrink:0}}>
+            <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:16}}>
+              <button onClick={()=>setSelected(null)} style={{background:'rgba(255,255,255,0.12)',border:'none',borderRadius:'var(--r-md)',width:30,height:30,display:'flex',alignItems:'center',justifyContent:'center',cursor:'pointer',color:'#fff'}}><I n="x" s={14}/></button>
+              <Btn variant="outline" size="sm" icon="edit" style={{borderColor:'rgba(255,255,255,0.3)',color:'#fff'}}>Editar</Btn>
+            </div>
+            <div style={{marginBottom:16}}>
+              <code style={{fontSize:20,fontWeight:800,color:'#fff',letterSpacing:'0.06em',fontFamily:'monospace',background:'rgba(255,255,255,0.12)',padding:'6px 14px',borderRadius:'var(--r-md)'}}>{vehiculo.matricula}</code>
+              <div style={{fontFamily:'var(--font-display)',fontSize:17,fontWeight:700,color:'#fff',marginTop:12}}>{vehiculo.marca} {vehiculo.modelo}</div>
+              <div style={{fontSize:13,color:'rgba(255,255,255,0.55)',marginTop:2}}>Año {vehiculo.anio}</div>
+            </div>
+            <div style={{paddingBottom:16,display:'flex',gap:16}}>
+              {[['km actuales',vehiculo.km+' km'],['propietario',vehiculo.propietario]].map(([l,v])=>(
+                <div key={l}><div style={{fontSize:10,color:'rgba(255,255,255,0.4)',textTransform:'uppercase',letterSpacing:'0.07em',fontWeight:700}}>{l}</div><div style={{fontSize:13,color:'#fff',marginTop:2,fontWeight:500}}>{v}</div></div>
+              ))}
+            </div>
+          </div>
+          <div style={{padding:20,display:'flex',flexDirection:'column',gap:14}}>
+            {/* ITV status */}
+            <div style={{padding:14,borderRadius:'var(--r-md)',background:itvCfg[vehiculo.itvSt].bg,border:`1px solid ${itvCfg[vehiculo.itvSt].color}22`}}>
+              <div style={{display:'flex',alignItems:'center',gap:8,marginBottom:4}}>
+                <I n={itvCfg[vehiculo.itvSt].icon} s={15} c={itvCfg[vehiculo.itvSt].color}/>
+                <span style={{fontSize:12,fontWeight:700,color:itvCfg[vehiculo.itvSt].color,textTransform:'uppercase',letterSpacing:'0.06em'}}>ITV {itvCfg[vehiculo.itvSt].label}</span>
+              </div>
+              <div style={{fontSize:14,fontWeight:600,color:'var(--c-text)'}}>Vence: {vehiculo.itv}</div>
+            </div>
+            {/* Last service */}
+            <div style={{padding:14,borderRadius:'var(--r-md)',background:'var(--c-bg)',border:'1px solid var(--c-border)'}}>
+              <div style={{fontSize:11,color:'var(--c-text-muted)',textTransform:'uppercase',letterSpacing:'0.07em',fontWeight:700,marginBottom:6}}>Último servicio</div>
+              <div style={{fontSize:14,color:'var(--c-text)',fontWeight:500}}>{vehiculo.servicio}</div>
+            </div>
+            {/* Órdenes this vehicle */}
+            <div>
+              <div style={{fontSize:11,color:'var(--c-text-muted)',textTransform:'uppercase',letterSpacing:'0.07em',fontWeight:700,marginBottom:10}}>Historial de órdenes</div>
+              {ORDENES.filter(o=>o.matricula===vehiculo.matricula).map(o=>(
+                <div key={o.id} style={{padding:'10px 12px',borderRadius:'var(--r-md)',border:'1px solid var(--c-border)',background:'var(--c-bg)',marginBottom:8}}>
+                  <div style={{display:'flex',justifyContent:'space-between',marginBottom:4}}><span style={{fontFamily:'var(--font-display)',fontWeight:700,fontSize:12,color:'var(--c-accent)'}}>{o.id}</span><Badge status={o.estado}/></div>
+                  <div style={{fontSize:12,color:'var(--c-text-secondary)'}}>{o.descripcion}</div>
+                  <div style={{fontSize:11,color:'var(--c-text-muted)',marginTop:4}}>{o.fecha} · {o.importe}</div>
+                </div>
+              ))}
+              {ORDENES.filter(o=>o.matricula===vehiculo.matricula).length===0&&<p style={{fontSize:13,color:'var(--c-text-muted)'}}>Sin órdenes registradas</p>}
+            </div>
+          </div>
+        </>}
+      </Panel>
+    </div>
+  );
+};
+
+/* ═══════════════════════════════════════════════════════
+   ÓRDENES VIEW — Kanban + Lista
+═══════════════════════════════════════════════════════ */
+const KANBAN_COLS=[
+  {id:'recibido',   label:'Recibido',    color:'var(--c-blue)',    bg:'var(--c-blue-soft)'},
+  {id:'presupuesto',label:'Presupuesto', color:'var(--c-yellow-text)',bg:'var(--c-yellow-soft)'},
+  {id:'en_curso',   label:'En Curso',    color:'var(--c-accent)',  bg:'var(--c-accent-soft)'},
+  {id:'listo',      label:'Listo',       color:'var(--c-green)',   bg:'var(--c-green-soft)'},
+  {id:'entregado',  label:'Entregado',   color:'var(--c-text-muted)',bg:'#F0F1F5'},
+];
+
+const KanbanCard=({orden,onClick})=>(
+  <div onClick={onClick} style={{background:'var(--c-surface)',borderRadius:'var(--r-md)',border:'1px solid var(--c-border)',padding:14,cursor:'pointer',transition:'all var(--transition)',marginBottom:8,boxShadow:'var(--shadow-xs)'}}
+    onMouseEnter={e=>{e.currentTarget.style.boxShadow='var(--shadow-md)';e.currentTarget.style.transform='translateY(-1px)'}}
+    onMouseLeave={e=>{e.currentTarget.style.boxShadow='var(--shadow-xs)';e.currentTarget.style.transform='translateY(0)'}}>
+    <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:8}}>
+      <span style={{fontFamily:'var(--font-display)',fontSize:11,fontWeight:700,color:'var(--c-accent)'}}>{orden.id}</span>
+      <span style={{fontSize:10,color:'var(--c-text-muted)'}}>{orden.fecha}</span>
+    </div>
+    <div style={{fontWeight:600,color:'var(--c-text)',fontSize:13,marginBottom:3,lineHeight:1.3}}>{orden.cliente}</div>
+    <div style={{marginBottom:8}}><Plate value={orden.matricula}/><span style={{fontSize:11,color:'var(--c-text-secondary)',marginLeft:6}}>{orden.vehiculo.split(' ').slice(0,2).join(' ')}</span></div>
+    <div style={{fontSize:12,color:'var(--c-text-secondary)',marginBottom:10,lineHeight:1.4}}>{orden.descripcion}</div>
+    <div style={{display:'flex',alignItems:'center',justifyContent:'space-between'}}>
+      <div style={{display:'flex',alignItems:'center',gap:6}}>
+        {orden.tecnico!=='—'&&<div style={{display:'flex',alignItems:'center',gap:4}}><Avatar name={orden.tecnico} size={20}/><span style={{fontSize:11,color:'var(--c-text-secondary)'}}>{orden.tecnico}</span></div>}
+        {orden.tecnico==='—'&&<span style={{fontSize:11,color:'var(--c-text-muted)',fontStyle:'italic'}}>Sin asignar</span>}
+      </div>
+      <span style={{fontFamily:'var(--font-display)',fontWeight:700,fontSize:13,color:orden.importe!=='—'?'var(--c-text)':'var(--c-text-muted)'}}>{orden.importe}</span>
+    </div>
+  </div>
+);
+
+const OrdenesView=()=>{
+  const [viewMode,setViewMode]=useState('kanban');
+  const [search,setSearch]=useState('');
+  const [statusFilter,setStatusFilter]=useState('todos');
+  const [selected,setSelected]=useState(null);
+
+  const orden=ORDENES.find(o=>o.id===selected);
+
+  const filteredList=ORDENES.filter(o=>{
+    const q=search.toLowerCase();
+    const match=!q||o.id.toLowerCase().includes(q)||o.cliente.toLowerCase().includes(q)||o.matricula.toLowerCase().includes(q);
+    const f=statusFilter==='todos'||o.estado===statusFilter;
+    return match&&f;
+  });
+
+  return (
+    <div className="page-enter" style={{display:'flex',flexDirection:'column',gap:16}}>
+      <div style={{display:'flex',alignItems:'flex-start',justifyContent:'space-between'}}>
+        <div>
+          <h1 style={{fontFamily:'var(--font-display)',fontSize:21,fontWeight:700,color:'var(--c-text)',letterSpacing:'-0.02em'}}>Órdenes de Trabajo</h1>
+          <p style={{fontSize:13,color:'var(--c-text-secondary)',marginTop:2}}>{ORDENES.length} órdenes totales · {ORDENES.filter(o=>o.estado==='en_curso').length} en curso hoy</p>
+        </div>
+        <div style={{display:'flex',gap:8,alignItems:'center'}}>
+          {/* View toggle */}
+          <div style={{display:'flex',background:'var(--c-bg)',border:'1px solid var(--c-border)',borderRadius:'var(--r-md)',padding:3,gap:2}}>
+            {[['kanban','grid','Kanban'],['lista','list','Lista']].map(([id,ic,lbl])=>(
+              <button key={id} onClick={()=>setViewMode(id)}
+                style={{display:'flex',alignItems:'center',gap:5,padding:'5px 12px',borderRadius:6,border:'none',cursor:'pointer',transition:'all var(--transition)',background:viewMode===id?'var(--c-surface)':'transparent',color:viewMode===id?'var(--c-text)':'var(--c-text-muted)',fontWeight:viewMode===id?600:400,fontSize:12,boxShadow:viewMode===id?'var(--shadow-xs)':'none'}}>
+                <I n={ic} s={13}/>{lbl}
+              </button>
+            ))}
+          </div>
+          <Btn icon="plus" variant="primary" onClick={()=>window.__openOrden&&window.__openOrden()}>Nueva Orden</Btn>
+        </div>
+      </div>
+
+      {/* Toolbar */}
+      <div style={{display:'flex',alignItems:'center',gap:10,flexWrap:'wrap'}}>
+        <SearchBar placeholder="Buscar OT, cliente o matrícula…" value={search} onChange={setSearch}/>
+        {viewMode==='lista'&&<div style={{display:'flex',gap:6}}>
+          {[['todos','Todos'],...KANBAN_COLS.map(c=>[c.id,c.label])].map(([v,l])=>(
+            <Chip key={v} label={l} active={statusFilter===v} onClick={()=>setStatusFilter(v)} dot={BS[v]?.color}/>
+          ))}
+        </div>}
+        <Btn variant="secondary" size="sm" icon="download" style={{marginLeft:'auto'}}>Exportar</Btn>
+      </div>
+
+      {/* KANBAN */}
+      {viewMode==='kanban'&&(
+        <div style={{display:'grid',gridTemplateColumns:'repeat(5,1fr)',gap:12,alignItems:'start'}}>
+          {KANBAN_COLS.map(col=>{
+            const colOrdenes=ORDENES.filter(o=>o.estado===col.id&&(!search||(o.cliente.toLowerCase().includes(search.toLowerCase())||o.matricula.toLowerCase().includes(search.toLowerCase())||o.id.toLowerCase().includes(search.toLowerCase()))));
+            return (
+              <div key={col.id}>
+                {/* Column header */}
+                <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:10,padding:'6px 10px',borderRadius:'var(--r-md)',background:col.bg}}>
+                  <span style={{fontSize:12,fontWeight:700,color:col.color,textTransform:'uppercase',letterSpacing:'0.06em'}}>{col.label}</span>
+                  <span style={{width:20,height:20,borderRadius:'50%',background:col.color,display:'flex',alignItems:'center',justifyContent:'center',fontSize:10,fontWeight:800,color:'#fff'}}>{colOrdenes.length}</span>
+                </div>
+                {/* Cards */}
+                {colOrdenes.map(o=><KanbanCard key={o.id} orden={o} onClick={()=>setSelected(o.id)}/>)}
+                {colOrdenes.length===0&&<div style={{padding:'24px 12px',textAlign:'center',border:'1.5px dashed var(--c-border)',borderRadius:'var(--r-md)',color:'var(--c-text-muted)',fontSize:12}}>Sin órdenes</div>}
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      {/* LISTA */}
+      {viewMode==='lista'&&(
+        <Card style={{padding:0}}>
+          <div style={{overflowX:'auto'}}>
+            <table style={{width:'100%',borderCollapse:'collapse',fontSize:13}}>
+              <thead>
+                <tr style={{borderBottom:'1px solid var(--c-border)'}}>
+                  {['OT','Cliente','Matrícula','Vehículo','Estado','Técnico','Importe','Fecha',''].map(c=>(
+                    <th key={c} style={{padding:'10px 16px',textAlign:'left',fontSize:11,fontWeight:700,color:'var(--c-text-muted)',textTransform:'uppercase',letterSpacing:'0.07em',whiteSpace:'nowrap'}}>{c}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {filteredList.map(o=>(
+                  <tr key={o.id} onClick={()=>setSelected(o.id)}
+                    style={{borderBottom:'1px solid var(--c-border)',cursor:'pointer',transition:'background var(--transition)'}}
+                    onMouseEnter={e=>e.currentTarget.style.background='var(--c-bg)'}
+                    onMouseLeave={e=>e.currentTarget.style.background='transparent'}>
+                    <td style={{padding:'12px 16px',fontFamily:'var(--font-display)',fontWeight:700,color:'var(--c-accent)',fontSize:12}}>{o.id}</td>
+                    <td style={{padding:'12px 16px'}}>
+                      <div style={{display:'flex',alignItems:'center',gap:8}}><Avatar name={o.cliente} size={26}/><span style={{fontWeight:500,color:'var(--c-text)'}}>{o.cliente}</span></div>
+                    </td>
+                    <td style={{padding:'12px 16px'}}><Plate value={o.matricula}/></td>
+                    <td style={{padding:'12px 16px',color:'var(--c-text-secondary)',maxWidth:140,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{o.vehiculo}</td>
+                    <td style={{padding:'12px 16px'}}><Badge status={o.estado}/></td>
+                    <td style={{padding:'12px 16px',color:'var(--c-text-secondary)'}}>{o.tecnico}</td>
+                    <td style={{padding:'12px 16px',fontFamily:'var(--font-display)',fontWeight:700,color:'var(--c-text)'}}>{o.importe}</td>
+                    <td style={{padding:'12px 16px',color:'var(--c-text-muted)',fontSize:12}}>{o.fecha}</td>
+                    <td style={{padding:'12px 16px'}}><button style={{background:'none',border:'none',cursor:'pointer',color:'var(--c-text-muted)'}}><I n="chevronRight" s={14}/></button></td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            {filteredList.length===0&&<div style={{padding:'48px',textAlign:'center',color:'var(--c-text-muted)',fontSize:14}}>No se encontraron órdenes</div>}
+          </div>
+          <div style={{padding:'10px 18px',borderTop:'1px solid var(--c-border)',fontSize:12,color:'var(--c-text-muted)'}}>Mostrando {filteredList.length} de {ORDENES.length} órdenes</div>
+        </Card>
+      )}
+
+      {/* Order detail panel */}
+      <Panel open={!!selected} onClose={()=>setSelected(null)} width={400}>
+        {orden&&<>
+          <div style={{padding:'20px 20px 20px',background:'var(--c-primary)',flexShrink:0}}>
+            <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:16}}>
+              <button onClick={()=>setSelected(null)} style={{background:'rgba(255,255,255,0.12)',border:'none',borderRadius:'var(--r-md)',width:30,height:30,display:'flex',alignItems:'center',justifyContent:'center',cursor:'pointer',color:'#fff'}}><I n="x" s={14}/></button>
+              <Badge status={orden.estado} size="lg"/>
+            </div>
+            <div style={{fontFamily:'var(--font-display)',fontSize:22,fontWeight:700,color:'#fff',marginBottom:4}}>{orden.id}</div>
+            <div style={{fontSize:13,color:'rgba(255,255,255,0.6)',marginBottom:12,lineHeight:1.5}}>{orden.descripcion}</div>
+            <div style={{display:'flex',gap:20}}>
+              <div><div style={{fontSize:10,color:'rgba(255,255,255,0.4)',textTransform:'uppercase',letterSpacing:'0.07em',fontWeight:700}}>Fecha</div><div style={{fontSize:13,color:'#fff',marginTop:2}}>{orden.fecha}</div></div>
+              <div><div style={{fontSize:10,color:'rgba(255,255,255,0.4)',textTransform:'uppercase',letterSpacing:'0.07em',fontWeight:700}}>Importe</div><div style={{fontSize:16,color:'#fff',marginTop:2,fontFamily:'var(--font-display)',fontWeight:700}}>{orden.importe}</div></div>
+            </div>
+          </div>
+          <div style={{padding:20,display:'flex',flexDirection:'column',gap:16}}>
+            {/* Cliente */}
+            <div style={{padding:14,borderRadius:'var(--r-md)',background:'var(--c-bg)',border:'1px solid var(--c-border)'}}>
+              <div style={{fontSize:11,color:'var(--c-text-muted)',textTransform:'uppercase',letterSpacing:'0.07em',fontWeight:700,marginBottom:10}}>Cliente</div>
+              <div style={{display:'flex',alignItems:'center',gap:10}}>
+                <Avatar name={orden.cliente} size={36}/>
+                <div><div style={{fontWeight:600,color:'var(--c-text)'}}>{orden.cliente}</div><div style={{fontSize:12,color:'var(--c-text-muted)',marginTop:1}}>{CLIENTES.find(c=>c.id===orden.cId)?.email}</div></div>
+              </div>
+            </div>
+            {/* Vehículo */}
+            <div style={{padding:14,borderRadius:'var(--r-md)',background:'var(--c-bg)',border:'1px solid var(--c-border)'}}>
+              <div style={{fontSize:11,color:'var(--c-text-muted)',textTransform:'uppercase',letterSpacing:'0.07em',fontWeight:700,marginBottom:10}}>Vehículo</div>
+              <div style={{display:'flex',alignItems:'center',justifyContent:'space-between'}}>
+                <div><div style={{fontWeight:600,color:'var(--c-text)'}}>{orden.vehiculo}</div></div>
+                <Plate value={orden.matricula}/>
+              </div>
+            </div>
+            {/* Técnico */}
+            <div style={{padding:14,borderRadius:'var(--r-md)',background:'var(--c-bg)',border:'1px solid var(--c-border)'}}>
+              <div style={{fontSize:11,color:'var(--c-text-muted)',textTransform:'uppercase',letterSpacing:'0.07em',fontWeight:700,marginBottom:10}}>Técnico asignado</div>
+              {orden.tecnico!=='—'?<div style={{display:'flex',alignItems:'center',gap:8}}><Avatar name={orden.tecnico} size={28}/><span style={{fontWeight:500,color:'var(--c-text)'}}>{orden.tecnico}</span></div>:<span style={{fontSize:13,color:'var(--c-text-muted)',fontStyle:'italic'}}>Sin asignar</span>}
+            </div>
+            {/* Actions */}
+            <div style={{display:'flex',gap:8,marginTop:4}}>
+              {orden.estado==='recibido'&&<Btn variant="primary" style={{flex:1}}>Crear presupuesto</Btn>}
+              {orden.estado==='presupuesto'&&<Btn variant="primary" style={{flex:1}}>Aprobar y asignar</Btn>}
+              {orden.estado==='en_curso'&&<Btn variant="success" style={{flex:1}}>Marcar como lista</Btn>}
+              {orden.estado==='listo'&&<Btn variant="primary" style={{flex:1}}>Confirmar entrega</Btn>}
+              {orden.estado==='impagado'&&<Btn variant="danger" style={{flex:1}}>Gestionar cobro</Btn>}
+              <Btn variant="secondary" icon="edit">Editar</Btn>
+            </div>
+          </div>
+        </>}
+      </Panel>
+    </div>
+  );
+};
+
+/* ═══════════════════════════════════════════════════════
+   DASHBOARD VIEW
+═══════════════════════════════════════════════════════ */
+const DashboardView=()=>{
+  const badgeSt={recibido:{bg:'var(--c-blue-soft)',color:'var(--c-blue)'},presupuesto:{bg:'var(--c-yellow-soft)',color:'var(--c-yellow-text)'},en_curso:{bg:'var(--c-accent-soft)',color:'var(--c-accent)'},listo:{bg:'var(--c-green-soft)',color:'var(--c-green)'},entregado:{bg:'#F0F1F5',color:'var(--c-text-secondary)'},impagado:{bg:'var(--c-red-soft)',color:'var(--c-red)'}};
+  return (
+    <div className="page-enter">
+      <div style={{display:'flex',alignItems:'flex-start',justifyContent:'space-between',marginBottom:20}}>
+        <div>
+          <h1 style={{fontFamily:'var(--font-display)',fontSize:21,fontWeight:700,color:'var(--c-text)',letterSpacing:'-0.02em'}}>Dashboard</h1>
+          <p style={{fontSize:13,color:'var(--c-text-secondary)',marginTop:2}}>Lunes, 20 de abril de 2026</p>
+        </div>
+        <Btn icon="plus" variant="primary" onClick={()=>window.__openOrden&&window.__openOrden()}>Nueva Orden</Btn>
+      </div>
+
+      <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:14,marginBottom:20}}>
+        <StatCard label="Órdenes activas" value="24" delta="+4" icon="orders"/>
+        <StatCard label="Listas hoy" value="7" delta="+2" icon="check" accentBg="var(--c-green-soft)" accentColor="var(--c-green)"/>
+        <StatCard label="Facturado (abril)" value="€ 8.240" delta="+12%" icon="dollar" accentBg="var(--c-blue-soft)" accentColor="var(--c-blue)"/>
+        <StatCard label="Impagadas" value="3" delta="-1" icon="alert" accentBg="var(--c-red-soft)" accentColor="var(--c-red)"/>
+      </div>
+
+      {/* Recent orders */}
+      <Card style={{padding:0,marginBottom:16}}>
+        <div style={{padding:'14px 18px',borderBottom:'1px solid var(--c-border)',display:'flex',alignItems:'center',justifyContent:'space-between'}}>
+          <h2 style={{fontFamily:'var(--font-display)',fontSize:14,fontWeight:700,color:'var(--c-text)'}}>Órdenes recientes</h2>
+          <Btn variant="ghost" size="sm">Ver todas →</Btn>
+        </div>
+        <table style={{width:'100%',borderCollapse:'collapse',fontSize:13}}>
+          <tbody>
+            {ORDENES.slice(0,6).map(o=>(
+              <tr key={o.id} style={{borderBottom:'1px solid var(--c-border)',cursor:'pointer',transition:'background var(--transition)'}}
+                onMouseEnter={e=>e.currentTarget.style.background='var(--c-bg)'}
+                onMouseLeave={e=>e.currentTarget.style.background='transparent'}>
+                <td style={{padding:'11px 18px',fontFamily:'var(--font-display)',fontWeight:700,color:'var(--c-accent)',fontSize:12,width:80}}>{o.id}</td>
+                <td style={{padding:'11px 8px'}}>
+                  <div style={{display:'flex',alignItems:'center',gap:8}}><Avatar name={o.cliente} size={26}/><span style={{fontWeight:500,color:'var(--c-text)'}}>{o.cliente}</span></div>
+                </td>
+                <td style={{padding:'11px 8px'}}><Plate value={o.matricula}/></td>
+                <td style={{padding:'11px 8px',color:'var(--c-text-secondary)',fontSize:12}}>{o.vehiculo.split(' ').slice(0,2).join(' ')}</td>
+                <td style={{padding:'11px 8px'}}><Badge status={o.estado}/></td>
+                <td style={{padding:'11px 18px',fontFamily:'var(--font-display)',fontWeight:700,color:'var(--c-text)',textAlign:'right'}}>{o.importe}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </Card>
+
+      <div style={{display:'grid',gridTemplateColumns:'1fr 300px',gap:16}}>
+        {/* Activity */}
+        <Card>
+          <h3 style={{fontFamily:'var(--font-display)',fontSize:14,fontWeight:700,color:'var(--c-text)',marginBottom:16}}>Actividad reciente</h3>
+          {[
+            {text:'OT-2402 marcada como Lista por Luis',time:'Hace 10 min',icon:'check',color:'var(--c-green)'},
+            {text:'Nuevo vehículo: VW Golf 7890-MNO registrado',time:'Hace 32 min',icon:'car',color:'var(--c-blue)'},
+            {text:'Factura #F-0198 enviada a María L.',time:'Hace 1 h',icon:'billing',color:'var(--c-accent)'},
+            {text:'OT-2407 presupuestada — pendiente aprobación',time:'Hace 2 h',icon:'orders',color:'var(--c-yellow-text)'},
+          ].map((a,i)=>(
+            <div key={i} style={{display:'flex',gap:12,paddingBottom:14,marginBottom:14,borderBottom:i<3?'1px solid var(--c-border)':'none'}}>
+              <span style={{width:30,height:30,borderRadius:'var(--r-md)',background:'var(--c-bg)',display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0,color:a.color}}><I n={a.icon} s={14}/></span>
+              <div><div style={{fontSize:13,color:'var(--c-text)',fontWeight:500}}>{a.text}</div><div style={{fontSize:11,color:'var(--c-text-muted)',marginTop:2}}>{a.time}</div></div>
+            </div>
+          ))}
+        </Card>
+
+        {/* State summary */}
+        <Card>
+          <h3 style={{fontFamily:'var(--font-display)',fontSize:14,fontWeight:700,color:'var(--c-text)',marginBottom:16}}>Por estado</h3>
+          {[['recibido',2,8],['presupuesto',2,8],['en_curso',2,8],['listo',2,8],['impagado',1,4]].map(([st,n,pct])=>(
+            <div key={st} style={{marginBottom:12}}>
+              <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:5}}><Badge status={st}/><span style={{fontFamily:'var(--font-display)',fontWeight:700,color:'var(--c-text)',fontSize:13}}>{n}</span></div>
+              <div style={{height:4,borderRadius:2,background:'var(--c-border)'}}><div style={{height:'100%',borderRadius:2,width:`${pct*10}%`,background:badgeSt[st].color,transition:'width 0.6s ease'}}/></div>
+            </div>
+          ))}
+        </Card>
+      </div>
+    </div>
+  );
+};
+
+/* ═══════════════════════════════════════════════════════
+   NAV
+═══════════════════════════════════════════════════════ */
+const NAV_ITEMS=[
+  {id:'dashboard',label:'Dashboard',icon:'dashboard'},
+  {id:'clientes', label:'Clientes', icon:'clients'},
+  {id:'vehiculos',label:'Vehículos',icon:'vehicles'},
+  {id:'ordenes',  label:'Órdenes',  icon:'orders'},
+  {id:'facturacion',label:'Facturación',icon:'billing'},
+];
+
+const Sidebar=({active,onNav,collapsed,onToggle})=>(
+  <nav style={{position:'fixed',left:0,top:0,bottom:0,zIndex:100,width:collapsed?'var(--sidebar-collapsed-w)':'var(--sidebar-w)',background:'var(--c-sidebar-bg)',display:'flex',flexDirection:'column',transition:'width var(--transition)',boxShadow:'2px 0 16px rgba(0,0,0,0.2)'}}>
+    <div style={{height:'var(--topbar-h)',display:'flex',alignItems:'center',padding:'0 16px',borderBottom:'1px solid rgba(255,255,255,0.06)',gap:10,overflow:'hidden'}}>
+      <span style={{width:30,height:30,borderRadius:8,background:'var(--c-accent)',display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0}}><I n="tool" s={15} c="#fff"/></span>
+      {!collapsed&&<span style={{fontFamily:'var(--font-display)',fontWeight:700,fontSize:15,color:'#fff',whiteSpace:'nowrap'}}>Talleres<span style={{color:'var(--c-accent)'}}>360</span></span>}
+    </div>
+    <div style={{flex:1,padding:'10px 8px',display:'flex',flexDirection:'column',gap:1,overflowY:'auto'}}>
+      {NAV_ITEMS.map(item=>{
+        const isA=active===item.id;
+        return <button key={item.id} onClick={()=>onNav(item.id)} title={collapsed?item.label:undefined}
+          style={{display:'flex',alignItems:'center',gap:10,padding:collapsed?'10px 0':'9px 12px',justifyContent:collapsed?'center':'flex-start',borderRadius:'var(--r-md)',border:'none',cursor:'pointer',background:isA?'var(--c-sidebar-active)':'transparent',color:isA?'#fff':'var(--c-sidebar-text)',transition:'all var(--transition)',fontFamily:'var(--font-body)',fontSize:13,fontWeight:isA?600:400,whiteSpace:'nowrap',borderLeft:isA?'3px solid var(--c-accent)':'3px solid transparent'}}
+          onMouseEnter={e=>{if(!isA)e.currentTarget.style.background='var(--c-sidebar-hover)'}}
+          onMouseLeave={e=>{if(!isA)e.currentTarget.style.background='transparent'}}>
+          <I n={item.icon} s={17}/>{!collapsed&&item.label}
+        </button>;
+      })}
+    </div>
+    <div style={{padding:'8px',borderTop:'1px solid rgba(255,255,255,0.06)',display:'flex',flexDirection:'column',gap:1}}>
+      <button onClick={()=>onNav('config')} style={{display:'flex',alignItems:'center',gap:10,padding:collapsed?'10px 0':'9px 12px',justifyContent:collapsed?'center':'flex-start',borderRadius:'var(--r-md)',border:'none',cursor:'pointer',background:active==='config'?'var(--c-sidebar-active)':'transparent',color:active==='config'?'#fff':'var(--c-sidebar-text)',transition:'all var(--transition)',fontFamily:'var(--font-body)',fontSize:13,whiteSpace:'nowrap',borderLeft:active==='config'?'3px solid var(--c-accent)':'3px solid transparent'}}>
+        <I n="settings" s={17}/>{!collapsed&&'Configuración'}
+      </button>
+      <button onClick={onToggle} style={{display:'flex',alignItems:'center',justifyContent:'center',padding:'8px',borderRadius:'var(--r-md)',border:'none',cursor:'pointer',background:'transparent',color:'var(--c-sidebar-text)',transition:'all var(--transition)'}}>
+        <I n={collapsed?'chevronRight':'chevronLeft'} s={15}/>
+      </button>
+    </div>
+  </nav>
+);
+
+const Topbar=({sidebarW,darkMode,onToggleDark})=>{
+  const [s,ss]=useState('');
+  return (
+    <header style={{position:'fixed',top:0,right:0,left:sidebarW,zIndex:90,height:'var(--topbar-h)',background:'var(--c-topbar-bg)',borderBottom:'1px solid var(--c-border)',display:'flex',alignItems:'center',padding:'0 20px',gap:14,transition:'left var(--transition)'}}>
+      <div style={{display:'flex',alignItems:'center',gap:7,marginRight:8}}>
+        <span style={{width:7,height:7,borderRadius:'50%',background:'var(--c-green)',flexShrink:0}}/>
+        <span style={{fontFamily:'var(--font-display)',fontWeight:600,fontSize:13,color:'var(--c-text)',whiteSpace:'nowrap'}}>Taller Martínez e Hijos</span>
+        <I n="chevronDown" s={13} c="var(--c-text-muted)"/>
+      </div>
+      <div style={{flex:1,maxWidth:360,position:'relative'}}>
+        <span style={{position:'absolute',left:10,top:'50%',transform:'translateY(-50%)',pointerEvents:'none',color:'var(--c-text-muted)'}}><I n="search" s={14}/></span>
+        <input value={s} onChange={e=>ss(e.target.value)} placeholder="Buscar matrícula, cliente, orden…"
+          style={{width:'100%',padding:'7px 12px 7px 32px',border:'1.5px solid var(--c-border)',borderRadius:'var(--r-md)',background:'var(--c-bg)',fontFamily:'var(--font-body)',fontSize:13,color:'var(--c-text)',outline:'none',transition:'border var(--transition)'}}
+          onFocus={e=>e.target.style.borderColor='var(--c-accent)'} onBlur={e=>e.target.style.borderColor='var(--c-border)'}/>
+      </div>
+      <div style={{flex:1}}/>
+      <button onClick={onToggleDark} style={{width:32,height:32,borderRadius:'var(--r-md)',border:'1px solid var(--c-border)',display:'flex',alignItems:'center',justifyContent:'center',background:'var(--c-surface)',cursor:'pointer',color:'var(--c-text-secondary)'}}><I n={darkMode?'sun':'moon'} s={14}/></button>
+      <button style={{width:32,height:32,borderRadius:'var(--r-md)',border:'1px solid var(--c-border)',display:'flex',alignItems:'center',justifyContent:'center',background:'var(--c-surface)',cursor:'pointer',color:'var(--c-text-secondary)',position:'relative'}}>
+        <I n="bell" s={14}/><span style={{position:'absolute',top:6,right:6,width:6,height:6,borderRadius:'50%',background:'var(--c-red)',border:'1.5px solid var(--c-topbar-bg)'}}/>
+      </button>
+      <div style={{display:'flex',alignItems:'center',gap:8,cursor:'pointer'}}>
+        <div style={{width:30,height:30,borderRadius:'50%',background:'var(--c-primary-mid)',display:'flex',alignItems:'center',justifyContent:'center',fontFamily:'var(--font-display)',fontWeight:700,fontSize:11,color:'#fff'}}>JM</div>
+        <div style={{display:'flex',flexDirection:'column'}}>
+          <span style={{fontSize:12,fontWeight:600,color:'var(--c-text)',lineHeight:1.2}}>Javier M.</span>
+          <span style={{fontSize:10,color:'var(--c-text-muted)',lineHeight:1.2}}>Administrador</span>
+        </div>
+        <I n="chevronDown" s={12} c="var(--c-text-muted)"/>
+      </div>
+    </header>
+  );
+};
+
+/* ═══════════════════════════════════════════════════════
+   MODAL BASE
+═══════════════════════════════════════════════════════ */
+const Modal=({open,onClose,children,width=560,title,subtitle,step,totalSteps})=>{
+  useEffect(()=>{
+    const h=e=>{ if(e.key==='Escape') onClose(); };
+    if(open) document.addEventListener('keydown',h);
+    return()=>document.removeEventListener('keydown',h);
+  },[open,onClose]);
+  if(!open) return null;
+  return (
+    <div style={{position:'fixed',inset:0,zIndex:500,display:'flex',alignItems:'center',justifyContent:'center',padding:20,background:'rgba(8,12,24,0.72)',backdropFilter:'blur(4px)',animation:'backdropIn 200ms ease'}} onClick={e=>{ if(e.target===e.currentTarget) onClose(); }}>
+      <div style={{width:'100%',maxWidth:width,background:'var(--c-surface)',borderRadius:'var(--r-xl)',boxShadow:'var(--shadow-lg)',border:'1px solid var(--c-border)',display:'flex',flexDirection:'column',maxHeight:'90vh',animation:'modalIn 220ms cubic-bezier(0.34,1.2,0.64,1)'}}>
+        {/* Header */}
+        <div style={{padding:'22px 24px 16px',borderBottom:'1px solid var(--c-border)',flexShrink:0}}>
+          <div style={{display:'flex',alignItems:'flex-start',justifyContent:'space-between',gap:12}}>
+            <div>
+              <h2 style={{fontFamily:'var(--font-display)',fontSize:17,fontWeight:700,color:'var(--c-text)',letterSpacing:'-0.01em'}}>{title}</h2>
+              {subtitle&&<p style={{fontSize:13,color:'var(--c-text-secondary)',marginTop:3}}>{subtitle}</p>}
+            </div>
+            <button onClick={onClose} style={{width:30,height:30,borderRadius:'var(--r-md)',border:'1px solid var(--c-border)',background:'var(--c-bg)',display:'flex',alignItems:'center',justifyContent:'center',cursor:'pointer',color:'var(--c-text-muted)',flexShrink:0,marginTop:2}}><I n="x" s={14}/></button>
+          </div>
+          {/* Step indicator */}
+          {totalSteps&&<div style={{display:'flex',gap:6,marginTop:14}}>
+            {Array.from({length:totalSteps},(_,i)=>(
+              <div key={i} style={{height:3,flex:1,borderRadius:2,background:i<step?'var(--c-accent)':i===step?'var(--c-accent)':'var(--c-border)',opacity:i===step?1:i<step?0.8:1,transition:'background 0.3s'}}/>
+            ))}
+          </div>}
+        </div>
+        {/* Body */}
+        <div style={{overflowY:'auto',flex:1}}>
+          {children}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+/* ── FORM HELPERS ─────────────────────────────────────── */
+const FormField=({label,required,hint,error,children})=>(
+  <div style={{display:'flex',flexDirection:'column',gap:5}}>
+    <label style={{fontSize:13,fontWeight:600,color:'var(--c-text)',display:'flex',gap:4}}>
+      {label}{required&&<span style={{color:'var(--c-red)',fontSize:12}}>*</span>}
+    </label>
+    {children}
+    {(hint||error)&&<span style={{fontSize:12,color:error?'var(--c-red)':'var(--c-text-muted)'}}>{error||hint}</span>}
+  </div>
+);
+const FInput=({placeholder,value,onChange,type='text',icon,error,autoFocus})=>{
+  const [f,sf]=useState(false);
+  return <div style={{position:'relative'}}>
+    {icon&&<span style={{position:'absolute',left:10,top:'50%',transform:'translateY(-50%)',color:'var(--c-text-muted)',pointerEvents:'none'}}><I n={icon} s={14}/></span>}
+    <input autoFocus={autoFocus} type={type} placeholder={placeholder} value={value} onChange={e=>onChange(e.target.value)}
+      onFocus={()=>sf(true)} onBlur={()=>sf(false)}
+      style={{width:'100%',padding:icon?'9px 12px 9px 34px':'9px 12px',fontFamily:'var(--font-body)',fontSize:14,color:'var(--c-text)',background:'var(--c-bg)',border:`1.5px solid ${error?'var(--c-red)':f?'var(--c-accent)':'var(--c-border)'}`,borderRadius:'var(--r-md)',outline:'none',transition:'border var(--transition)',boxShadow:f?`0 0 0 3px var(--c-accent-soft)`:error?'0 0 0 3px var(--c-red-soft)':'none'}}/>
+  </div>;
+};
+const FTextarea=({placeholder,value,onChange,rows=3})=>{
+  const [f,sf]=useState(false);
+  return <textarea placeholder={placeholder} value={value} onChange={e=>onChange(e.target.value)} rows={rows}
+    onFocus={()=>sf(true)} onBlur={()=>sf(false)}
+    style={{width:'100%',padding:'9px 12px',fontFamily:'var(--font-body)',fontSize:14,color:'var(--c-text)',background:'var(--c-bg)',border:`1.5px solid ${f?'var(--c-accent)':'var(--c-border)'}`,borderRadius:'var(--r-md)',outline:'none',resize:'vertical',transition:'border var(--transition)',boxShadow:f?'0 0 0 3px var(--c-accent-soft)':'none'}}/>;
+};
+const FSelect=({value,onChange,options})=>{
+  const [f,sf]=useState(false);
+  return <select value={value} onChange={e=>onChange(e.target.value)}
+    onFocus={()=>sf(true)} onBlur={()=>sf(false)}
+    style={{width:'100%',padding:'9px 12px',fontFamily:'var(--font-body)',fontSize:14,color:'var(--c-text)',background:'var(--c-bg)',border:`1.5px solid ${f?'var(--c-accent)':'var(--c-border)'}`,borderRadius:'var(--r-md)',outline:'none',cursor:'pointer'}}>
+    {options.map(([v,l])=><option key={v} value={v}>{l}</option>)}
+  </select>;
+};
+const ModalFooter=({onBack,onNext,onSubmit,nextLabel='Siguiente',submitLabel='Crear',canNext=true,isLast,loading})=>(
+  <div style={{padding:'16px 24px',borderTop:'1px solid var(--c-border)',display:'flex',justifyContent:'space-between',alignItems:'center',flexShrink:0}}>
+    <div>{onBack&&<Btn variant="ghost" onClick={onBack} icon="chevronLeft">Atrás</Btn>}</div>
+    <div style={{display:'flex',gap:8}}>
+      {isLast
+        ? <Btn variant="primary" onClick={onSubmit} disabled={!canNext}>{loading?'Guardando…':submitLabel}</Btn>
+        : <Btn variant="primary" onClick={onNext} disabled={!canNext}>{nextLabel} <I n="chevronRight" s={13}/></Btn>}
+    </div>
+  </div>
+);
+
+/* ── MODAL NUEVA ORDEN (3 pasos) ──────────────────────── */
+const ModalNuevaOrden=({open,onClose})=>{
+  const [step,setStep]=useState(0);
+  const [clienteSearch,setClienteSearch]=useState('');
+  const [clienteSel,setClienteSel]=useState(null);
+  const [vehiculoSel,setVehiculoSel]=useState(null);
+  const [matriculaManual,setMatriculaManual]=useState('');
+  const [descripcion,setDescripcion]=useState('');
+  const [tecnico,setTecnico]=useState('sin_asignar');
+  const [prioridad,setPrioridad]=useState('normal');
+  const [done,setDone]=useState(false);
+  const [loading,setLoading]=useState(false);
+
+  const reset=()=>{ setStep(0);setClienteSearch('');setClienteSel(null);setVehiculoSel(null);setMatriculaManual('');setDescripcion('');setTecnico('sin_asignar');setPrioridad('normal');setDone(false);setLoading(false); };
+  const handleClose=()=>{ onClose(); setTimeout(reset,300); };
+
+  const clientesFilt=CLIENTES.filter(c=>!clienteSearch||c.nombre.toLowerCase().includes(clienteSearch.toLowerCase())||c.tel.includes(clienteSearch));
+  const vehiculosCliente=VEHICULOS.filter(v=>v.propId===clienteSel?.id);
+  const cliente=clienteSel;
+
+  const handleSubmit=()=>{
+    setLoading(true);
+    setTimeout(()=>{ setLoading(false); setDone(true); },1200);
+  };
+
+  const stepTitles=[['Seleccionar cliente','¿Para quién es la orden?'],['Seleccionar vehículo','¿Qué vehículo entra al taller?'],['Detalles del trabajo','Describe la intervención']];
+
+  if(!open) return null;
+  return (
+    <Modal open={open} onClose={handleClose} width={540}
+      title={done?'¡Orden creada!':stepTitles[step][0]}
+      subtitle={done?undefined:stepTitles[step][1]}
+      step={step} totalSteps={done?undefined:3}>
+
+      {done ? (
+        /* ── SUCCESS ── */
+        <div style={{padding:'40px 24px',textAlign:'center'}}>
+          <div style={{width:64,height:64,borderRadius:'50%',background:'var(--c-green-soft)',border:'2px solid var(--c-green)',display:'flex',alignItems:'center',justifyContent:'center',margin:'0 auto 16px',color:'var(--c-green)'}}><I n="check" s={28} w={2.5}/></div>
+          <div style={{fontFamily:'var(--font-display)',fontSize:18,fontWeight:700,color:'var(--c-text)',marginBottom:6}}>Orden creada correctamente</div>
+          <div style={{fontSize:13,color:'var(--c-text-secondary)',marginBottom:8}}>
+            <span style={{fontFamily:'var(--font-display)',fontWeight:700,color:'var(--c-accent)'}}>OT-2411</span> · {cliente?.nombre} · {vehiculoSel?.matricula||matriculaManual||'—'}
+          </div>
+          {descripcion&&<div style={{fontSize:13,color:'var(--c-text-muted)',fontStyle:'italic',marginBottom:24}}>"{descripcion}"</div>}
+          <div style={{display:'flex',gap:10,justifyContent:'center'}}>
+            <Btn variant="secondary" onClick={()=>{ reset(); }}>Nueva orden</Btn>
+            <Btn variant="primary" onClick={handleClose} icon="eye">Ver orden</Btn>
+          </div>
+        </div>
+      ) : step===0 ? (
+        /* ── STEP 1: CLIENTE ── */
+        <div style={{padding:'20px 24px'}}>
+          <FInput icon="search" placeholder="Buscar cliente por nombre o teléfono…" value={clienteSearch} onChange={setClienteSearch} autoFocus/>
+          <div style={{marginTop:12,display:'flex',flexDirection:'column',gap:2,maxHeight:280,overflowY:'auto'}}>
+            {clientesFilt.map(c=>(
+              <button key={c.id} onClick={()=>{ setClienteSel(c); setStep(1); }}
+                style={{display:'flex',alignItems:'center',gap:12,padding:'11px 12px',borderRadius:'var(--r-md)',border:`1.5px solid ${clienteSel?.id===c.id?'var(--c-accent)':'transparent'}`,background:clienteSel?.id===c.id?'var(--c-accent-soft)':'transparent',cursor:'pointer',transition:'all var(--transition)',textAlign:'left'}}
+                onMouseEnter={e=>{ if(clienteSel?.id!==c.id){ e.currentTarget.style.background='var(--c-bg)'; }}}
+                onMouseLeave={e=>{ if(clienteSel?.id!==c.id){ e.currentTarget.style.background='transparent'; }}}>
+                <Avatar name={c.nombre} size={36}/>
+                <div style={{flex:1}}>
+                  <div style={{fontWeight:600,color:'var(--c-text)',fontSize:14}}>{c.nombre}</div>
+                  <div style={{fontSize:12,color:'var(--c-text-muted)',marginTop:1}}>{c.tel} · {c.vehiculos} vehículo{c.vehiculos!==1?'s':''}</div>
+                </div>
+                {clienteSel?.id===c.id&&<I n="check" s={16} c="var(--c-accent)"/>}
+              </button>
+            ))}
+          </div>
+          <div style={{height:1,background:'var(--c-border)',margin:'14px 0'}}/>
+          <button style={{display:'flex',alignItems:'center',gap:10,padding:'11px 12px',borderRadius:'var(--r-md)',border:'1.5px dashed var(--c-border)',background:'transparent',cursor:'pointer',width:'100%',color:'var(--c-text-secondary)',transition:'all var(--transition)'}}
+            onMouseEnter={e=>{ e.currentTarget.style.borderColor='var(--c-accent)';e.currentTarget.style.color='var(--c-accent)'; }}
+            onMouseLeave={e=>{ e.currentTarget.style.borderColor='var(--c-border)';e.currentTarget.style.color='var(--c-text-secondary)'; }}>
+            <span style={{width:32,height:32,borderRadius:8,border:'1.5px dashed currentColor',display:'flex',alignItems:'center',justifyContent:'center'}}><I n="plus" s={14}/></span>
+            <span style={{fontSize:13,fontWeight:600}}>Crear cliente nuevo</span>
+          </button>
+        </div>
+      ) : step===1 ? (
+        /* ── STEP 2: VEHÍCULO ── */
+        <div style={{padding:'20px 24px'}}>
+          {cliente&&<div style={{display:'flex',alignItems:'center',gap:10,padding:'10px 12px',background:'var(--c-bg)',borderRadius:'var(--r-md)',marginBottom:16,border:'1px solid var(--c-border)'}}>
+            <Avatar name={cliente.nombre} size={28}/>
+            <span style={{fontSize:13,fontWeight:600,color:'var(--c-text)'}}>{cliente.nombre}</span>
+            <button onClick={()=>{ setClienteSel(null);setVehiculoSel(null);setStep(0); }} style={{marginLeft:'auto',background:'none',border:'none',cursor:'pointer',fontSize:12,color:'var(--c-accent)',fontWeight:600}}>Cambiar</button>
+          </div>}
+          {vehiculosCliente.length>0&&<>
+            <div style={{fontSize:12,fontWeight:700,color:'var(--c-text-muted)',textTransform:'uppercase',letterSpacing:'0.07em',marginBottom:8}}>Vehículos del cliente</div>
+            <div style={{display:'flex',flexDirection:'column',gap:6,marginBottom:14}}>
+              {vehiculosCliente.map(v=>(
+                <button key={v.id} onClick={()=>setVehiculoSel(v)}
+                  style={{display:'flex',alignItems:'center',gap:12,padding:'12px 14px',borderRadius:'var(--r-md)',border:`1.5px solid ${vehiculoSel?.id===v.id?'var(--c-accent)':'var(--c-border)'}`,background:vehiculoSel?.id===v.id?'var(--c-accent-soft)':'var(--c-surface)',cursor:'pointer',transition:'all var(--transition)',textAlign:'left'}}
+                  onMouseEnter={e=>{ if(vehiculoSel?.id!==v.id) e.currentTarget.style.background='var(--c-bg)'; }}
+                  onMouseLeave={e=>{ if(vehiculoSel?.id!==v.id) e.currentTarget.style.background='var(--c-surface)'; }}>
+                  <span style={{width:38,height:38,borderRadius:'var(--r-md)',background:'var(--c-bg)',border:'1px solid var(--c-border)',display:'flex',alignItems:'center',justifyContent:'center',color:'var(--c-text-muted)'}}><I n="car" s={17}/></span>
+                  <div style={{flex:1}}>
+                    <div style={{display:'flex',alignItems:'center',gap:8}}>
+                      <Plate value={v.matricula}/>
+                      <span style={{fontWeight:600,color:'var(--c-text)',fontSize:13}}>{v.marca} {v.modelo}</span>
+                    </div>
+                    <div style={{fontSize:11,color:'var(--c-text-muted)',marginTop:3}}>{v.anio} · {v.km} km · ITV: {v.itv}</div>
+                  </div>
+                  {vehiculoSel?.id===v.id&&<I n="check" s={16} c="var(--c-accent)"/>}
+                </button>
+              ))}
+            </div>
+          </>}
+          <div style={{fontSize:12,fontWeight:700,color:'var(--c-text-muted)',textTransform:'uppercase',letterSpacing:'0.07em',marginBottom:8}}>Introducir matrícula manualmente</div>
+          <FInput placeholder="Ej: 1234-XYZ" value={matriculaManual} onChange={v=>{ setMatriculaManual(v.toUpperCase());setVehiculoSel(null); }} icon="car"/>
+        </div>
+      ) : (
+        /* ── STEP 3: DETALLES ── */
+        <div style={{padding:'20px 24px',display:'flex',flexDirection:'column',gap:16}}>
+          {/* Summary chips */}
+          <div style={{display:'flex',gap:8,flexWrap:'wrap'}}>
+            <span style={{display:'inline-flex',alignItems:'center',gap:6,padding:'4px 10px',borderRadius:'var(--r-full)',background:'var(--c-accent-soft)',color:'var(--c-accent)',fontSize:12,fontWeight:600}}><I n="clients" s={12}/>{cliente?.nombre}</span>
+            <span style={{display:'inline-flex',alignItems:'center',gap:6,padding:'4px 10px',borderRadius:'var(--r-full)',background:'var(--c-bg)',color:'var(--c-text-secondary)',fontSize:12,fontWeight:600,border:'1px solid var(--c-border)'}}><I n="car" s={12}/>{vehiculoSel?.matricula||matriculaManual||'—'}</span>
+          </div>
+          <FormField label="Descripción del trabajo" required>
+            <FTextarea placeholder="Describe la avería o el servicio solicitado…" value={descripcion} onChange={setDescripcion} rows={3}/>
+          </FormField>
+          <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:14}}>
+            <FormField label="Técnico asignado">
+              <FSelect value={tecnico} onChange={setTecnico} options={[['sin_asignar','Sin asignar'],['rafa','Rafa'],['luis','Luis'],['miguel','Miguel']]}/>
+            </FormField>
+            <FormField label="Prioridad">
+              <div style={{display:'flex',gap:6}}>
+                {[['normal','Normal'],['urgente','Urgente'],['express','Express']].map(([v,l])=>(
+                  <button key={v} onClick={()=>setPrioridad(v)}
+                    style={{flex:1,padding:'8px 4px',borderRadius:'var(--r-md)',border:`1.5px solid ${prioridad===v?v==='urgente'?'var(--c-yellow)':v==='express'?'var(--c-red)':'var(--c-accent)':'var(--c-border)'}`,background:prioridad===v?v==='urgente'?'var(--c-yellow-soft)':v==='express'?'var(--c-red-soft)':'var(--c-accent-soft)':'var(--c-bg)',color:prioridad===v?v==='urgente'?'var(--c-yellow-text)':v==='express'?'var(--c-red)':'var(--c-accent)':'var(--c-text-muted)',fontSize:11,fontWeight:700,cursor:'pointer',transition:'all var(--transition)'}}>
+                    {l}
+                  </button>
+                ))}
+              </div>
+            </FormField>
+          </div>
+          <FormField label="Observaciones" hint="Opcional — notas internas del taller">
+            <FInput placeholder="Ej: cliente trae el coche mañana a las 9h" value="" onChange={()=>{}}/>
+          </FormField>
+        </div>
+      )}
+
+      {!done&&<ModalFooter
+        onBack={step>0?()=>setStep(s=>s-1):undefined}
+        onNext={step<2?()=>setStep(s=>s+1):undefined}
+        onSubmit={handleSubmit}
+        canNext={step===0?!!clienteSel:step===1?(!!vehiculoSel||matriculaManual.length>=4):descripcion.trim().length>3}
+        isLast={step===2}
+        loading={loading}
+        submitLabel="Crear orden"
+      />}
+    </Modal>
+  );
+};
+
+/* ── MODAL NUEVO CLIENTE ──────────────────────────────── */
+const ModalNuevoCliente=({open,onClose})=>{
+  const [nombre,setNombre]=useState('');
+  const [tel,setTel]=useState('');
+  const [email,setEmail]=useState('');
+  const [dni,setDni]=useState('');
+  const [notas,setNotas]=useState('');
+  const [errors,setErrors]=useState({});
+  const [done,setDone]=useState(false);
+  const [loading,setLoading]=useState(false);
+
+  const reset=()=>{ setNombre('');setTel('');setEmail('');setDni('');setNotas('');setErrors({});setDone(false);setLoading(false); };
+  const handleClose=()=>{ onClose(); setTimeout(reset,300); };
+
+  const validate=()=>{
+    const e={};
+    if(!nombre.trim()) e.nombre='El nombre es obligatorio';
+    if(!tel.trim()) e.tel='El teléfono es obligatorio';
+    else if(!/^[0-9\s\+\-]{9,}$/.test(tel.trim())) e.tel='Introduce un teléfono válido';
+    if(email&&!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) e.email='Email no válido';
+    setErrors(e);
+    return Object.keys(e).length===0;
+  };
+
+  const handleSubmit=()=>{
+    if(!validate()) return;
+    setLoading(true);
+    setTimeout(()=>{ setLoading(false); setDone(true); },1000);
+  };
+
+  if(!open) return null;
+  return (
+    <Modal open={open} onClose={handleClose} width={480} title={done?'Cliente registrado':'Nuevo cliente'} subtitle={done?undefined:'Rellena los datos del nuevo cliente'}>
+      {done ? (
+        <div style={{padding:'40px 24px',textAlign:'center'}}>
+          <Avatar name={nombre} size={64}/>
+          <div style={{fontFamily:'var(--font-display)',fontSize:18,fontWeight:700,color:'var(--c-text)',marginTop:14,marginBottom:4}}>{nombre}</div>
+          <div style={{fontSize:13,color:'var(--c-text-secondary)',marginBottom:24}}>{tel}{email&&` · ${email}`}</div>
+          <div style={{display:'flex',gap:10,justifyContent:'center'}}>
+            <Btn variant="secondary" onClick={reset} icon="plus">Otro cliente</Btn>
+            <Btn variant="success" onClick={handleClose} icon="car">Añadir vehículo</Btn>
+            <Btn variant="primary" onClick={handleClose} icon="eye">Ver cliente</Btn>
+          </div>
+        </div>
+      ) : (
+        <>
+          <div style={{padding:'20px 24px',display:'flex',flexDirection:'column',gap:14}}>
+            <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:14}}>
+              <FormField label="Nombre completo" required error={errors.nombre}>
+                <FInput placeholder="Pedro García" value={nombre} onChange={setNombre} error={errors.nombre} autoFocus/>
+              </FormField>
+              <FormField label="Teléfono" required error={errors.tel}>
+                <FInput placeholder="612 345 678" value={tel} onChange={setTel} icon="phone" error={errors.tel} type="tel"/>
+              </FormField>
+            </div>
+            <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:14}}>
+              <FormField label="Email" error={errors.email}>
+                <FInput placeholder="pedro@email.com" value={email} onChange={setEmail} icon="mail" type="email" error={errors.email}/>
+              </FormField>
+              <FormField label="DNI / NIF" hint="Opcional">
+                <FInput placeholder="12345678A" value={dni} onChange={setDni}/>
+              </FormField>
+            </div>
+            <FormField label="Notas internas" hint="Observaciones del cliente, preferencias, historial…">
+              <FTextarea placeholder="Cliente habitual, prefiere avisar por WhatsApp…" value={notas} onChange={setNotas} rows={2}/>
+            </FormField>
+          </div>
+          <ModalFooter onSubmit={handleSubmit} isLast canNext={nombre.trim().length>1&&tel.trim().length>8} loading={loading} submitLabel="Registrar cliente"/>
+        </>
+      )}
+    </Modal>
+  );
+};
+
+/* ═══════════════════════════════════════════════════════
+   APP
+═══════════════════════════════════════════════════════ */
+const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
+  "darkMode": false,
+  "accentColor": "cobalt",
+  "sidebarCollapsed": true
+}/*EDITMODE-END*/;
+
+const accentMap={
+  orange:{a:'oklch(0.64 0.18 40)',h:'oklch(0.58 0.20 40)',s:'oklch(0.96 0.04 40)'},
+  emerald:{a:'oklch(0.65 0.18 150)',h:'oklch(0.58 0.18 150)',s:'oklch(0.96 0.05 150)'},
+  cobalt:{a:'oklch(0.60 0.18 245)',h:'oklch(0.54 0.20 245)',s:'oklch(0.95 0.04 245)'},
+};
+
+const GenericView=({name})=>(
+  <div className="page-enter">
+    <PageHeader title={name} actionLabel="Nuevo"/>
+    <Card style={{minHeight:300,display:'flex',alignItems:'center',justifyContent:'center'}}>
+      <div style={{textAlign:'center'}}>
+        <div style={{width:44,height:44,borderRadius:'var(--r-lg)',background:'var(--c-bg)',border:'1px solid var(--c-border)',display:'flex',alignItems:'center',justifyContent:'center',margin:'0 auto 12px',color:'var(--c-text-muted)'}}><I n="tool" s={18}/></div>
+        <p style={{color:'var(--c-text-muted)',fontSize:14}}>Vista de {name} — próximamente</p>
+      </div>
+    </Card>
+  </div>
+);
+
+const App=()=>{
+  const [nav,setNav]=useState(()=>localStorage.getItem('t360_nav')||'dashboard');
+  const [collapsed,setCollapsed]=useState(TWEAK_DEFAULTS.sidebarCollapsed);
+  const [darkMode,setDarkMode]=useState(TWEAK_DEFAULTS.darkMode);
+  const [tweaks,setTweaks]=useState(TWEAK_DEFAULTS);
+  const [showTweaks,setShowTweaks]=useState(false);
+  const [modalOrden,setModalOrden]=useState(false);
+  const [modalCliente,setModalCliente]=useState(false);
+
+  // Global openers for child views
+  useEffect(()=>{ window.__openOrden=()=>setModalOrden(true); window.__openCliente=()=>setModalCliente(true); },[]);
+
+  useEffect(()=>{ localStorage.setItem('t360_nav',nav); },[nav]);
+  useEffect(()=>{ document.documentElement.classList.toggle('dark',darkMode); },[darkMode]);
+  useEffect(()=>{
+    const acc=accentMap[tweaks.accentColor]||accentMap.cobalt;
+    document.documentElement.style.setProperty('--c-accent',acc.a);
+    document.documentElement.style.setProperty('--c-accent-hover',acc.h);
+    document.documentElement.style.setProperty('--c-accent-soft',acc.s);
+    document.documentElement.style.setProperty('--c-blue',acc.a);
+    document.documentElement.style.setProperty('--c-blue-soft',acc.s);
+  },[tweaks.accentColor]);
+  useEffect(()=>{
+    const h=e=>{
+      if(e.data?.type==='__activate_edit_mode') setShowTweaks(true);
+      if(e.data?.type==='__deactivate_edit_mode') setShowTweaks(false);
+    };
+    window.addEventListener('message',h);
+    window.parent.postMessage({type:'__edit_mode_available'},'*');
+    return()=>window.removeEventListener('message',h);
+  },[]);
+
+  const updateTweak=(key,val)=>{
+    const next={...tweaks,[key]:val};
+    setTweaks(next);
+    window.parent.postMessage({type:'__edit_mode_set_keys',edits:{[key]:val}},'*');
+    if(key==='darkMode') setDarkMode(val);
+    if(key==='sidebarCollapsed') setCollapsed(val);
+  };
+
+  const sidebarW=collapsed?'var(--sidebar-collapsed-w)':'var(--sidebar-w)';
+  const views={dashboard:<DashboardView/>,clientes:<ClientesView/>,vehiculos:<VehiculosView/>,ordenes:<OrdenesView/>,facturacion:<GenericView name="Facturación"/>,config:<GenericView name="Configuración"/>};
+
+  return (
+    <div style={{minHeight:'100vh',background:'var(--c-bg)'}}>
+      <Sidebar active={nav} onNav={setNav} collapsed={collapsed} onToggle={()=>{const n=!collapsed;setCollapsed(n);updateTweak('sidebarCollapsed',n);}}/>
+      <Topbar sidebarW={sidebarW} darkMode={darkMode} onToggleDark={()=>setDarkMode(!darkMode)}/>
+      <main style={{marginLeft:sidebarW,paddingTop:'var(--topbar-h)',transition:'margin-left var(--transition)'}}>
+        <div style={{padding:'24px 24px 48px'}}>
+          {views[nav]||<DashboardView/>}
+        </div>
+      </main>
+
+      <ModalNuevaOrden open={modalOrden} onClose={()=>setModalOrden(false)}/>
+      <ModalNuevoCliente open={modalCliente} onClose={()=>setModalCliente(false)}/>
+      {/* Tweaks */}
+      {showTweaks&&<div style={{position:'fixed',bottom:20,right:20,zIndex:9999,background:'var(--c-surface)',border:'1px solid var(--c-border)',borderRadius:'var(--r-xl)',boxShadow:'var(--shadow-lg)',padding:18,width:252,fontFamily:'var(--font-body)'}}>
+        <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:14}}>
+          <span style={{fontFamily:'var(--font-display)',fontWeight:700,fontSize:13,color:'var(--c-text)'}}>Tweaks</span>
+          <button onClick={()=>setShowTweaks(false)} style={{background:'none',border:'none',cursor:'pointer',color:'var(--c-text-muted)'}}><I n="x" s={13}/></button>
+        </div>
+        <div style={{display:'flex',flexDirection:'column',gap:14}}>
+          <div>
+            <div style={{fontSize:10,fontWeight:700,color:'var(--c-text-muted)',letterSpacing:'0.07em',textTransform:'uppercase',marginBottom:7}}>Modo</div>
+            <div style={{display:'flex',gap:6}}>
+              {[['false','Claro'],['true','Oscuro']].map(([v,l])=>(
+                <button key={v} onClick={()=>updateTweak('darkMode',v==='true')} style={{flex:1,padding:'6px',borderRadius:'var(--r-md)',border:`1.5px solid ${String(darkMode)===v?'var(--c-accent)':'var(--c-border)'}`,background:String(darkMode)===v?'var(--c-accent-soft)':'var(--c-bg)',color:'var(--c-text)',fontSize:12,fontWeight:600,cursor:'pointer'}}>{l}</button>
+              ))}
+            </div>
+          </div>
+          <div>
+            <div style={{fontSize:10,fontWeight:700,color:'var(--c-text-muted)',letterSpacing:'0.07em',textTransform:'uppercase',marginBottom:7}}>Acento</div>
+            <div style={{display:'flex',gap:6}}>
+              {[['orange','Naranja','oklch(0.64 0.18 40)'],['emerald','Verde','oklch(0.65 0.18 150)'],['cobalt','Azul','oklch(0.60 0.18 245)']].map(([v,l,clr])=>(
+                <button key={v} onClick={()=>updateTweak('accentColor',v)} style={{flex:1,padding:'6px 4px',borderRadius:'var(--r-md)',border:`1.5px solid ${tweaks.accentColor===v?clr:'var(--c-border)'}`,background:'var(--c-bg)',fontSize:11,fontWeight:600,cursor:'pointer',display:'flex',flexDirection:'column',alignItems:'center',gap:4,color:'var(--c-text)'}}>
+                  <span style={{width:14,height:14,borderRadius:'50%',background:clr}}/>{l}
+                </button>
+              ))}
+            </div>
+          </div>
+          <div>
+            <div style={{fontSize:10,fontWeight:700,color:'var(--c-text-muted)',letterSpacing:'0.07em',textTransform:'uppercase',marginBottom:7}}>Sidebar</div>
+            <div style={{display:'flex',gap:6}}>
+              {[['Expandido',false],['Colapsado',true]].map(([l,v])=>(
+                <button key={l} onClick={()=>{setCollapsed(v);updateTweak('sidebarCollapsed',v);}} style={{flex:1,padding:'6px',borderRadius:'var(--r-md)',border:`1.5px solid ${collapsed===v?'var(--c-accent)':'var(--c-border)'}`,background:collapsed===v?'var(--c-accent-soft)':'var(--c-bg)',color:'var(--c-text)',fontSize:12,fontWeight:600,cursor:'pointer'}}>{l}</button>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>}
+    </div>
+  );
+};
+ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+</script>
+</body>
+</html>

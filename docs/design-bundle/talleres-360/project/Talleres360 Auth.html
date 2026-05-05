@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Talleres360 — Acceso</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&display=swap" rel="stylesheet"/>
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body,#root{height:100%;min-height:100%}
+body{font-family:'DM Sans',sans-serif;background:#07101E;color:#DCE6F5;-webkit-font-smoothing:antialiased}
+
+:root{
+  --c-bg:#07101E;
+  --c-surface:#0F1928;
+  --c-surface-2:#162030;
+  --c-border:rgba(100,160,230,0.10);
+  --c-border-focus:oklch(0.60 0.18 245);
+  --c-text:#DCE6F5;
+  --c-text-secondary:#5A7A9A;
+  --c-text-muted:#2C4060;
+  --c-accent:oklch(0.60 0.18 245);
+  --c-accent-hover:oklch(0.54 0.20 245);
+  --c-accent-soft:oklch(0.60 0.18 245 / 0.12);
+  --c-green:oklch(0.65 0.18 150);
+  --c-green-soft:oklch(0.65 0.18 150 / 0.12);
+  --c-red:oklch(0.58 0.22 25);
+  --c-red-soft:oklch(0.58 0.22 25 / 0.12);
+  --r-md:8px; --r-lg:12px; --r-xl:16px; --r-full:9999px;
+  --font-display:'Space Grotesk',sans-serif;
+  --font-body:'DM Sans',sans-serif;
+  --t:160ms cubic-bezier(0.4,0,0.2,1);
+  --shadow-card:0 24px 64px rgba(0,0,0,0.55), 0 0 0 1px rgba(100,160,230,0.08);
+}
+
+@keyframes fadeIn{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+@keyframes slideLeft{from{opacity:0;transform:translateX(20px)}to{opacity:1;transform:translateX(0)}}
+@keyframes slideRight{from{opacity:0;transform:translateX(-20px)}to{opacity:1;transform:translateX(0)}}
+@keyframes pulse{0%,100%{opacity:0.4;transform:scale(1)}50%{opacity:0.7;transform:scale(1.05)}}
+@keyframes rotate{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+@keyframes shimmer{0%{transform:translateX(-100%)}100%{transform:translateX(200%)}}
+
+.fade-in{animation:fadeIn 300ms ease forwards}
+.slide-left{animation:slideLeft 240ms cubic-bezier(0.34,1.1,0.64,1) forwards}
+.slide-right{animation:slideRight 240ms cubic-bezier(0.34,1.1,0.64,1) forwards}
+
+input:-webkit-autofill,input:-webkit-autofill:focus{
+  transition:background-color 600000s 0s,color 600000s 0s;
+  -webkit-text-fill-color:#DCE6F5 !important;
+}
+</style>
+</head>
+<body><div id="root"></div>
+<script type="text/babel">
+const {useState,useEffect,useRef}=React;
+
+/* ── LOGO ICON SVG ───────────────────────────────────── */
+const Logo=({size=40,showText=true})=>(
+  <div style={{display:'flex',alignItems:'center',gap:12}}>
+    <svg width={size} height={size} viewBox="0 0 56 56" fill="none">
+      {/* Arc wrench — V3 concept */}
+      <path d="M14 10 A24 24 0 1 0 42 10" stroke="oklch(0.68 0.18 245)" strokeWidth="3" strokeLinecap="round" fill="none"/>
+      <circle cx="14" cy="10" r="4" fill="oklch(0.68 0.18 245)"/>
+      <circle cx="42" cy="10" r="4" fill="oklch(0.68 0.18 245)"/>
+      <rect x="25.5" y="26" width="5" height="20" rx="2.5" fill="white"/>
+      <rect x="20" y="25" width="16" height="4" rx="2" fill="white"/>
+    </svg>
+    {showText&&<div>
+      <div style={{fontFamily:'var(--font-display)',fontWeight:800,fontSize:size*0.45,color:'#DCE6F5',letterSpacing:'-0.02em',lineHeight:1}}>
+        Talleres<span style={{color:'oklch(0.68 0.18 245)'}}>360</span>
+      </div>
+      <div style={{fontSize:size*0.2,color:'var(--c-text-muted)',letterSpacing:'0.1em',textTransform:'uppercase',marginTop:2}}>Gestión de talleres</div>
+    </div>}
+  </div>
+);
+
+/* ── ICON ────────────────────────────────────────────── */
+const I=({n,s=18,c='currentColor'})=>{
+  const d={
+    eye:<><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></>,
+    eyeOff:<><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></>,
+    mail:<><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></>,
+    lock:<><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></>,
+    user:<><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></>,
+    building:<><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M9 22v-4h6v4"/><path d="M8 6h.01M16 6h.01M8 10h.01M16 10h.01M8 14h.01M16 14h.01"/></>,
+    phone:<><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.38 2 2 0 0 1 3.6 1.17h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.82a16 16 0 0 0 6.29 6.29l.95-.95a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></>,
+    check:<polyline points="20 6 9 17 4 12"/>,
+    arrowRight:<><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></>,
+    x:<><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></>,
+    tool:<><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></>,
+    google:<><path d="M20.283 10.356h-8.327v3.451h4.792c-.446 2.193-2.313 3.453-4.792 3.453a5.27 5.27 0 0 1-5.279-5.28 5.27 5.27 0 0 1 5.279-5.279c1.259 0 2.397.447 3.29 1.178l2.6-2.599c-1.584-1.381-3.615-2.233-5.89-2.233a8.908 8.908 0 0 0-8.934 8.934 8.908 8.908 0 0 0 8.934 8.934c4.467 0 8.529-3.249 8.529-8.934 0-.528-.081-1.097-.202-1.625z" fill="currentColor" stroke="none"/></>,
+  };
+  return <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">{d[n]}</svg>;
+};
+
+/* ── FIELD ───────────────────────────────────────────── */
+const Field=({label,placeholder,type='text',icon,value,onChange,error,hint,autoFocus,suffix})=>{
+  const [show,setShow]=useState(false);
+  const [focused,setFocused]=useState(false);
+  const isPass=type==='password';
+  const inputType=isPass?(show?'text':'password'):type;
+  return (
+    <div style={{display:'flex',flexDirection:'column',gap:6}}>
+      {label&&<label style={{fontSize:13,fontWeight:600,color:focused?'var(--c-text)':'var(--c-text-secondary)',transition:'color var(--t)'}}>{label}</label>}
+      <div style={{position:'relative'}}>
+        {icon&&<span style={{position:'absolute',left:12,top:'50%',transform:'translateY(-50%)',color:focused?'var(--c-accent)':'var(--c-text-muted)',transition:'color var(--t)',pointerEvents:'none'}}><I n={icon} s={15}/></span>}
+        <input
+          autoFocus={autoFocus} type={inputType} placeholder={placeholder}
+          value={value} onChange={e=>onChange(e.target.value)}
+          onFocus={()=>setFocused(true)} onBlur={()=>setFocused(false)}
+          style={{
+            width:'100%',
+            padding:`11px ${isPass||suffix?'44px':'14px'} 11px ${icon?'40px':'14px'}`,
+            fontFamily:'var(--font-body)',fontSize:14,color:'var(--c-text)',
+            background:'var(--c-surface-2)',
+            border:`1.5px solid ${error?'var(--c-red)':focused?'var(--c-accent)':'var(--c-border)'}`,
+            borderRadius:'var(--r-lg)',outline:'none',transition:'all var(--t)',
+            boxShadow:focused&&!error?'0 0 0 3px oklch(0.60 0.18 245 / 0.15)':error?'0 0 0 3px oklch(0.58 0.22 25 / 0.12)':'none',
+          }}/>
+        {isPass&&<button type="button" onClick={()=>setShow(!show)}
+          style={{position:'absolute',right:12,top:'50%',transform:'translateY(-50%)',background:'none',border:'none',cursor:'pointer',color:'var(--c-text-muted)',padding:2,display:'flex'}}>
+          <I n={show?'eyeOff':'eye'} s={15}/>
+        </button>}
+      </div>
+      {(error||hint)&&<span style={{fontSize:12,color:error?'var(--c-red)':'var(--c-text-muted)',display:'flex',alignItems:'center',gap:4}}>
+        {error&&<I n="x" s={12} c="var(--c-red)"/>}{error||hint}
+      </span>}
+    </div>
+  );
+};
+
+/* ── PRIMARY BUTTON ──────────────────────────────────── */
+const Btn=({children,onClick,loading,disabled,variant='primary',full})=>{
+  const [h,sh]=useState(false);
+  const styles={
+    primary:{bg:h?'var(--c-accent-hover)':'var(--c-accent)',color:'#fff'},
+    ghost:{bg:h?'rgba(100,160,230,0.08)':'transparent',color:'var(--c-text-secondary)',border:'1.5px solid var(--c-border)'},
+    text:{bg:'transparent',color:'var(--c-accent)'},
+  }[variant];
+  return (
+    <button onClick={onClick} disabled={disabled||loading}
+      onMouseEnter={()=>sh(true)} onMouseLeave={()=>sh(false)}
+      style={{
+        width:full?'100%':undefined,
+        display:'flex',alignItems:'center',justifyContent:'center',gap:8,
+        padding:'12px 20px',borderRadius:'var(--r-lg)',border:'none',
+        fontFamily:'var(--font-body)',fontSize:14,fontWeight:600,cursor:disabled||loading?'not-allowed':'pointer',
+        opacity:disabled&&!loading?0.5:1,transition:'all var(--t)',
+        ...styles,
+      }}>
+      {loading
+        ? <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" style={{animation:'rotate 0.8s linear infinite'}}><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
+        : children}
+    </button>
+  );
+};
+
+/* ── DIVIDER ─────────────────────────────────────────── */
+const Divider=({label})=>(
+  <div style={{display:'flex',alignItems:'center',gap:12}}>
+    <div style={{flex:1,height:1,background:'var(--c-border)'}}/>
+    <span style={{fontSize:12,color:'var(--c-text-muted)',fontWeight:500}}>{label}</span>
+    <div style={{flex:1,height:1,background:'var(--c-border)'}}/>
+  </div>
+);
+
+/* ── STEP INDICATOR ──────────────────────────────────── */
+const Steps=({current,total})=>(
+  <div style={{display:'flex',gap:5,justifyContent:'center',marginBottom:24}}>
+    {Array.from({length:total},(_,i)=>(
+      <div key={i} style={{height:3,width:i===current?28:12,borderRadius:99,background:i<current?'var(--c-green)':i===current?'var(--c-accent)':'var(--c-border)',transition:'all 400ms ease'}}/>
+    ))}
+  </div>
+);
+
+/* ── STRENGTH METER ──────────────────────────────────── */
+const StrengthMeter=({pwd})=>{
+  const s=pwd.length===0?0:pwd.length<6?1:pwd.length<10?2:(/[A-Z]/.test(pwd)&&/[0-9]/.test(pwd)&&/[^a-zA-Z0-9]/.test(pwd))?4:3;
+  const labels=['','Muy débil','Débil','Buena','Muy segura'];
+  const colors=['','var(--c-red)','#F59E0B','var(--c-accent)','var(--c-green)'];
+  if(!pwd) return null;
+  return (
+    <div style={{display:'flex',flexDirection:'column',gap:5,marginTop:-4}}>
+      <div style={{display:'flex',gap:4}}>
+        {[1,2,3,4].map(i=>(
+          <div key={i} style={{flex:1,height:3,borderRadius:99,background:i<=s?colors[s]:'var(--c-border)',transition:'all 0.3s'}}/>
+        ))}
+      </div>
+      <span style={{fontSize:11,color:colors[s],fontWeight:600}}>{labels[s]}</span>
+    </div>
+  );
+};
+
+/* ═══════════════════════════════════════════════════════
+   LOGIN VIEW
+═══════════════════════════════════════════════════════ */
+const LoginView=({onSwitch,onSuccess})=>{
+  const [email,setEmail]=useState('');
+  const [pwd,setPwd]=useState('');
+  const [errors,setErrors]=useState({});
+  const [loading,setLoading]=useState(false);
+  const [remember,setRemember]=useState(false);
+
+  const validate=()=>{
+    const e={};
+    if(!email) e.email='El email es obligatorio';
+    else if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) e.email='Email no válido';
+    if(!pwd) e.pwd='La contraseña es obligatoria';
+    setErrors(e);
+    return Object.keys(e).length===0;
+  };
+
+  const submit=()=>{
+    if(!validate()) return;
+    setLoading(true);
+    setTimeout(()=>{ setLoading(false); onSuccess(); },1400);
+  };
+
+  return (
+    <div className="slide-right" style={{display:'flex',flexDirection:'column',gap:20}}>
+      {/* Header */}
+      <div style={{textAlign:'center',marginBottom:4}}>
+        <div style={{fontFamily:'var(--font-display)',fontSize:22,fontWeight:800,color:'var(--c-text)',letterSpacing:'-0.02em',marginBottom:4}}>Bienvenido de nuevo</div>
+        <div style={{fontSize:14,color:'var(--c-text-secondary)'}}>Accede a la gestión de tu taller</div>
+      </div>
+
+      {/* Google SSO */}
+      <button style={{display:'flex',alignItems:'center',justifyContent:'center',gap:10,padding:'11px',border:'1.5px solid var(--c-border)',borderRadius:'var(--r-lg)',background:'var(--c-surface-2)',cursor:'pointer',transition:'all var(--t)',color:'var(--c-text)',fontFamily:'var(--font-body)',fontSize:14,fontWeight:500,width:'100%'}}
+        onMouseEnter={e=>{e.currentTarget.style.borderColor='var(--c-accent)';e.currentTarget.style.background='var(--c-accent-soft)';}}
+        onMouseLeave={e=>{e.currentTarget.style.borderColor='var(--c-border)';e.currentTarget.style.background='var(--c-surface-2)';}}>
+        <svg width="17" height="17" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+        Continuar con Google
+      </button>
+
+      <Divider label="o con tu cuenta"/>
+
+      {/* Fields */}
+      <Field label="Email" placeholder="pedro@taller.com" type="email" icon="mail" value={email} onChange={v=>{setEmail(v);setErrors(e=>({...e,email:undefined}))}} error={errors.email} autoFocus/>
+      <Field label="Contraseña" placeholder="••••••••" type="password" icon="lock" value={pwd} onChange={v=>{setPwd(v);setErrors(e=>({...e,pwd:undefined}))}} error={errors.pwd}/>
+
+      {/* Remember + forgot */}
+      <div style={{display:'flex',alignItems:'center',justifyContent:'space-between'}}>
+        <label style={{display:'flex',alignItems:'center',gap:8,cursor:'pointer'}}>
+          <div onClick={()=>setRemember(!remember)} style={{width:18,height:18,borderRadius:5,border:`1.5px solid ${remember?'var(--c-accent)':'var(--c-border)'}`,background:remember?'var(--c-accent)':'transparent',display:'flex',alignItems:'center',justifyContent:'center',transition:'all var(--t)',flexShrink:0}}>
+            {remember&&<I n="check" s={11} c="#fff"/>}
+          </div>
+          <span style={{fontSize:13,color:'var(--c-text-secondary)'}}>Recordarme</span>
+        </label>
+        <button style={{background:'none',border:'none',cursor:'pointer',fontSize:13,color:'var(--c-accent)',fontWeight:600,fontFamily:'var(--font-body)'}}>¿Olvidaste tu contraseña?</button>
+      </div>
+
+      <Btn full loading={loading} onClick={submit}>Iniciar sesión</Btn>
+
+      {/* Switch */}
+      <div style={{textAlign:'center',fontSize:13,color:'var(--c-text-secondary)'}}>
+        ¿Nuevo en Talleres360?{' '}
+        <button onClick={onSwitch} style={{background:'none',border:'none',cursor:'pointer',color:'var(--c-accent)',fontWeight:700,fontFamily:'var(--font-body)',fontSize:13}}>Crear cuenta</button>
+      </div>
+    </div>
+  );
+};
+
+/* ═══════════════════════════════════════════════════════
+   REGISTER VIEW — 3 STEPS
+═══════════════════════════════════════════════════════ */
+const RegisterView=({onSwitch,onSuccess})=>{
+  const [step,setStep]=useState(0);
+  const [loading,setLoading]=useState(false);
+  const [errors,setErrors]=useState({});
+
+  const [nombre,setNombre]=useState('');
+  const [email,setEmail]=useState('');
+  const [pwd,setPwd]=useState('');
+  const [confirmPwd,setConfirmPwd]=useState('');
+  const [taller,setTaller]=useState('');
+  const [ciudad,setCiudad]=useState('');
+  const [telefono,setTelefono]=useState('');
+  const [plan,setPlan]=useState('pro');
+
+  const validateStep=()=>{
+    const e={};
+    if(step===0){
+      if(!nombre.trim()) e.nombre='El nombre es obligatorio';
+      if(!email) e.email='El email es obligatorio';
+      else if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) e.email='Email no válido';
+      if(!pwd) e.pwd='La contraseña es obligatoria';
+      else if(pwd.length<8) e.pwd='Mínimo 8 caracteres';
+      if(pwd!==confirmPwd) e.confirmPwd='Las contraseñas no coinciden';
+    }
+    if(step===1){
+      if(!taller.trim()) e.taller='El nombre del taller es obligatorio';
+      if(!ciudad.trim()) e.ciudad='La ciudad es obligatoria';
+    }
+    setErrors(e);
+    return Object.keys(e).length===0;
+  };
+
+  const next=()=>{ if(validateStep()) setStep(s=>s+1); };
+  const submit=()=>{
+    setLoading(true);
+    setTimeout(()=>{ setLoading(false); onSuccess(); },1600);
+  };
+
+  const plans=[
+    {id:'starter',name:'Starter',price:'€ 0',desc:'1 técnico · 50 órdenes/mes',features:['Dashboard básico','Clientes y vehículos','Soporte por email']},
+    {id:'pro',name:'Pro',price:'€ 29',desc:'5 técnicos · órdenes ilimitadas',features:['Todo en Starter','Facturación digital','Informes avanzados','Soporte prioritario'],popular:true},
+    {id:'enterprise',name:'Enterprise',price:'Consultar',desc:'Técnicos ilimitados · multitaller',features:['Todo en Pro','Multi-taller','API y webhooks','Gestor dedicado']},
+  ];
+
+  return (
+    <div className="slide-left" style={{display:'flex',flexDirection:'column',gap:20}}>
+      {/* Header */}
+      <div style={{textAlign:'center',marginBottom:0}}>
+        <div style={{fontFamily:'var(--font-display)',fontSize:20,fontWeight:800,color:'var(--c-text)',letterSpacing:'-0.02em',marginBottom:4}}>
+          {['Crea tu cuenta','Tu taller','Elige tu plan'][step]}
+        </div>
+        <div style={{fontSize:13,color:'var(--c-text-secondary)'}}>
+          {['Empieza gratis en menos de 2 minutos','Personaliza tu espacio de trabajo','14 días de prueba gratuita, sin tarjeta'][step]}
+        </div>
+      </div>
+
+      <Steps current={step} total={3}/>
+
+      {/* STEP 0 — Personal data */}
+      {step===0&&<div style={{display:'flex',flexDirection:'column',gap:14}} className="slide-left">
+        <Field label="Nombre completo" placeholder="Pedro García" icon="user" value={nombre} onChange={v=>{setNombre(v);setErrors(e=>({...e,nombre:undefined}))}} error={errors.nombre} autoFocus/>
+        <Field label="Email profesional" placeholder="pedro@taller.com" type="email" icon="mail" value={email} onChange={v=>{setEmail(v);setErrors(e=>({...e,email:undefined}))}} error={errors.email}/>
+        <Field label="Contraseña" placeholder="Mínimo 8 caracteres" type="password" icon="lock" value={pwd} onChange={v=>{setPwd(v);setErrors(e=>({...e,pwd:undefined}))}} error={errors.pwd}/>
+        <StrengthMeter pwd={pwd}/>
+        <Field label="Confirmar contraseña" placeholder="Repite la contraseña" type="password" icon="lock" value={confirmPwd} onChange={v=>{setConfirmPwd(v);setErrors(e=>({...e,confirmPwd:undefined}))}} error={errors.confirmPwd}/>
+      </div>}
+
+      {/* STEP 1 — Taller data */}
+      {step===1&&<div style={{display:'flex',flexDirection:'column',gap:14}} className="slide-left">
+        <Field label="Nombre del taller" placeholder="Ej: Taller García e Hijos" icon="building" value={taller} onChange={v=>{setTaller(v);setErrors(e=>({...e,taller:undefined}))}} error={errors.taller} autoFocus/>
+        <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:12}}>
+          <Field label="Ciudad" placeholder="Madrid" value={ciudad} onChange={v=>{setCiudad(v);setErrors(e=>({...e,ciudad:undefined}))}} error={errors.ciudad}/>
+          <Field label="Teléfono" placeholder="612 345 678" icon="phone" type="tel" value={telefono} onChange={setTelefono}/>
+        </div>
+        {/* Tipo de taller */}
+        <div>
+          <div style={{fontSize:13,fontWeight:600,color:'var(--c-text-secondary)',marginBottom:8}}>Especialidad principal</div>
+          <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:6}}>
+            {[['mecanica','🔧 Mecánica general'],['electricidad','⚡ Electricidad'],['chapa','🎨 Chapa y pintura'],['integral','🏭 Taller integral']].map(([v,l])=>{
+              const [sel,setSel]=useState('mecanica');
+              return <button key={v} onClick={()=>{}}
+                style={{padding:'9px 10px',borderRadius:'var(--r-md)',border:`1.5px solid ${'mecanica'===v?'var(--c-accent)':'var(--c-border)'}`,background:'mecanica'===v?'var(--c-accent-soft)':'var(--c-surface-2)',color:'var(--c-text)',fontSize:13,fontWeight:'mecanica'===v?600:400,cursor:'pointer',textAlign:'left',transition:'all var(--t)'}}>
+                {l}
+              </button>;
+            })}
+          </div>
+        </div>
+      </div>}
+
+      {/* STEP 2 — Plan */}
+      {step===2&&<div style={{display:'flex',flexDirection:'column',gap:10}} className="slide-left">
+        {plans.map(p=>(
+          <button key={p.id} onClick={()=>setPlan(p.id)}
+            style={{padding:'14px 16px',borderRadius:'var(--r-lg)',border:`1.5px solid ${plan===p.id?'var(--c-accent)':'var(--c-border)'}`,background:plan===p.id?'var(--c-accent-soft)':'var(--c-surface-2)',cursor:'pointer',textAlign:'left',transition:'all var(--t)',position:'relative',overflow:'hidden'}}>
+            {p.popular&&<span style={{position:'absolute',top:10,right:10,background:'var(--c-accent)',color:'#fff',fontSize:10,fontWeight:700,padding:'2px 8px',borderRadius:99,letterSpacing:'0.04em'}}>POPULAR</span>}
+            <div style={{display:'flex',alignItems:'baseline',gap:8,marginBottom:4}}>
+              <span style={{fontFamily:'var(--font-display)',fontSize:15,fontWeight:700,color:'var(--c-text)'}}>{p.name}</span>
+              <span style={{fontFamily:'var(--font-display)',fontSize:19,fontWeight:800,color:plan===p.id?'var(--c-accent)':'var(--c-text)'}}>{p.price}</span>
+              {p.price!=='Consultar'&&<span style={{fontSize:11,color:'var(--c-text-muted)'}}>/mes</span>}
+            </div>
+            <div style={{fontSize:12,color:'var(--c-text-muted)',marginBottom:8}}>{p.desc}</div>
+            <div style={{display:'flex',gap:10,flexWrap:'wrap'}}>
+              {p.features.map(f=>(
+                <span key={f} style={{display:'inline-flex',alignItems:'center',gap:4,fontSize:11,color:plan===p.id?'var(--c-text-secondary)':'var(--c-text-muted)'}}>
+                  <I n="check" s={11} c={plan===p.id?'var(--c-green)':'var(--c-text-muted)'}/>{f}
+                </span>
+              ))}
+            </div>
+          </button>
+        ))}
+      </div>}
+
+      {/* Actions */}
+      <div style={{display:'flex',gap:10}}>
+        {step>0&&<button onClick={()=>setStep(s=>s-1)}
+          style={{padding:'12px 16px',borderRadius:'var(--r-lg)',border:'1.5px solid var(--c-border)',background:'transparent',color:'var(--c-text-secondary)',fontFamily:'var(--font-body)',fontSize:14,fontWeight:600,cursor:'pointer',transition:'all var(--t)'}}>
+          Atrás
+        </button>}
+        <Btn full={true} loading={loading} onClick={step<2?next:submit}>
+          {step===0?'Continuar':step===1?'Siguiente':loading?'Creando cuenta…':'Crear cuenta gratis'}
+          {!loading&&step<2&&<I n="arrowRight" s={14}/>}
+        </Btn>
+      </div>
+
+      <div style={{textAlign:'center',fontSize:13,color:'var(--c-text-secondary)'}}>
+        ¿Ya tienes cuenta?{' '}
+        <button onClick={onSwitch} style={{background:'none',border:'none',cursor:'pointer',color:'var(--c-accent)',fontWeight:700,fontFamily:'var(--font-body)',fontSize:13}}>Iniciar sesión</button>
+      </div>
+    </div>
+  );
+};
+
+/* ═══════════════════════════════════════════════════════
+   SUCCESS VIEW
+═══════════════════════════════════════════════════════ */
+const SuccessView=({mode})=>(
+  <div className="fade-in" style={{display:'flex',flexDirection:'column',alignItems:'center',gap:16,textAlign:'center',padding:'8px 0 16px'}}>
+    <div style={{width:72,height:72,borderRadius:'50%',background:'var(--c-green-soft)',border:'2px solid var(--c-green)',display:'flex',alignItems:'center',justifyContent:'center',color:'var(--c-green)',animation:'fadeIn 400ms 200ms ease both'}}>
+      <I n="check" s={32} c="var(--c-green)"/>
+    </div>
+    <div>
+      <div style={{fontFamily:'var(--font-display)',fontSize:20,fontWeight:800,color:'var(--c-text)',letterSpacing:'-0.01em',marginBottom:6}}>
+        {mode==='login'?'¡Bienvenido de nuevo!':'¡Cuenta creada!'}
+      </div>
+      <div style={{fontSize:14,color:'var(--c-text-secondary)',lineHeight:1.6}}>
+        {mode==='login'?'Redirigiendo al dashboard…':'Tu taller está listo. Redirigiendo…'}
+      </div>
+    </div>
+    <div style={{marginTop:8,display:'flex',alignItems:'center',gap:8,padding:'8px 16px',borderRadius:99,background:'var(--c-surface-2)',border:'1px solid var(--c-border)'}}>
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--c-accent)" strokeWidth="2.5" strokeLinecap="round" style={{animation:'rotate 1s linear infinite'}}><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
+      <span style={{fontSize:12,color:'var(--c-text-secondary)'}}>Cargando dashboard…</span>
+    </div>
+  </div>
+);
+
+/* ═══════════════════════════════════════════════════════
+   BACKGROUND DECORATION
+═══════════════════════════════════════════════════════ */
+const BgDecor=()=>(
+  <div style={{position:'fixed',inset:0,pointerEvents:'none',overflow:'hidden',zIndex:0}}>
+    {/* Grid lines */}
+    <svg width="100%" height="100%" style={{opacity:0.03}}>
+      <defs><pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M 40 0 L 0 0 0 40" fill="none" stroke="#60A0FF" strokeWidth="1"/></pattern></defs>
+      <rect width="100%" height="100%" fill="url(#grid)"/>
+    </svg>
+    {/* Glow orb top-right */}
+    <div style={{position:'absolute',top:-180,right:-180,width:520,height:520,borderRadius:'50%',background:'radial-gradient(circle,oklch(0.60 0.18 245 / 0.15) 0%,transparent 70%)',animation:'pulse 6s ease-in-out infinite'}}/>
+    {/* Glow orb bottom-left */}
+    <div style={{position:'absolute',bottom:-200,left:-200,width:480,height:480,borderRadius:'50%',background:'radial-gradient(circle,oklch(0.65 0.18 150 / 0.08) 0%,transparent 70%)',animation:'pulse 8s ease-in-out infinite 2s'}}/>
+    {/* Left panel illustration */}
+  </div>
+);
+
+/* ═══════════════════════════════════════════════════════
+   LEFT PANEL (stats / testimonial)
+═══════════════════════════════════════════════════════ */
+const LeftPanel=()=>{
+  const stats=[['1.200+','Talleres activos'],['€ 48M','Facturado en 2025'],['98%','Satisfacción'],['< 2min','Tiempo de setup']];
+  return (
+    <div style={{flex:'0 0 420px',padding:'52px 48px',display:'flex',flexDirection:'column',justifyContent:'space-between',borderRight:'1px solid var(--c-border)',position:'relative',overflow:'hidden'}}>
+      {/* Logo */}
+      <Logo size={38}/>
+
+      {/* Center content */}
+      <div style={{display:'flex',flexDirection:'column',gap:32}}>
+        <div>
+          <div style={{fontFamily:'var(--font-display)',fontSize:26,fontWeight:800,color:'var(--c-text)',lineHeight:1.2,letterSpacing:'-0.02em',marginBottom:12}}>
+            Gestiona tu taller<br/>desde cualquier lugar
+          </div>
+          <div style={{fontSize:14,color:'var(--c-text-secondary)',lineHeight:1.7}}>
+            Órdenes de trabajo, clientes, vehículos y facturación en una sola plataforma. Diseñada para mecánicos, no para contables.
+          </div>
+        </div>
+
+        {/* Stats grid */}
+        <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:10}}>
+          {stats.map(([v,l])=>(
+            <div key={l} style={{padding:'14px 16px',borderRadius:'var(--r-lg)',background:'var(--c-surface)',border:'1px solid var(--c-border)'}}>
+              <div style={{fontFamily:'var(--font-display)',fontSize:20,fontWeight:800,color:'var(--c-accent)',letterSpacing:'-0.02em'}}>{v}</div>
+              <div style={{fontSize:11,color:'var(--c-text-muted)',marginTop:3,fontWeight:500}}>{l}</div>
+            </div>
+          ))}
+        </div>
+
+        {/* Testimonial */}
+        <div style={{padding:'16px 18px',borderRadius:'var(--r-lg)',background:'var(--c-surface)',border:'1px solid var(--c-border)'}}>
+          <div style={{fontSize:13,color:'var(--c-text-secondary)',lineHeight:1.6,fontStyle:'italic',marginBottom:12}}>
+            "Desde que usamos Talleres360, tardamos la mitad en gestionar las órdenes. El cliente ve el estado en tiempo real y llama mucho menos."
+          </div>
+          <div style={{display:'flex',alignItems:'center',gap:10}}>
+            <div style={{width:34,height:34,borderRadius:'50%',background:'oklch(0.60 0.18 245 / 0.2)',display:'flex',alignItems:'center',justifyContent:'center',fontFamily:'var(--font-display)',fontWeight:700,fontSize:13,color:'var(--c-accent)'}}>RG</div>
+            <div>
+              <div style={{fontSize:13,fontWeight:600,color:'var(--c-text)'}}>Roberto García</div>
+              <div style={{fontSize:11,color:'var(--c-text-muted)'}}>Propietario · Taller García, Sevilla</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Footer */}
+      <div style={{fontSize:11,color:'var(--c-text-muted)',display:'flex',gap:16}}>
+        {['Privacidad','Términos','Contacto'].map(l=><a key={l} href="#" style={{color:'inherit',textDecoration:'none'}}>{l}</a>)}
+      </div>
+    </div>
+  );
+};
+
+/* ═══════════════════════════════════════════════════════
+   APP
+═══════════════════════════════════════════════════════ */
+const App=()=>{
+  const [view,setView]=useState(()=>localStorage.getItem('t360_auth_view')||'login');
+  const [success,setSuccess]=useState(false);
+
+  useEffect(()=>{ localStorage.setItem('t360_auth_view',view); },[view]);
+  useEffect(()=>{
+    if(success){
+      const t=setTimeout(()=>{
+        window.open('Talleres360 Design System.html','_self');
+      },2200);
+      return()=>clearTimeout(t);
+    }
+  },[success]);
+
+  return (
+    <div style={{minHeight:'100vh',display:'flex',alignItems:'stretch',position:'relative'}}>
+      <BgDecor/>
+      <div style={{display:'flex',width:'100%',maxWidth:960,margin:'auto',background:'var(--c-surface)',borderRadius:20,boxShadow:'var(--shadow-card)',border:'1px solid var(--c-border)',overflow:'hidden',position:'relative',zIndex:1,minHeight:580}}>
+        {/* Left panel */}
+        <LeftPanel/>
+        {/* Right panel */}
+        <div style={{flex:1,padding:'48px 44px',display:'flex',flexDirection:'column',justifyContent:'center',overflowY:'auto'}}>
+          {success
+            ? <SuccessView mode={view}/>
+            : view==='login'
+              ? <LoginView onSwitch={()=>setView('register')} onSuccess={()=>setSuccess(true)}/>
+              : <RegisterView onSwitch={()=>setView('login')} onSuccess={()=>setSuccess(true)}/>}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+</script>
+</body>
+</html>

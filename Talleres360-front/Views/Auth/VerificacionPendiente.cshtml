@@ -1,0 +1,33 @@
+@{
+    ViewData["Title"] = "Verifica tu correo";
+    Layout = "_LayoutAuth";
+}
+
+<div class="auth-card" style="text-align:center;">
+
+    <div style="width:56px;height:56px;background:oklch(0.60 0.18 245 / 0.12);border-radius:50%;
+                display:flex;align-items:center;justify-content:center;margin:0 auto 20px;">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="oklch(0.68 0.18 245)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+            <polyline points="22,6 12,13 2,6"/>
+        </svg>
+    </div>
+
+    <h1 class="auth-title">Revisa tu correo</h1>
+    <p class="auth-subtitle">
+        Te hemos enviado un enlace de activación. Haz clic en él para activar tu cuenta.
+    </p>
+
+    <p style="font-size:12px;color:#2C4060;margin-bottom:24px;">
+        ¿No ves el correo? Revisa la carpeta de spam.
+    </p>
+
+    <a asp-controller="Auth" asp-action="Login"
+       style="display:flex;align-items:center;justify-content:center;gap:8px;width:100%;
+              padding:12px 20px;border-radius:12px;border:1.5px solid rgba(100,160,230,0.15);
+              background:transparent;font-family:'DM Sans',sans-serif;font-size:14px;
+              font-weight:600;color:#5A7A9A;text-decoration:none;transition:all 160ms ease;">
+        Volver al inicio de sesión
+    </a>
+
+</div>

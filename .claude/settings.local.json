@@ -16,7 +16,8 @@
       "Bash(dotnet run *)",
       "WebFetch(domain:talleres360-api.azurewebsites.net)",
       "PowerShell(try { $resp = Invoke-RestMethod -Uri \"https://talleres360-api.azurewebsites.net/api/v1/verification/verify-email?token=hue1yUGkzoFGubv15IZkqLAHcCIwmjBfZUzFBsklQb8\" -Method GET; $resp | ConvertTo-Json -Depth 5 } catch { $_.Exception.Response.StatusCode; $stream = $_.Exception.Response.GetResponseStream\\(\\); $reader = New-Object System.IO.StreamReader\\($stream\\); $reader.ReadToEnd\\(\\) })",
-      "PowerShell($body = '{\"email\":\"test@test.com\",\"password\":\"Test1234!\"}'; try { $resp = Invoke-RestMethod -Uri \"https://talleres360-api.azurewebsites.net/api/v1/auth/login\" -Method POST -ContentType \"application/json\" -Body $body -SessionVariable session; $resp | ConvertTo-Json -Depth 5 } catch { $_.Exception.Response.StatusCode; $stream = $_.Exception.Response.GetResponseStream\\(\\); $reader = New-Object System.IO.StreamReader\\($stream\\); $reader.ReadToEnd\\(\\) })"
+      "PowerShell($body = '{\"email\":\"test@test.com\",\"password\":\"Test1234!\"}'; try { $resp = Invoke-RestMethod -Uri \"https://talleres360-api.azurewebsites.net/api/v1/auth/login\" -Method POST -ContentType \"application/json\" -Body $body -SessionVariable session; $resp | ConvertTo-Json -Depth 5 } catch { $_.Exception.Response.StatusCode; $stream = $_.Exception.Response.GetResponseStream\\(\\); $reader = New-Object System.IO.StreamReader\\($stream\\); $reader.ReadToEnd\\(\\) })",
+      "Bash(python3 -c ' *)"
     ]
   }
 }
