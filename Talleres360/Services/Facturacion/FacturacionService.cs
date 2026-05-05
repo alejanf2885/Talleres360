@@ -17,19 +17,25 @@ namespace Talleres360.Services.Facturacion
         private readonly ITallerRepository _tallerRepository;
         private readonly IVehiculoRepository _vehiculoRepository;
         private readonly ICustomerRepository _customerRepository;
+        private readonly IFacturaPdfService _facturaPdfService;
+        private readonly ILogger<FacturacionService> _logger;
 
         public FacturacionService(
             ITrabajoRepository trabajoRepository,
             IFacturaRepository facturaRepository,
             ITallerRepository tallerRepository,
             IVehiculoRepository vehiculoRepository,
-            ICustomerRepository customerRepository)
+            ICustomerRepository customerRepository,
+            IFacturaPdfService facturaPdfService,
+            ILogger<FacturacionService> logger)
         {
             _trabajoRepository  = trabajoRepository;
             _facturaRepository  = facturaRepository;
             _tallerRepository   = tallerRepository;
             _vehiculoRepository = vehiculoRepository;
             _customerRepository = customerRepository;
+            _facturaPdfService  = facturaPdfService;
+            _logger             = logger;
         }
 
         public async Task<ServiceResult<TrabajoDto>> FacturarTrabajoAsync(int tallerId, int trabajoId)
@@ -148,6 +154,16 @@ namespace Talleres360.Services.Facturacion
                 }).ToList();
 
             await _facturaRepository.GuardarSnapshotAsync(factura, lineas, desgloses);
+
+            try
+            {
+                string urlPdf = await _facturaPdfService.GenerarYSubirAsync(factura, lineas, desgloses);
+                await _facturaRepository.ActualizarUrlPdfAsync(factura.Id, urlPdf);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error generando PDF para factura {FacturaId} ({NumeroFactura}). La factura se ha guardado correctamente pero sin PDF.", factura.Id, factura.NumeroFactura);
+            }
 
             trabajo.Estado = TrabajoEstado.FACTURADO;
             if (trabajo.FechaCierre == null)

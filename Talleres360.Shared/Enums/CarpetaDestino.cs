@@ -4,7 +4,6 @@
     {
         Usuarios,
         Talleres,
-
-
+        PdfFacturas,
     }
 }

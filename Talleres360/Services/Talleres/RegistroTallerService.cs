@@ -38,23 +38,23 @@ namespace Talleres360.Services.Talleres
             string nombreTallerLimpio = request.NombreTaller.Trim();
             string nombreAdminLimpio = request.NombreAdmin.Trim();
 
-            ServiceResult<bool> validacionEmail = await _usuarioService.ValidarEmailDisponibleAsync(emailLimpio);
-
-            if (!validacionEmail.Success)
-            {
-                return ServiceResult<bool>.Fail(validacionEmail.ErrorCode!, validacionEmail.Message!);
-            }
-
             await _unitOfWork.BeginTransactionAsync();
 
             try
             {
+                ServiceResult<bool> validacionEmail = await _usuarioService.ValidarEmailDisponibleAsync(emailLimpio);
+
+                if (!validacionEmail.Success)
+                {
+                    await _unitOfWork.RollbackTransactionAsync();
+                    return ServiceResult<bool>.Fail(validacionEmail.ErrorCode!, validacionEmail.Message!);
+                }
                 Plan? plan = await _planRepo.GetPlanPorNombreAsync(PlanTipo.Profesional.ToString());
                 if (plan == null)
                 {
                     return ServiceResult<bool>.Fail(
                         ErrorCode.REG_PLAN_NO_ENCONTRADO.ToString(),
-                        "El plan de suscripción no está configurado en el sistema.");
+                        "El plan de suscripciï¿½n no estï¿½ configurado en el sistema.");
                 }
 
                 string cifTemporal = $"TEMP{DateTime.UtcNow:yyyyMMddHHmmss}{Guid.NewGuid():N}".Substring(0, 20);
@@ -110,7 +110,7 @@ namespace Talleres360.Services.Talleres
                 await _unitOfWork.RollbackTransactionAsync();
                 return ServiceResult<bool>.Fail(
                     ErrorCode.SYS_ERROR_GENERICO.ToString(),
-                    "Ocurrió un error crítico durante el registro.");
+                    "Ocurriï¿½ un error crï¿½tico durante el registro.");
             }
         }
     }

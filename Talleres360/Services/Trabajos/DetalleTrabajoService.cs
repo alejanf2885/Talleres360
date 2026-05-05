@@ -65,6 +65,7 @@ namespace Talleres360.Services.Trabajos
             var detalle = new DetalleTrabajo
             {
                 TrabajoId          = trabajoId,
+                TallerId           = tallerId,
                 ProductoId         = request.ProductoId,
                 Concepto           = request.Concepto.Trim(),
                 Cantidad           = request.EsManoObra && request.HorasAplicadas.HasValue

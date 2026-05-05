@@ -5,5 +5,6 @@ namespace Talleres360.Interfaces.Facturacion
         Task<string> GenerarNumeroFacturaAsync(int tallerId);
         Task<List<DetalleTrabajo>> ObtenerDetallesParaFacturarAsync(int trabajoId);
         Task GuardarSnapshotAsync(Factura factura, List<LineaFactura> lineas, List<DesgloseIva> desgloses);
+        Task ActualizarUrlPdfAsync(int facturaId, string urlPdf);
     }
 }

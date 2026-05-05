@@ -111,5 +111,9 @@ namespace Talleres360.Models.Facturacion
         [Column("Serie")]
         [StringLength(10)]
         public string? Serie { get; set; }
+
+        [Column("UrlPdf")]
+        [StringLength(500)]
+        public string? UrlPdf { get; set; }
     }
 }

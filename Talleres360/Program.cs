@@ -1,3 +1,5 @@
+using Azure.Extensions.AspNetCore.Configuration.Secrets;
+using Azure.Identity;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -69,6 +71,7 @@ using Talleres360.Services.SaneadorFotos;
 using Talleres360.Services.Seguridad;
 using Talleres360.Services.Servicios;
 using Talleres360.Services.Talleres;
+using QuestPDF.Infrastructure;
 using Talleres360.Services.Facturacion;
 using Talleres360.Services.Presupuestos;
 using Talleres360.Services.Trabajos;
@@ -76,7 +79,15 @@ using Talleres360.Services.Usuarios;
 using Talleres360.Services.Vehiculos;
 
 
+QuestPDF.Settings.License = LicenseType.Community;
+
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
+
+string? kvUri = builder.Configuration["KeyVault:Uri"];
+if (!string.IsNullOrWhiteSpace(kvUri))
+{
+    builder.Configuration.AddAzureKeyVault(new Uri(kvUri), new DefaultAzureCredential());
+}
 
 string connectionString = builder.Configuration.GetConnectionString("SqlSaas")
     ?? throw new InvalidOperationException("No se encontró la cadena de conexión 'SqlBBDD'.");
@@ -136,6 +147,7 @@ builder.Services.AddScoped<ITrabajoService, TrabajoService>();
 builder.Services.AddScoped<IPresupuestoService, PresupuestoService>();
 builder.Services.AddScoped<IFacturacionService, FacturacionService>();
 builder.Services.AddScoped<IFacturaRepository, FacturaRepository>();
+builder.Services.AddScoped<IFacturaPdfService, FacturaPdfService>();
 builder.Services.AddScoped<ICobroTrabajoService, CobroTrabajoService>();
 builder.Services.AddScoped<ITarifaHoraService, TarifaHoraService>();
 builder.Services.AddScoped<IDetalleTrabajoService, DetalleTrabajoService>();
@@ -291,17 +303,48 @@ WebApplication app = builder.Build();
 
 app.UseMiddleware<ExceptionMiddleware>();
 
-if (app.Environment.IsDevelopment())
+app.MapOpenApi();
+_ = app.MapScalarApiReference(options =>
 {
-    app.MapOpenApi();
-    _ = app.MapScalarApiReference(options =>
+    _ = options
+        .WithTitle("Talleres360 API Docs")
+        .WithTheme(ScalarTheme.Moon)
+        .WithDefaultHttpClient(ScalarTarget.CSharp, ScalarClient.HttpClient);
+});
+
+app.MapGet("/diagnostics/config", (IConfiguration config) =>
+{
+    string[] claves =
+    [
+        "ConnectionStrings:SqlSaas",
+        "ConnectionStrings:SqlBBDD",
+        "ConnectionStrings:AzureStorage",
+        "Jwt:Key",
+        "NotificationsApi:ApiKey",
+        "KeyVault:Uri"
+    ];
+
+    var resultado = claves.ToDictionary(
+        k => k,
+        k => !string.IsNullOrWhiteSpace(config[k]) ? "OK" : "MISSING"
+    );
+
+    bool todoOk = resultado.Values.All(v => v == "OK");
+    return todoOk ? Results.Ok(resultado) : Results.Json(resultado, statusCode: 500);
+}).AllowAnonymous();
+
+app.MapGet("/diagnostics/db", async (ApplicationDbContext db) =>
+{
+    try
     {
-        _ = options
-            .WithTitle("Talleres360 API Docs")
-            .WithTheme(ScalarTheme.Moon)
-            .WithDefaultHttpClient(ScalarTarget.CSharp, ScalarClient.HttpClient);
-    });
-}
+        bool canConnect = await db.Database.CanConnectAsync();
+        return Results.Ok(new { db = canConnect ? "OK" : "CANNOT_CONNECT" });
+    }
+    catch (Exception ex)
+    {
+        return Results.Json(new { db = "ERROR", error = ex.Message }, statusCode: 500);
+    }
+}).AllowAnonymous();
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();

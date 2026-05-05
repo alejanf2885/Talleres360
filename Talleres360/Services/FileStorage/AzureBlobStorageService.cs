@@ -41,8 +41,9 @@ namespace Talleres360.Services.FileStorage
 
         public async Task<string> GuardarArchivoAsync(Stream contenido, string nombreArchivo, CarpetaDestino carpeta)
         {
+            string container = carpeta == CarpetaDestino.PdfFacturas ? "talleres360-facturas" : _containerName;
             BlobServiceClient blobServiceClient = new BlobServiceClient(_connectionString);
-            BlobContainerClient containerClient = blobServiceClient.GetBlobContainerClient(_containerName);
+            BlobContainerClient containerClient = blobServiceClient.GetBlobContainerClient(container);
 
             try
             {
@@ -58,9 +59,10 @@ namespace Talleres360.Services.FileStorage
 
             BlobClient blobClient = containerClient.GetBlobClient(rutaBlob);
 
+            string contentType = carpeta == CarpetaDestino.PdfFacturas ? "application/pdf" : "image/webp";
             BlobUploadOptions uploadOptions = new BlobUploadOptions
             {
-                HttpHeaders = new BlobHttpHeaders { ContentType = "image/webp" }
+                HttpHeaders = new BlobHttpHeaders { ContentType = contentType }
             };
 
             await blobClient.UploadAsync(contenido, uploadOptions);
