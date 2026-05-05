@@ -1,3 +1,5 @@
+using Talleres360.Dtos;
+using Talleres360.Dtos.Facturacion;
 using Talleres360.Dtos.Responses;
 using Talleres360.Dtos.Trabajos;
 using Talleres360.Enums;
@@ -176,6 +178,28 @@ namespace Talleres360.Services.Facturacion
             return detalle != null
                 ? ServiceResult<TrabajoDto>.Ok(detalle)
                 : ServiceResult<TrabajoDto>.Fail(ErrorCode.SYS_ERROR_GENERICO.ToString(), "Factura generada pero no se pudo recuperar el trabajo.");
+        }
+
+        public async Task<ServiceResult<PagedResponse<FacturaDto>>> ObtenerTodosAsync(int tallerId, PaginationParams pagination)
+        {
+            PagedResponse<FacturaDto> resultado = await _facturaRepository.ObtenerTodosPorTallerAsync(tallerId, pagination);
+            return ServiceResult<PagedResponse<FacturaDto>>.Ok(resultado);
+        }
+
+        public async Task<ServiceResult<FacturaDto>> ObtenerPorIdAsync(int tallerId, int facturaId)
+        {
+            FacturaDto? factura = await _facturaRepository.ObtenerPorIdAsync(facturaId, tallerId);
+            if (factura == null)
+                return ServiceResult<FacturaDto>.Fail(ErrorCode.SYS_ENTIDAD_NO_ENCONTRADA.ToString(), "Factura no encontrada.");
+            return ServiceResult<FacturaDto>.Ok(factura);
+        }
+
+        public async Task<ServiceResult<FacturaDto>> ObtenerPorTrabajoAsync(int tallerId, int trabajoId)
+        {
+            FacturaDto? factura = await _facturaRepository.ObtenerPorTrabajoAsync(trabajoId, tallerId);
+            if (factura == null)
+                return ServiceResult<FacturaDto>.Fail(ErrorCode.SYS_ENTIDAD_NO_ENCONTRADA.ToString(), "No existe factura para este trabajo.");
+            return ServiceResult<FacturaDto>.Ok(factura);
         }
     }
 }

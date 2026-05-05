@@ -53,7 +53,7 @@ namespace Talleres360.Controllers
         }
 
         [HttpDelete("{id:int:min(1)}")]
-        [TallerAuthorize<ITrabajoRepository>]
+        [TallerAuthorize<ITrabajoRepository>("trabajoId")]
         public async Task<IActionResult> Delete(int trabajoId, int id)
         {
             int? tallerId = _userContextService.GetTallerId();
