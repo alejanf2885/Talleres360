@@ -17,18 +17,18 @@ namespace Talleres360.Repositories.Facturas
 
         public async Task<string> GenerarNumeroFacturaAsync(int tallerId)
         {
-            SqlParameter parametroTallerId = new SqlParameter("@TallerId", tallerId);
-            SqlParameter parametroTipo = new SqlParameter("@TipoDocumento", "FACTURA");
-            SqlParameter parametroNumero = new SqlParameter("@NumeroGenerado", SqlDbType.NVarChar, 100)
+            SqlParameter pTallerId = new SqlParameter("@p_TallerId", tallerId);
+            SqlParameter pTipo     = new SqlParameter("@p_Tipo", "FACTURA");
+            SqlParameter pNumero   = new SqlParameter("@p_Numero", SqlDbType.NVarChar, 100)
             {
                 Direction = ParameterDirection.Output
             };
 
             await _context.Database.ExecuteSqlRawAsync(
-                "EXEC [dbo].[sp_SiguienteNumeroDocumento] @TallerId, @TipoDocumento, @NumeroGenerado OUTPUT",
-                parametroTallerId, parametroTipo, parametroNumero);
+                "EXEC [dbo].[sp_SiguienteNumeroDocumento] @TallerId = @p_TallerId, @TipoDocumento = @p_Tipo, @NumeroGenerado = @p_Numero OUTPUT",
+                pTallerId, pTipo, pNumero);
 
-            return parametroNumero.Value?.ToString() ?? string.Empty;
+            return pNumero.Value?.ToString() ?? string.Empty;
         }
 
         public async Task<List<DetalleTrabajo>> ObtenerDetallesParaFacturarAsync(int trabajoId)
@@ -48,6 +48,14 @@ namespace Talleres360.Repositories.Facturas
 
             await _context.LineasFactura.AddRangeAsync(lineas);
             await _context.DesglosesIva.AddRangeAsync(desgloses);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task ActualizarUrlPdfAsync(int facturaId, string urlPdf)
+        {
+            Factura? factura = await _context.Facturas.FindAsync(facturaId);
+            if (factura == null) return;
+            factura.UrlPdf = urlPdf;
             await _context.SaveChangesAsync();
         }
     }
