@@ -13,7 +13,8 @@ public class ApiClient
 
     private static readonly JsonSerializerOptions JsonOptions = new()
     {
-        PropertyNameCaseInsensitive = true
+        PropertyNameCaseInsensitive = true,
+        Converters = { new System.Text.Json.Serialization.JsonStringEnumConverter() }
     };
 
     public ApiClient(IHttpClientFactory httpClientFactory, IHttpContextAccessor httpContextAccessor)
@@ -106,6 +107,11 @@ public class ApiClient
     {
         string raw = await response.Content.ReadAsStringAsync();
         int statusCode = (int)response.StatusCode;
+
+        if (string.IsNullOrWhiteSpace(raw))
+            return response.IsSuccessStatusCode
+                ? ApiResult<T>.Empty(statusCode)
+                : ApiResult<T>.Fail(statusCode);
 
         if (response.IsSuccessStatusCode)
         {

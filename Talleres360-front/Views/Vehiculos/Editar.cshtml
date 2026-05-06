@@ -1,0 +1,153 @@
+@model Talleres360_front.Models.Vehiculos.VehiculoFormModel
+@using Talleres360.Dtos.Vehiculos
+@using Talleres360.Models.Negocio
+@{
+    ViewData["Title"] = "Editar vehículo";
+    List<VehiculoTipoDto>   tipos    = ViewData["Tipos"]    as List<VehiculoTipoDto>   ?? new();
+    List<MarcaVehiculoDto>  marcas   = ViewData["Marcas"]   as List<MarcaVehiculoDto>  ?? new();
+    List<ModeloVehiculoDto> modelos  = ViewData["Modelos"]  as List<ModeloVehiculoDto> ?? new();
+    List<Cliente>           clientes = ViewData["Clientes"] as List<Cliente>           ?? new();
+}
+
+<div class="page-header">
+    <div class="d-flex align-items-center gap-3">
+        <a asp-action="Index" class="link-muted-360">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="15 18 9 12 15 6"/>
+            </svg>
+        </a>
+        <div>
+            <h1 class="page-title">Editar vehículo</h1>
+            <p class="page-subtitle">@Model.Matricula</p>
+        </div>
+    </div>
+</div>
+
+<div class="w-100" style="max-width:672px;">
+    <div class="card">
+
+        @if (!Html.ViewData.ModelState.IsValid && Html.ViewData.ModelState.ContainsKey(string.Empty))
+        {
+            <div class="mb-4 p-3 rounded-3 border" style="background:var(--c-red-soft);color:var(--c-red);border-color:rgba(12, 18, 30, 0.15);">
+                @Html.ValidationSummary(true)
+            </div>
+        }
+
+        <form asp-action="Editar" asp-route-id="@Model.Id" method="post" asp-antiforgery="true">
+
+            <div class="row g-3">
+
+                <div class="form-group col-12">
+                    <label asp-for="ClienteId" class="form-label">Cliente</label>
+                    <select asp-for="ClienteId" class="form-select">
+                        <option value="">Sin cliente asignado</option>
+                        @foreach (Cliente c in clientes)
+                        {
+                            string nombre = string.IsNullOrEmpty(c.Apellidos) ? c.Nombre : $"{c.Nombre} {c.Apellidos}";
+                            <option value="@c.Id" selected="@(Model.ClienteId == c.Id)">@nombre @(!string.IsNullOrEmpty(c.NifCif) ? $"— {c.NifCif}" : "")</option>
+                        }
+                    </select>
+                </div>
+
+                <div class="form-group col-12 col-md-6">
+                    <label asp-for="Matricula" class="form-label">Matrícula <span style="color:var(--c-red);">*</span></label>
+                    <input asp-for="Matricula" class="form-input" placeholder="1234ABC" style="text-transform:uppercase;" />
+                    <span asp-validation-for="Matricula" class="form-error"></span>
+                </div>
+
+                <div class="form-group col-12 col-md-6">
+                    <label asp-for="VehiculoTipoId" class="form-label">Tipo <span style="color:var(--c-red);">*</span></label>
+                    <select asp-for="VehiculoTipoId" class="form-select">
+                        <option value="0">Selecciona tipo…</option>
+                        @foreach (VehiculoTipoDto t in tipos)
+                        {
+                            <option value="@t.Id" selected="@(Model.VehiculoTipoId == t.Id)">@t.Nombre</option>
+                        }
+                    </select>
+                    <span asp-validation-for="VehiculoTipoId" class="form-error"></span>
+                </div>
+
+                <div class="form-group col-12 col-md-6">
+                    <label asp-for="MarcaId" class="form-label">Marca <span style="color:var(--c-red);">*</span></label>
+                    <select asp-for="MarcaId" id="select-marca" class="form-select">
+                        <option value="0">Selecciona marca…</option>
+                        @foreach (MarcaVehiculoDto m in marcas)
+                        {
+                            <option value="@m.Id" selected="@(Model.MarcaId == m.Id)">@m.Nombre</option>
+                        }
+                    </select>
+                    <span asp-validation-for="MarcaId" class="form-error"></span>
+                </div>
+
+                <div class="form-group col-12 col-md-6">
+                    <label asp-for="ModeloId" class="form-label">Modelo <span style="color:var(--c-red);">*</span></label>
+                    <select asp-for="ModeloId" id="select-modelo" class="form-select">
+                        <option value="0">Selecciona modelo…</option>
+                        @foreach (ModeloVehiculoDto m in modelos)
+                        {
+                            <option value="@m.Id" selected="@(Model.ModeloId == m.Id)">@m.Nombre</option>
+                        }
+                    </select>
+                    <span asp-validation-for="ModeloId" class="form-error"></span>
+                </div>
+
+                <div class="form-group col-12 col-md-6">
+                    <label asp-for="Anio" class="form-label">Año</label>
+                    <input asp-for="Anio" type="number" class="form-input" placeholder="2020" min="1900" max="2100" />
+                    <span asp-validation-for="Anio" class="form-error"></span>
+                </div>
+
+                <div class="form-group col-12 col-md-6">
+                    <label asp-for="KmActuales" class="form-label">Km actuales</label>
+                    <input asp-for="KmActuales" type="number" class="form-input" placeholder="50000" min="0" />
+                    <span asp-validation-for="KmActuales" class="form-error"></span>
+                </div>
+
+            </div>
+
+            <div class="d-flex align-items-center justify-content-end gap-3 mt-4 pt-4 border-top" style="border-color:var(--c-border);">
+                <a asp-action="Index" class="btn btn-secondary btn-md">Cancelar</a>
+                <button type="submit" class="btn btn-primary btn-md">Guardar cambios</button>
+            </div>
+
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+    const selectMarca   = document.getElementById('select-marca');
+    const selectModelo  = document.getElementById('select-modelo');
+    const modeloActual  = @Model.ModeloId;
+
+    selectMarca.addEventListener('change', async function () {
+        const marcaId = this.value;
+        selectModelo.innerHTML = '<option value="0">Cargando…</option>';
+        selectModelo.disabled = true;
+
+        if (!marcaId || marcaId === '0') {
+            selectModelo.innerHTML = '<option value="0">Primero elige una marca…</option>';
+            return;
+        }
+
+        try {
+            const res     = await fetch(`/Vehiculos/Modelos/${marcaId}`);
+            const modelos = await res.json();
+
+            if (!modelos.length) {
+                selectModelo.innerHTML = '<option value="0">Sin modelos disponibles</option>';
+                return;
+            }
+
+            selectModelo.innerHTML = '<option value="0">Selecciona modelo…</option>' +
+                modelos.map(m =>
+                    `<option value="${m.id}" ${m.id === modeloActual ? 'selected' : ''}>${m.nombre}</option>`
+                ).join('');
+            selectModelo.disabled = false;
+        } catch {
+            selectModelo.innerHTML = '<option value="0">Error al cargar modelos</option>';
+        }
+    });
+    </script>
+}

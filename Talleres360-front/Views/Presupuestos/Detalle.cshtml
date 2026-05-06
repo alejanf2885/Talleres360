@@ -1,0 +1,337 @@
+@model Talleres360.Dtos.Trabajos.TrabajoDto
+@using Talleres360.Enums
+@using Talleres360.Dtos.Trabajos
+@{
+    ViewData["Title"] = $"Presupuesto {Model.NumeroDocumento ?? $"#{Model.Id}"}";
+    List<DetalleTrabajoDto> lineas = ViewData["Lineas"] as List<DetalleTrabajoDto> ?? new();
+    
+    decimal subtotalLineas = lineas.Sum(l => l.Cantidad * l.PrecioUnitario * (1 - l.DescuentoPorcentaje / 100));
+    decimal ivaLineas      = lineas.Sum(l => l.Cantidad * l.PrecioUnitario * (1 - l.DescuentoPorcentaje / 100) * l.ImpuestoPorcentaje / 100);
+    decimal totalLineas    = subtotalLineas + ivaLineas;
+
+    string EstadoClass(TrabajoEstado e) => e switch {
+        TrabajoEstado.PRESUPUESTO         => "badge-pendiente",
+        TrabajoEstado.PRESUPUESTO_ENVIADO => "badge-en-curso",
+        TrabajoEstado.RECHAZADO           => "badge-inactivo",
+        TrabajoEstado.CADUCADO            => "badge-inactivo",
+        _                                 => "badge-inactivo"
+    };
+    string EstadoLabel(TrabajoEstado e) => e switch {
+        TrabajoEstado.PRESUPUESTO         => "Borrador",
+        TrabajoEstado.PRESUPUESTO_ENVIADO => "Enviado a cliente",
+        TrabajoEstado.RECHAZADO           => "Rechazado",
+        TrabajoEstado.CADUCADO            => "Caducado",
+        _                                 => e.ToString()
+    };
+
+    var productos = ViewData["ProductosCatalog"] as List<Talleres360.Dtos.Inventario.ProductoDto> ?? new();
+    var servicios = ViewData["ServiciosCatalog"] as List<Talleres360.Dtos.Servicios.ServicioDto> ?? new();
+}
+
+<div class="page-header">
+    <div class="d-flex align-items-center gap-3">
+        <a asp-action="Index" class="link-muted-360">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="15 18 9 12 15 6"/>
+            </svg>
+        </a>
+        <div>
+            <h1 class="page-title">@(Model.NumeroDocumento ?? $"Presupuesto #{Model.Id}")</h1>
+            <p class="page-subtitle">@(Model.TituloMantenimiento ?? "Valoración de servicio")</p>
+        </div>
+    </div>
+    <div class="d-flex gap-2">
+        @if (Model.Estado == TrabajoEstado.PRESUPUESTO)
+        {
+            <a asp-action="Editar" asp-route-id="@Model.Id" class="btn btn-secondary btn-md">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                </svg>
+                Editar
+            </a>
+            
+            <form asp-action="Enviar" asp-route-id="@Model.Id" method="post"
+                  data-confirm-title="Marcar como enviado"
+                  data-confirm-msg="¿Marcar presupuesto como enviado al cliente?">
+                @Html.AntiForgeryToken()
+                <button type="submit" class="btn btn-primary btn-md">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="22" y1="2" x2="11" y2="13"/>
+                        <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+                    </svg>
+                    Marcar como Enviado
+                </button>
+            </form>
+        }
+        else if (Model.Estado == TrabajoEstado.PRESUPUESTO_ENVIADO)
+        {
+            <button type="button" class="btn btn-danger btn-md" onclick="document.getElementById('modalRechazar').style.display='flex'">Rechazar</button>
+            <form asp-action="Aceptar" asp-route-id="@Model.Id" method="post"
+                  data-confirm-title="Aceptar Presupuesto"
+                  data-confirm-msg="El presupuesto se convertirá en un Trabajo abierto.">
+                @Html.AntiForgeryToken()
+                <button type="submit" class="btn btn-success btn-md" style="background:var(--c-green);border-color:var(--c-green);color:white;">Aceptar y abrir trabajo</button>
+            </form>
+        }
+    </div>
+</div>
+
+@* ── Tarjetas de resumen ── *@
+<div class="row g-3 mb-4">
+    <div class="col-6 col-md-3">
+        <div class="card" style="padding:16px;">
+            <div class="small" style="color:var(--c-text-muted);">Estado</div>
+            <div class="mt-1"><span class="badge @EstadoClass(Model.Estado)">@EstadoLabel(Model.Estado)</span></div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="card" style="padding:16px;">
+            <div class="small" style="color:var(--c-text-muted);">Fecha Creación</div>
+            <div class="fw-semibold mt-1" style="color:var(--c-text);">@Model.FechaCreacion.ToString("dd/MM/yyyy")</div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="card" style="padding:16px;">
+            <div class="small" style="color:var(--c-text-muted);">Subtotal</div>
+            <div class="fw-semibold mt-1" style="color:var(--c-text);font-size:18px;">@subtotalLineas.ToString("N2") €</div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="card" style="padding:16px;background:var(--c-surface-2,rgba(255,255,255,0.03));border:1px solid var(--c-border);">
+            <div class="small" style="color:var(--c-text-muted);">Total (IVA inc.)</div>
+            <div class="fw-semibold mt-1" style="color:var(--c-text);font-size:18px;">@totalLineas.ToString("N2") €</div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-12 col-lg-8">
+        
+        @if (Model.VehiculoId.HasValue || Model.KmEntrada > 0)
+        {
+            <div class="card mb-4" style="padding:16px 20px;">
+                <div class="small fw-semibold mb-3" style="color:var(--c-text-muted);text-transform:uppercase;letter-spacing:.05em;">Datos del presupuesto</div>
+                <div class="row g-2">
+                    @if (Model.VehiculoId.HasValue)
+                    {
+                        <div class="col-6">
+                            <div class="small" style="color:var(--c-text-muted);">Vehículo</div>
+                            <div class="small fw-semibold">#@Model.VehiculoId</div>
+                        </div>
+                    }
+                    @if (Model.KmEntrada > 0)
+                    {
+                        <div class="col-6">
+                            <div class="small" style="color:var(--c-text-muted);">KM Estimados</div>
+                            <div class="small fw-semibold">@Model.KmEntrada.ToString("N0") km</div>
+                        </div>
+                    }
+                    @if (!string.IsNullOrEmpty(Model.TrabajoRealizado))
+                    {
+                        <div class="col-12 mt-2 pt-2 border-top" style="border-color:var(--c-border);">
+                            <div class="small" style="color:var(--c-text-muted);">Observaciones</div>
+                            <div class="small mt-1" style="color:var(--c-text);white-space:pre-wrap;">@Model.TrabajoRealizado</div>
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+
+        <div class="card" style="padding:0;">
+            <div class="d-flex align-items-center justify-content-between p-3 border-bottom" style="border-color:var(--c-border) !important;">
+                <div class="fw-semibold" style="color:var(--c-text);">Conceptos a facturar</div>
+                <span class="badge badge-activo">@lineas.Count líneas</span>
+            </div>
+            
+            <div class="table-wrap">
+                <table class="t360 m-0">
+                    <thead>
+                        <tr>
+                            <th>Concepto</th>
+                            <th class="text-center">Cant.</th>
+                            <th class="text-end">P. Unit.</th>
+                            <th class="text-end">Dto %</th>
+                            <th class="text-end">Subtotal</th>
+                            <th style="width:40px;"></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (!lineas.Any())
+                        {
+                            <tr>
+                                <td colspan="6" class="text-center py-4" style="color:var(--c-text-muted);">
+                                    <p class="small">Aún no hay conceptos añadidos al presupuesto.</p>
+                                </td>
+                            </tr>
+                        }
+                        else
+                        {
+                            foreach (var l in lineas)
+                            {
+                                decimal sub = l.Cantidad * l.PrecioUnitario * (1 - l.DescuentoPorcentaje / 100);
+                                <tr>
+                                    <td>
+                                        <div class="fw-semibold small" style="color:var(--c-text);">@l.Concepto</div>
+                                        @if (l.EsManoObra)
+                                        {
+                                            <span class="badge" style="background:var(--c-surface-2);color:var(--c-text-muted);font-size:10px;">Mano de obra</span>
+                                        }
+                                    </td>
+                                    <td class="text-center small">@l.Cantidad.ToString("0.##")</td>
+                                    <td class="text-end small">@l.PrecioUnitario.ToString("N2") €</td>
+                                    <td class="text-end small">@(l.DescuentoPorcentaje > 0 ? l.DescuentoPorcentaje.ToString("0.##") + "%" : "—")</td>
+                                    <td class="text-end fw-semibold small">@sub.ToString("N2") €</td>
+                                    <td>
+                                        @if (Model.Estado == TrabajoEstado.PRESUPUESTO)
+                                        {
+                                            <form asp-action="EliminarLinea" asp-route-id="@Model.Id" asp-route-lineaId="@l.Id" method="post">
+                                                @Html.AntiForgeryToken()
+                                                <button type="submit" class="btn btn-danger btn-sm" title="Eliminar">
+                                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                        <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+                                                    </svg>
+                                                </button>
+                                            </form>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+            
+            @if (Model.Estado == TrabajoEstado.PRESUPUESTO)
+            {
+                <div style="padding:16px 20px;border-top:1px solid var(--c-border);">
+                    <div class="small fw-semibold mb-3" style="color:var(--c-text);">Añadir concepto</div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label small" style="color:var(--c-text-muted);">Cargar desde catálogo (Opcional)</label>
+                        <select id="catalogoSelector" class="form-select" onchange="cargarDesdeCatalogo(this)">
+                            <option value="">— Seleccionar Producto o Servicio —</option>
+                            @if (servicios.Any())
+                            {
+                                <optgroup label="Servicios">
+                                    @foreach (var s in servicios)
+                                    {
+                                        <option value="S_@s.Id" data-nombre="@s.Nombre" data-precio="@s.PrecioBase.ToString(System.Globalization.CultureInfo.InvariantCulture)" data-iva="@s.ImpuestoPorcentaje.ToString(System.Globalization.CultureInfo.InvariantCulture)" data-esmanoobra="true">@s.Nombre (@s.PrecioBase.ToString("N2") €)</option>
+                                    }
+                                </optgroup>
+                            }
+                            @if (productos.Any())
+                            {
+                                <optgroup label="Productos">
+                                    @foreach (var p in productos)
+                                    {
+                                        <option value="P_@p.Id" data-id="@p.Id" data-nombre="@p.Nombre" data-precio="@p.PrecioVenta.ToString(System.Globalization.CultureInfo.InvariantCulture)" data-iva="21" data-esmanoobra="false">@p.Nombre (@p.PrecioVenta.ToString("N2") €)</option>
+                                    }
+                                </optgroup>
+                            }
+                        </select>
+                    </div>
+
+                    <form asp-action="AgregarLinea" asp-route-id="@Model.Id" method="post" asp-antiforgery="true">
+                        <input type="hidden" id="ProductoId" name="lineaForm.ProductoId" value="" />
+                        <div class="row g-2">
+                            <div class="col-12 col-sm-5">
+                                <input id="Concepto" name="lineaForm.Concepto" class="form-input" placeholder="Descripción del producto o servicio *" required maxlength="255" />
+                            </div>
+                            <div class="col-6 col-sm-2">
+                                <input id="Cantidad" name="lineaForm.Cantidad" type="number" step="0.001" min="0.001" value="1" class="form-input" placeholder="Cant." required />
+                            </div>
+                            <div class="col-6 col-sm-2">
+                                <input id="PrecioUnitario" name="lineaForm.PrecioUnitario" type="number" step="0.01" min="0" value="0" class="form-input" placeholder="Precio €" required />
+                            </div>
+                            <div class="col-6 col-sm-2">
+                                <input id="Descuento" name="lineaForm.DescuentoPorcentaje" type="number" step="1" min="0" max="100" value="0" class="form-input" placeholder="Dto %" />
+                            </div>
+                            <div class="col-6 col-sm-1">
+                                <input id="Iva" name="lineaForm.ImpuestoPorcentaje" type="number" step="1" min="0" max="100" value="21" class="form-input" placeholder="IVA %" />
+                            </div>
+                            <div class="col-12 mt-1">
+                                <label class="d-flex align-items-center gap-2 small" style="color:var(--c-text-muted);cursor:pointer;">
+                                    <input id="EsManoObra" name="lineaForm.EsManoObra" type="checkbox" value="true" />
+                                    Mano de obra / Taller
+                                </label>
+                            </div>
+                        </div>
+                        <div class="d-flex justify-content-end mt-3">
+                            <button type="submit" class="btn btn-primary btn-sm">Añadir al presupuesto</button>
+                        </div>
+                    </form>
+                </div>
+            }
+
+            <div class="p-3" style="background:var(--c-surface-2);border-bottom-left-radius:12px;border-bottom-right-radius:12px;border-top:1px solid var(--c-border);">
+                <div class="d-flex justify-content-between mb-1">
+                    <span class="small" style="color:var(--c-text-muted);">Subtotal</span>
+                    <span class="small">@subtotalLineas.ToString("N2") €</span>
+                </div>
+                <div class="d-flex justify-content-between mb-2 pb-2 border-bottom" style="border-color:var(--c-border) !important;">
+                    <span class="small" style="color:var(--c-text-muted);">IVA total</span>
+                    <span class="small">@ivaLineas.ToString("N2") €</span>
+                </div>
+                <div class="d-flex justify-content-between align-items-center">
+                    <span class="fw-semibold" style="color:var(--c-text);">Total Presupuesto</span>
+                    <span class="fw-bold" style="color:var(--c-text);font-size:18px;">@totalLineas.ToString("N2") €</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@* Modal de Rechazo *@
+<div id="modalRechazar" class="modal-overlay" style="display:none;">
+    <div class="modal-box">
+        <div class="modal-header">
+            <h3 class="modal-title">Rechazar Presupuesto</h3>
+            <button type="button" class="modal-close" onclick="document.getElementById('modalRechazar').style.display='none'">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+                </svg>
+            </button>
+        </div>
+        <form asp-action="Rechazar" asp-route-id="@Model.Id" method="post" asp-antiforgery="true">
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label">Motivo de rechazo <span style="color:var(--c-red);">*</span></label>
+                    <textarea name="MotivoRechazo" class="form-input" rows="3" required placeholder="Indica el motivo por el que el cliente no acepta..."></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary btn-md" onclick="document.getElementById('modalRechazar').style.display='none'">Cancelar</button>
+                <button type="submit" class="btn btn-danger btn-md">Confirmar Rechazo</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        function cargarDesdeCatalogo(selectEl) {
+            const selectedOption = selectEl.options[selectEl.selectedIndex];
+            if (!selectedOption.value) return;
+
+            const isProducto = selectedOption.value.startsWith('P_');
+            const pId = isProducto ? selectedOption.getAttribute('data-id') : "";
+
+            const nombre = selectedOption.getAttribute('data-nombre');
+            const precio = selectedOption.getAttribute('data-precio');
+            const iva = selectedOption.getAttribute('data-iva');
+            const esManoObra = selectedOption.getAttribute('data-esmanoobra') === 'true';
+
+            document.getElementById('ProductoId').value = pId;
+            document.getElementById('Concepto').value = nombre || '';
+            
+            if(precio) document.getElementById('PrecioUnitario').value = precio;
+            if(iva) document.getElementById('Iva').value = iva;
+            
+            document.getElementById('Cantidad').value = 1;
+            document.getElementById('Descuento').value = 0;
+            document.getElementById('EsManoObra').checked = esManoObra;
+        }
+    </script>
+}

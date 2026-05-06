@@ -20,7 +20,7 @@ namespace Talleres360.Services.Trabajos
             IVehiculoRepository vehiculoRepository,
             IFacturacionService facturacionService)
         {
-            _trabajoRepository  = trabajoRepository;
+            _trabajoRepository = trabajoRepository;
             _vehiculoRepository = vehiculoRepository;
             _facturacionService = facturacionService;
         }
@@ -94,24 +94,24 @@ namespace Talleres360.Services.Trabajos
 
             Trabajo trabajo = new Trabajo
             {
-                TallerId                = tallerId,
-                VehiculoId              = request.VehiculoId,
-                MecanicoAsignadoId      = request.MecanicoAsignadoId,
-                NumeroDocumento         = string.IsNullOrWhiteSpace(request.NumeroDocumento) ? null : request.NumeroDocumento.Trim().ToUpper(),
-                TituloMantenimiento     = string.IsNullOrWhiteSpace(request.TituloMantenimiento) ? null : request.TituloMantenimiento.Trim(),
-                TrabajoRealizado        = string.IsNullOrWhiteSpace(request.TrabajoRealizado) ? null : request.TrabajoRealizado.Trim(),
-                KmEntrada               = request.KmEntrada,
-                Estado                  = estadoTrabajo,
-                EstadoPago              = estadoPagoTrabajo,
-                Subtotal                = request.Subtotal,
-                ImporteImpuestos        = request.ImporteImpuestos,
-                Total                   = request.Total,
-                CreadoPorId             = usuarioId,
-                FechaCreacion           = DateTime.UtcNow,
-                ModificadoPorId         = null,
+                TallerId = tallerId,
+                VehiculoId = request.VehiculoId,
+                MecanicoAsignadoId = request.MecanicoAsignadoId,
+                NumeroDocumento = string.IsNullOrWhiteSpace(request.NumeroDocumento) ? null : request.NumeroDocumento.Trim().ToUpper(),
+                TituloMantenimiento = string.IsNullOrWhiteSpace(request.TituloMantenimiento) ? null : request.TituloMantenimiento.Trim(),
+                TrabajoRealizado = string.IsNullOrWhiteSpace(request.TrabajoRealizado) ? null : request.TrabajoRealizado.Trim(),
+                KmEntrada = request.KmEntrada,
+                Estado = estadoTrabajo,
+                EstadoPago = estadoPagoTrabajo,
+                Subtotal = request.Subtotal,
+                ImporteImpuestos = request.ImporteImpuestos,
+                Total = request.Total,
+                CreadoPorId = usuarioId,
+                FechaCreacion = DateTime.UtcNow,
+                ModificadoPorId = null,
                 FechaUltimaModificacion = null,
-                Eliminado               = false,
-                DatosIncompletos        = datosIncompletosFinal
+                Eliminado = false,
+                DatosIncompletos = datosIncompletosFinal
             };
 
             await _trabajoRepository.AddAsync(trabajo);
@@ -181,23 +181,23 @@ namespace Talleres360.Services.Trabajos
 
             bool datosIncompletosFinal = request.DatosIncompletos || !request.VehiculoId.HasValue;
 
-            trabajo.VehiculoId              = request.VehiculoId;
-            trabajo.MecanicoAsignadoId      = request.MecanicoAsignadoId;
-            trabajo.NumeroDocumento         = string.IsNullOrWhiteSpace(request.NumeroDocumento) ? null : request.NumeroDocumento.Trim().ToUpper();
-            trabajo.TituloMantenimiento     = string.IsNullOrWhiteSpace(request.TituloMantenimiento) ? null : request.TituloMantenimiento.Trim();
-            trabajo.TrabajoRealizado        = string.IsNullOrWhiteSpace(request.TrabajoRealizado) ? null : request.TrabajoRealizado.Trim();
-            trabajo.KmEntrada               = request.KmEntrada;
-            trabajo.Estado                  = estadoTrabajo;
-            trabajo.EstadoPago              = estadoPagoTrabajo;
-            trabajo.Subtotal                = request.Subtotal;
-            trabajo.ImporteImpuestos        = request.ImporteImpuestos;
-            trabajo.Total                   = request.Total;
-            trabajo.FechaEntregaEstimada    = request.FechaEntregaEstimada;
-            trabajo.KmSalida                = request.KmSalida;
-            trabajo.ObservacionesEntrega    = string.IsNullOrWhiteSpace(request.ObservacionesEntrega) ? null : request.ObservacionesEntrega.Trim();
-            trabajo.ModificadoPorId         = usuarioId;
+            trabajo.VehiculoId = request.VehiculoId;
+            trabajo.MecanicoAsignadoId = request.MecanicoAsignadoId;
+            trabajo.NumeroDocumento = string.IsNullOrWhiteSpace(request.NumeroDocumento) ? null : request.NumeroDocumento.Trim().ToUpper();
+            trabajo.TituloMantenimiento = string.IsNullOrWhiteSpace(request.TituloMantenimiento) ? null : request.TituloMantenimiento.Trim();
+            trabajo.TrabajoRealizado = string.IsNullOrWhiteSpace(request.TrabajoRealizado) ? null : request.TrabajoRealizado.Trim();
+            trabajo.KmEntrada = request.KmEntrada;
+            trabajo.Estado = estadoTrabajo;
+            trabajo.EstadoPago = estadoPagoTrabajo;
+            trabajo.Subtotal = request.Subtotal;
+            trabajo.ImporteImpuestos = request.ImporteImpuestos;
+            trabajo.Total = request.Total;
+            trabajo.FechaEntregaEstimada = request.FechaEntregaEstimada;
+            trabajo.KmSalida = request.KmSalida;
+            trabajo.ObservacionesEntrega = string.IsNullOrWhiteSpace(request.ObservacionesEntrega) ? null : request.ObservacionesEntrega.Trim();
+            trabajo.ModificadoPorId = usuarioId;
             trabajo.FechaUltimaModificacion = DateTime.UtcNow;
-            trabajo.DatosIncompletos        = datosIncompletosFinal;
+            trabajo.DatosIncompletos = datosIncompletosFinal;
 
             if (estadoTrabajo == TrabajoEstado.CERRADO && trabajo.FechaCierre == null)
                 trabajo.FechaCierre = DateTime.UtcNow;

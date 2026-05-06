@@ -10,25 +10,27 @@
         .ToUpper();
 }
 
-<div class="panel-header-dark p-6">
-    <div class="flex items-start justify-between gap-3">
-        <div class="flex items-center gap-3">
-            <div class="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center text-lg font-bold text-white flex-shrink-0">
+<div class="panel-header-dark">
+    <div class="d-flex align-items-start justify-content-between gap-3">
+        <div class="d-flex align-items-center gap-3">
+            <div class="d-flex align-items-center justify-content-center flex-shrink-0"
+                 style="width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,0.12);font-size:0.85rem;font-weight:700;color:#fff;">
                 @iniciales
             </div>
             <div>
-                <h2 class="text-base font-semibold text-white leading-tight">@nombreCompleto</h2>
+                <h2 style="font-size:15px;font-weight:700;color:#fff;margin:0;line-height:1.3;">@nombreCompleto</h2>
                 @if (Model.EsEmpresa)
                 {
-                    <span class="inline-block mt-1 px-2 py-0.5 bg-white/10 rounded text-xs text-white/70">Empresa</span>
+                    <span style="display:inline-block;margin-top:4px;padding:2px 8px;background:rgba(255,255,255,0.1);border-radius:4px;font-size:11px;color:rgba(255,255,255,0.7);">Empresa</span>
                 }
                 else
                 {
-                    <p class="text-sm text-white/50 mt-0.5">Particular</p>
+                    <p style="font-size:12px;color:rgba(255,255,255,0.5);margin:2px 0 0;">Particular</p>
                 }
             </div>
         </div>
-        <button onclick="closePanel()" class="text-white/40 hover:text-white/80 transition-colors flex-shrink-0 mt-1" title="Cerrar">
+        <button onclick="closePanel()" title="Cerrar"
+                style="background:none;border:none;cursor:pointer;color:rgba(255,255,255,0.4);padding:2px;flex-shrink:0;">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
                 <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
             </svg>
@@ -36,70 +38,75 @@
     </div>
 </div>
 
-<div class="flex-1 p-5 space-y-4 overflow-y-auto">
+<div class="panel-body">
 
-    {{!-- Contacto --}}
-    <div>
-        <p class="text-xs font-semibold uppercase tracking-wide text-[var(--c-text-muted)] mb-2">Contacto</p>
-        <div class="space-y-2">
+    <div class="panel-section">
+        <p class="panel-section-label">Contacto</p>
+        <div class="d-flex flex-column gap-2">
             @if (!string.IsNullOrEmpty(Model.Email))
             {
-                <div class="flex items-center gap-2 text-sm text-[var(--c-text)]">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="text-[var(--c-text-muted)] flex-shrink-0">
-                        <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/>
+                <div class="d-flex align-items-center gap-2">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="color:var(--c-text-muted);flex-shrink:0;">
+                        <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+                        <polyline points="22,6 12,13 2,6"/>
                     </svg>
-                    <a href="mailto:@Model.Email" class="hover:text-[var(--c-accent)] transition-colors truncate">@Model.Email</a>
+                    <a href="mailto:@Model.Email" class="small" style="color:var(--c-text);text-decoration:none;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">@Model.Email</a>
                 </div>
             }
-            <div class="flex items-center gap-2 text-sm text-[var(--c-text)]">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="text-[var(--c-text-muted)] flex-shrink-0">
+            <div class="d-flex align-items-center gap-2">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="color:var(--c-text-muted);flex-shrink:0;">
                     <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.15 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.07 1.18h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.09 8.91a16 16 0 0 0 5.99 5.99l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/>
                 </svg>
-                <a href="tel:@Model.Telefono" class="hover:text-[var(--c-accent)] transition-colors">@Model.Telefono</a>
+                <a href="tel:@Model.Telefono" class="small" style="color:var(--c-text);text-decoration:none;">@Model.Telefono</a>
             </div>
             @if (!string.IsNullOrEmpty(Model.NifCif))
             {
-                <div class="flex items-center gap-2 text-sm text-[var(--c-text)]">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="text-[var(--c-text-muted)] flex-shrink-0">
-                        <rect x="3" y="4" width="18" height="16" rx="2"/><line x1="8" y1="10" x2="16" y2="10"/><line x1="8" y1="14" x2="13" y2="14"/>
+                <div class="d-flex align-items-center gap-2">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="color:var(--c-text-muted);flex-shrink:0;">
+                        <rect x="3" y="4" width="18" height="16" rx="2"/>
+                        <line x1="8" y1="10" x2="16" y2="10"/><line x1="8" y1="14" x2="13" y2="14"/>
                     </svg>
-                    <span>@Model.NifCif</span>
+                    <span class="small" style="color:var(--c-text);">@Model.NifCif</span>
                 </div>
             }
         </div>
     </div>
 
-    {{!-- Dirección --}}
     @if (!string.IsNullOrEmpty(Model.Direccion) || !string.IsNullOrEmpty(Model.Localidad))
     {
-        <div>
-            <p class="text-xs font-semibold uppercase tracking-wide text-[var(--c-text-muted)] mb-2">Dirección</p>
-            <div class="flex items-start gap-2 text-sm text-[var(--c-text)]">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="text-[var(--c-text-muted)] flex-shrink-0 mt-0.5">
-                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/>
+        <div class="panel-section">
+            <p class="panel-section-label">Dirección</p>
+            <div class="d-flex align-items-start gap-2">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="color:var(--c-text-muted);flex-shrink:0;margin-top:2px;">
+                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                    <circle cx="12" cy="10" r="3"/>
                 </svg>
                 <div>
-                    @if (!string.IsNullOrEmpty(Model.Direccion)) { <p>@Model.Direccion</p> }
+                    @if (!string.IsNullOrEmpty(Model.Direccion))
+                    {
+                        <p class="small mb-0" style="color:var(--c-text);">@Model.Direccion</p>
+                    }
                     @{
                         string localidad = string.Join(", ", new[] { Model.CodigoPostal, Model.Localidad, Model.Provincia }
                             .Where(s => !string.IsNullOrEmpty(s)));
                     }
-                    @if (!string.IsNullOrEmpty(localidad)) { <p class="text-[var(--c-text-muted)]">@localidad</p> }
+                    @if (!string.IsNullOrEmpty(localidad))
+                    {
+                        <p class="small mb-0" style="color:var(--c-text-muted);">@localidad</p>
+                    }
                 </div>
             </div>
         </div>
     }
 
-    {{!-- RGPD --}}
-    <div>
-        <p class="text-xs font-semibold uppercase tracking-wide text-[var(--c-text-muted)] mb-2">Comunicaciones</p>
-        <span class="@(Model.AceptaComunicaciones ? "badge badge-activo" : "badge badge-inactivo")">
+    <div class="panel-section">
+        <p class="panel-section-label">Comunicaciones RGPD</p>
+        <span class="badge @(Model.AceptaComunicaciones ? "badge-activo" : "badge-inactivo")">
             @(Model.AceptaComunicaciones ? "Acepta comunicaciones" : "Sin comunicaciones")
         </span>
     </div>
 
-    {{!-- Fecha --}}
-    <p class="text-xs text-[var(--c-text-muted)]">
+    <p class="small" style="color:var(--c-text-muted);padding:0 20px;">
         Alta: @Model.FechaCreacion.ToString("dd/MM/yyyy")
         @if (Model.FechaModificacion.HasValue)
         {
@@ -109,10 +116,8 @@
 
 </div>
 
-{{!-- Acciones --}}
-<div class="border-t border-[var(--c-border)] p-4 flex gap-2">
-    <a asp-action="Editar" asp-route-id="@Model.Id"
-       class="btn btn-secondary btn-sm flex-1 justify-center">
+<div class="panel-footer">
+    <a asp-action="Editar" asp-route-id="@Model.Id" class="btn btn-secondary btn-sm flex-grow-1 justify-content-center">
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
             <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
@@ -120,12 +125,15 @@
         Editar
     </a>
     <form asp-action="Eliminar" asp-route-id="@Model.Id" method="post"
-          onsubmit="return confirm('¿Eliminar a «@Html.Raw(Html.Encode(nombreCompleto))»? Esta acción no se puede deshacer.')">
+          data-confirm-title="Eliminar cliente"
+          data-confirm-msg="Se eliminará a @nombreCompleto. Esta acción no se puede deshacer.">
         @Html.AntiForgeryToken()
         <button type="submit" class="btn btn-danger btn-sm">
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
-                <path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/>
+                <polyline points="3 6 5 6 21 6"/>
+                <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
+                <path d="M10 11v6"/><path d="M14 11v6"/>
+                <path d="M9 6V4h6v2"/>
             </svg>
             Eliminar
         </button>

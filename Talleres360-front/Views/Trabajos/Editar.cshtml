@@ -1,0 +1,122 @@
+@model Talleres360_front.Models.Trabajos.TrabajoFormModel
+@using Talleres360.Enums
+@using Talleres360.Models.Flota
+@{
+    ViewData["Title"] = "Editar trabajo";
+    List<VehiculoDetalle> vehiculos = ViewData["Vehiculos"] as List<VehiculoDetalle> ?? new();
+}
+
+<div class="page-header">
+    <div class="d-flex align-items-center gap-3">
+        <a asp-action="Detalle" asp-route-id="@Model.Id" class="link-muted-360">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="15 18 9 12 15 6"/>
+            </svg>
+        </a>
+        <div>
+            <h1 class="page-title">Editar trabajo</h1>
+            <p class="page-subtitle">Modifica la cabecera de la orden</p>
+        </div>
+    </div>
+</div>
+
+<div class="w-100" style="max-width:672px;">
+    <div class="card">
+
+        @if (!Html.ViewData.ModelState.IsValid && Html.ViewData.ModelState.ContainsKey(string.Empty))
+        {
+            <div class="mb-4 p-3 rounded-3 border" style="background:var(--c-red-soft);color:var(--c-red);border-color:rgba(12,18,30,0.15);">
+                @Html.ValidationSummary(true)
+            </div>
+        }
+
+        <form asp-action="Editar" asp-route-id="@Model.Id" method="post" asp-antiforgery="true">
+
+            <div class="row g-3">
+
+                <div class="form-group col-12">
+                    <label asp-for="VehiculoId" class="form-label">Vehículo</label>
+                    <select asp-for="VehiculoId" class="form-select">
+                        <option value="0">— Sin vehículo —</option>
+                        @foreach (VehiculoDetalle v in vehiculos)
+                        {
+                            <option value="@v.Id">@v.Matricula — @v.MarcaNombre @v.ModeloNombre</option>
+                        }
+                    </select>
+                    <span asp-validation-for="VehiculoId" class="form-error"></span>
+                </div>
+
+                <div class="form-group col-12">
+                    <label asp-for="TituloMantenimiento" class="form-label">Título del mantenimiento</label>
+                    <input asp-for="TituloMantenimiento" class="form-input"
+                           placeholder="Ej: Revisión 60.000 km, Cambio pastillas…" />
+                    <span asp-validation-for="TituloMantenimiento" class="form-error"></span>
+                </div>
+
+                <div class="form-group col-12 col-md-6">
+                    <label asp-for="KmEntrada" class="form-label">Km de entrada</label>
+                    <input asp-for="KmEntrada" type="number" min="0" class="form-input" />
+                    <span asp-validation-for="KmEntrada" class="form-error"></span>
+                </div>
+
+                <div class="form-group col-12 col-md-6">
+                    <label asp-for="KmSalida" class="form-label">Km de salida</label>
+                    <input asp-for="KmSalida" type="number" min="0" class="form-input" placeholder="—" />
+                    <span asp-validation-for="KmSalida" class="form-error"></span>
+                </div>
+
+                <div class="form-group col-12 col-md-6">
+                    <label asp-for="Estado" class="form-label">Estado <span style="color:var(--c-red);">*</span></label>
+                    <select asp-for="Estado" class="form-select">
+                        <option value="@TrabajoEstado.ABIERTO">Abierto</option>
+                        <option value="@TrabajoEstado.EN_PROCESO">En proceso</option>
+                        <option value="@TrabajoEstado.PENDIENTE_PIEZAS">Pendiente piezas</option>
+                        <option value="@TrabajoEstado.CERRADO">Cerrado</option>
+                        <option value="@TrabajoEstado.CANCELADO">Cancelado</option>
+                    </select>
+                    <span asp-validation-for="Estado" class="form-error"></span>
+                </div>
+
+                <div class="form-group col-12 col-md-6">
+                    <label asp-for="EstadoPago" class="form-label">Estado de pago <span style="color:var(--c-red);">*</span></label>
+                    <select asp-for="EstadoPago" class="form-select">
+                        <option value="@TrabajoEstadoPago.PENDIENTE">Pendiente</option>
+                        <option value="@TrabajoEstadoPago.PARCIAL">Parcial</option>
+                        <option value="@TrabajoEstadoPago.PAGADO">Pagado</option>
+                        <option value="@TrabajoEstadoPago.ANULADO">Anulado</option>
+                    </select>
+                    <span asp-validation-for="EstadoPago" class="form-error"></span>
+                </div>
+
+                <div class="form-group col-12 col-md-6">
+                    <label asp-for="FechaEntregaEstimada" class="form-label">Fecha de entrega estimada</label>
+                    <input asp-for="FechaEntregaEstimada" type="date" class="form-input" />
+                    <span asp-validation-for="FechaEntregaEstimada" class="form-error"></span>
+                </div>
+
+                <div class="form-group col-12">
+                    <label asp-for="TrabajoRealizado" class="form-label">Trabajo realizado</label>
+                    <textarea asp-for="TrabajoRealizado" class="form-input" rows="3"
+                              placeholder="Descripción del trabajo realizado…" style="resize:vertical;"></textarea>
+                </div>
+
+                <div class="form-group col-12">
+                    <label asp-for="ObservacionesEntrega" class="form-label">Observaciones de entrega</label>
+                    <textarea asp-for="ObservacionesEntrega" class="form-input" rows="2"
+                              placeholder="Observaciones para la entrega al cliente…" style="resize:vertical;"></textarea>
+                    <span asp-validation-for="ObservacionesEntrega" class="form-error"></span>
+                </div>
+
+            </div>
+
+            <div class="d-flex align-items-center justify-content-end gap-3 mt-4 pt-4 border-top" style="border-color:var(--c-border);">
+                <a asp-action="Detalle" asp-route-id="@Model.Id" class="btn btn-secondary btn-md">Cancelar</a>
+                <button type="submit" class="btn btn-primary btn-md">Guardar cambios</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

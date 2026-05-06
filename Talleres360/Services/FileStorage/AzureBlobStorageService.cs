@@ -1,5 +1,6 @@
 using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
+using Azure.Storage.Sas;
 using Talleres360.Enums;
 using Talleres360.Interfaces.FileStorage;
 
@@ -9,11 +10,16 @@ namespace Talleres360.Services.FileStorage
     {
         private readonly string _connectionString;
         private readonly string _containerName = "talleres360-imagenes";
+        private readonly int _sasHorasPdf;
 
         public AzureBlobStorageService(IConfiguration configuration)
         {
             _connectionString = configuration.GetConnectionString("AzureStorage")
                                ?? throw new ArgumentNullException("AzureStorage connection string is missing");
+            int? horasConfiguradas = configuration.GetValue<int?>("Storage:SasHorasPdf");
+            _sasHorasPdf = horasConfiguradas.HasValue && horasConfiguradas.Value > 0
+                ? horasConfiguradas.Value
+                : 24;
         }
 
         public async Task BorrarArchivoAsync(string rutaRelativa)
@@ -47,7 +53,10 @@ namespace Talleres360.Services.FileStorage
 
             try
             {
-                await containerClient.CreateIfNotExistsAsync(PublicAccessType.Blob);
+                PublicAccessType acceso = carpeta == CarpetaDestino.PdfFacturas
+                    ? PublicAccessType.None
+                    : PublicAccessType.Blob;
+                await containerClient.CreateIfNotExistsAsync(acceso);
             }
             catch (Exception ex)
             {
@@ -67,7 +76,32 @@ namespace Talleres360.Services.FileStorage
 
             await blobClient.UploadAsync(contenido, uploadOptions);
 
+            if (carpeta == CarpetaDestino.PdfFacturas)
+            {
+                return GenerarUrlSasLectura(blobClient);
+            }
+
             return blobClient.Uri.ToString();
+        }
+
+        private string GenerarUrlSasLectura(BlobClient blobClient)
+        {
+            if (!blobClient.CanGenerateSasUri)
+            {
+                return blobClient.Uri.ToString();
+            }
+
+            BlobSasBuilder sasBuilder = new BlobSasBuilder
+            {
+                BlobContainerName = blobClient.BlobContainerName,
+                BlobName = blobClient.Name,
+                Resource = "b",
+                ExpiresOn = DateTimeOffset.UtcNow.AddHours(_sasHorasPdf)
+            };
+            sasBuilder.SetPermissions(BlobSasPermissions.Read);
+
+            Uri sasUri = blobClient.GenerateSasUri(sasBuilder);
+            return sasUri.ToString();
         }
     }
 }

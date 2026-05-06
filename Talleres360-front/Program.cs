@@ -1,9 +1,13 @@
 using Talleres360_front.Middlewares;
 using Talleres360_front.Services;
+using Talleres360_front.Binders;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddControllersWithViews();
+builder.Services.AddControllersWithViews(options =>
+{
+    options.ModelBinderProviders.Insert(0, new DecimalModelBinderProvider());
+});
 
 builder.Services.AddHttpContextAccessor();
 
@@ -27,6 +31,13 @@ builder.Services.AddScoped<ApiClient>();
 builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<TallerService>();
 builder.Services.AddScoped<ClienteService>();
+builder.Services.AddScoped<VehiculoService>();
+builder.Services.AddScoped<CitaService>();
+builder.Services.AddScoped<TrabajoService>();
+builder.Services.AddScoped<InventarioService>();
+builder.Services.AddScoped<ServicioService>();
+builder.Services.AddScoped<PresupuestoService>();
+builder.Services.AddScoped<FacturaService>();
 
 WebApplication app = builder.Build();
 

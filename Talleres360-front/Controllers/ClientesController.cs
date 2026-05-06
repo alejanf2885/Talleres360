@@ -10,6 +10,7 @@ using Talleres360_front.Services;
 namespace Talleres360_front.Controllers;
 
 [AuthRequired]
+[Route("[controller]")]
 public class ClientesController : Controller
 {
     private readonly ClienteService _clienteService;
@@ -20,6 +21,7 @@ public class ClientesController : Controller
     }
 
     // GET /clientes
+    [HttpGet("")]
     public async Task<IActionResult> Index(int pageNumber = 1, int pageSize = 15, string? buscar = null)
     {
         ApiResult<Talleres360.Dtos.PagedResponse<Cliente>> result =
@@ -41,7 +43,7 @@ public class ClientesController : Controller
     }
 
     // GET /clientes/{id}/panel  — devuelve HTML parcial para el panel lateral
-    [HttpGet]
+    [HttpGet("{id:int}/Panel")]
     public async Task<IActionResult> Panel(int id)
     {
         ApiResult<Cliente> result = await _clienteService.ObtenerAsync(id);
@@ -54,10 +56,11 @@ public class ClientesController : Controller
     }
 
     // GET /clientes/crear
+    [HttpGet("Crear")]
     public IActionResult Crear() => View(new ClienteFormModel());
 
     // POST /clientes/crear
-    [HttpPost]
+    [HttpPost("Crear")]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Crear(ClienteFormModel model)
     {

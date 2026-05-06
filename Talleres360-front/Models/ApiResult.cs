@@ -16,6 +16,9 @@ public class ApiResult<T>
     public static ApiResult<T> Ok(T data) =>
         new() { Success = true, Data = data, StatusCode = 200 };
 
+    public static ApiResult<T> Empty(int statusCode) =>
+        new() { Success = true, StatusCode = statusCode };
+
     public static ApiResult<T> Fail(int statusCode, ApiErrorResponse? error = null) =>
         new() { Success = false, StatusCode = statusCode, Error = error };
 }
