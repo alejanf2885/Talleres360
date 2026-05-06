@@ -1,0 +1,57 @@
+@model Talleres360.Dtos.PagedResponse<Talleres360.Models.Negocio.Cliente>
+
+@if (!Model.Data.Any())
+{
+    <tr>
+        <td colspan="6" class="text-center py-5" style="color:var(--c-text-muted);">
+            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" class="d-block mx-auto mb-3" style="opacity:0.4;">
+                <circle cx="9" cy="7" r="4"/>
+                <path d="M3 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2"/>
+            </svg>
+            <p class="small">No hay clientes que coincidan</p>
+        </td>
+    </tr>
+}
+else
+{
+    foreach (var c in Model.Data)
+    {
+        string nombreCompleto = string.IsNullOrEmpty(c.Apellidos)
+            ? c.Nombre
+            : $"{c.Nombre} {c.Apellidos}";
+        string iniciales = nombreCompleto.Split(' ')
+            .Where(w => w.Length > 0).Take(2)
+            .Aggregate(string.Empty, (a, w) => a + w[0])
+            .ToUpper();
+
+        <tr onclick="openPanel(@c.Id)" style="cursor:pointer;">
+            <td>
+                <div class="d-flex align-items-center gap-3">
+                    <div class="d-flex align-items-center justify-content-center flex-shrink-0" style="width:32px;height:32px;border-radius:50%;background:var(--c-accent-soft);color:var(--c-accent);font-size:0.75rem;font-weight:700;">
+                        @iniciales
+                    </div>
+                    <div>
+                        <div class="fw-semibold small" style="color:var(--c-text);">@nombreCompleto</div>
+                        @if (c.EsEmpresa)
+                        {
+                            <span class="badge badge-activo">Empresa</span>
+                        }
+                    </div>
+                </div>
+            </td>
+            <td class="d-none d-sm-table-cell small" style="color:var(--c-text-secondary);">
+                @(c.NifCif ?? "—")
+            </td>
+            <td class="d-none d-md-table-cell small" style="color:var(--c-text-secondary);">@c.Telefono</td>
+            <td class="d-none d-lg-table-cell small" style="color:var(--c-text-muted);">@(c.Email ?? "—")</td>
+            <td class="d-none d-xl-table-cell small" style="color:var(--c-text-muted);">
+                @c.FechaCreacion.ToString("dd/MM/yyyy")
+            </td>
+            <td>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="color:var(--c-text-muted);">
+                    <polyline points="9 18 15 12 9 6"/>
+                </svg>
+            </td>
+        </tr>
+    }
+}

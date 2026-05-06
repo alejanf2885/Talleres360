@@ -10,6 +10,7 @@ Stack: ASP.NET Core 10 MVC · Tailwind CSS · Vanilla JS (fetch API) · HttpOnly
 |---|---|---|
 | 0 | Infraestructura base | Tailwind, layout, design system, HTTP client |
 | 1 | Autenticación | Login, registro, logout, refresh token |
+| 1.5 | Onboarding del taller | Wizard de configuración inicial cuando `PerfilConfigurado = false` |
 | 2 | Verificación de email | Confirmar cuenta, reenviar email |
 | 3 | Dashboard y shell | Sidebar, header, página de inicio |
 | 4 | Clientes | CRUD completo + búsqueda y paginación |
@@ -119,9 +120,63 @@ Login y Register usan `_LayoutAuth.cshtml` (sin sidebar, centrado, fondo oscuro)
 
 ### Criterio de salida
 
-- Login con credenciales correctas → entra al dashboard
+- Login con credenciales correctas → entra al dashboard (o al wizard si `PerfilConfigurado = false`)
 - Login con credenciales incorrectas → muestra error en el formulario
 - JWT renovado automáticamente sin que el usuario lo note
+
+---
+
+## Fase 1.5 — Onboarding del taller
+
+**Objetivo:** wizard de configuración inicial que se muestra después del primer login cuando
+`PerfilConfigurado = false`. Bloquea el acceso al dashboard hasta completarlo.
+
+### Por qué existe
+
+El registro solo recoge `Nombre` del taller y el usuario. Los datos fiscales/operativos
+(CIF, dirección, localidad, teléfono, logo) se completan en este paso posterior.
+El backend marca `PerfilConfigurado = true` al llamar a `PUT /api/v1/workshops/config`.
+
+### Endpoint backend
+
+```
+PUT /api/v1/workshops/config
+Body: { CIF, Direccion, Localidad, Telefono, Logo (base64, opcional en frontend) }
+→ marca PerfilConfigurado = true en BD
+```
+
+### Cambios necesarios en código existente
+
+- **`AuthService.GuardarSesion`**: guardar `data.Usuario.PerfilConfigurado` en sesión
+  como `"perfil_configurado"` (`"true"` / `"false"`).
+- **`AuthController.Login` (POST)**: tras login exitoso, leer `perfil_configurado` de sesión;
+  si es `"false"` → `RedirectToAction("Setup", "Taller")` en lugar de ir al dashboard.
+- **`AuthRequiredAttribute`** o middleware: si el JWT existe pero `perfil_configurado = false`
+  y la ruta no es `/taller/setup` → redirigir al wizard (evita que el usuario navegue al
+  dashboard directamente con la URL).
+
+### Archivos a crear
+
+| Archivo | Descripción |
+|---|---|
+| `Controllers/TallerController.cs` | Acción GET/POST Setup |
+| `Views/Taller/Setup.cshtml` | Formulario wizard (CIF, dirección, localidad, teléfono, logo) |
+| `Models/Taller/SetupTallerForm.cs` | ViewModel del wizard |
+| `Services/TallerService.cs` | Llama a `PUT /api/v1/workshops/config` |
+
+### UX del wizard
+
+- Usar `_LayoutAuth.cshtml` (sin sidebar) para dar sensación de "paso obligatorio antes de entrar".
+- Pasos visuales opcionales (step indicator): "1 · Datos del taller → 2 · Listo".
+- Logo: `<input type="file" accept="image/*">` + conversión a base64 en JS antes de enviar.
+  Si no sube logo → enviar string vacío (el backend lo ignora si está en blanco).
+- Al guardar con éxito: actualizar `perfil_configurado` en sesión a `"true"` y redirigir al dashboard.
+
+### Criterio de salida
+
+- Nuevo taller que hace login por primera vez → ve el wizard, no el dashboard.
+- Tras completar el wizard → accede al dashboard normalmente.
+- Si intenta ir a `/` sin completar el wizard → redirigido de vuelta a `/taller/setup`.
 
 ---
 
@@ -614,10 +669,12 @@ Mostrar errores del servidor campo a campo si la API devuelve `detalles` con err
 ## Orden de implementación recomendado
 
 ```
-Fase 0 → Fase 1 → Fase 2 → Fase 3 → Fase 4 → Fase 5
+Fase 0 → Fase 1 → Fase 1.5 → Fase 2 → Fase 3 → Fase 4 → Fase 5
 → Fase 7 (Trabajos, sin cobros) → Fase 6 (Citas) → Fase 7 cobros
 → Fase 8 → Fase 9 → Fase 10 → Fase 11 → Fase 12
 ```
 
 Justificación: los Trabajos dependen de Clientes y Vehículos. Las Citas también. Facturación
 depende de Trabajos. Inventario es independiente y puede avanzar en paralelo con Citas/Trabajos.
+La Fase 1.5 (onboarding) debe ir inmediatamente después del login porque bloquea el acceso
+al resto de la app hasta que el taller esté configurado.

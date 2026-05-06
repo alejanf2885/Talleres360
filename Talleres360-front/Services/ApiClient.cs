@@ -2,6 +2,7 @@ using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
 using Talleres360.Dtos.Responses;
+using Talleres360_front.Models;
 
 namespace Talleres360_front.Services;
 
@@ -70,6 +71,50 @@ public class ApiClient
     {
         string raw = await response.Content.ReadAsStringAsync();
         return JsonSerializer.Deserialize<ApiErrorResponse>(raw, JsonOptions);
+    }
+
+    // Métodos tipados con ApiResult<T> — incluyen StatusCode para manejo de 401/402/403
+    public async Task<ApiResult<T>> GetResultAsync<T>(string endpoint)
+    {
+        HttpClient client = BuildClient();
+        HttpResponseMessage response = await client.GetAsync(endpoint);
+        return await ToResultAsync<T>(response);
+    }
+
+    public async Task<ApiResult<T>> PostResultAsync<T>(string endpoint, object body)
+    {
+        HttpClient client = BuildClient();
+        HttpResponseMessage response = await client.PostAsync(endpoint, SerializeBody(body));
+        return await ToResultAsync<T>(response);
+    }
+
+    public async Task<ApiResult<T>> PutResultAsync<T>(string endpoint, object body)
+    {
+        HttpClient client = BuildClient();
+        HttpResponseMessage response = await client.PutAsync(endpoint, SerializeBody(body));
+        return await ToResultAsync<T>(response);
+    }
+
+    public async Task<ApiResult<T>> DeleteResultAsync<T>(string endpoint)
+    {
+        HttpClient client = BuildClient();
+        HttpResponseMessage response = await client.DeleteAsync(endpoint);
+        return await ToResultAsync<T>(response);
+    }
+
+    private static async Task<ApiResult<T>> ToResultAsync<T>(HttpResponseMessage response)
+    {
+        string raw = await response.Content.ReadAsStringAsync();
+        int statusCode = (int)response.StatusCode;
+
+        if (response.IsSuccessStatusCode)
+        {
+            ApiResponse<T>? apiResponse = JsonSerializer.Deserialize<ApiResponse<T>>(raw, JsonOptions);
+            return ApiResult<T>.Ok(apiResponse!.Data!);
+        }
+
+        ApiErrorResponse? error = JsonSerializer.Deserialize<ApiErrorResponse>(raw, JsonOptions);
+        return ApiResult<T>.Fail(statusCode, error);
     }
 
     private HttpClient BuildClient()

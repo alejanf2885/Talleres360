@@ -15,13 +15,14 @@ public class AuthService
         PropertyNameCaseInsensitive = true
     };
 
-    private const string SessionJwt             = "jwt";
-    private const string SessionRefreshToken    = "refresh_token";
-    private const string SessionNombreUsuario   = "nombre_usuario";
-    private const string SessionNombreTaller    = "nombre_taller";
-    private const string SessionTallerId        = "taller_id";
-    private const string SessionRol             = "rol";
-    private const string RefreshTokenCookieName = "refreshToken";
+    private const string SessionJwt               = "jwt";
+    private const string SessionRefreshToken      = "refresh_token";
+    private const string SessionNombreUsuario     = "nombre_usuario";
+    private const string SessionNombreTaller      = "nombre_taller";
+    private const string SessionTallerId          = "taller_id";
+    private const string SessionRol               = "rol";
+    private const string SessionPerfilConfigurado = "perfil_configurado";
+    private const string RefreshTokenCookieName   = "refreshToken";
 
     public AuthService(IHttpClientFactory httpClientFactory)
     {
@@ -132,7 +133,19 @@ public class AuthService
             httpContext.Session.SetString(SessionRol, data.Usuario.Rol ?? string.Empty);
             httpContext.Session.SetString(SessionTallerId,
                 data.Usuario.TallerId?.ToString() ?? string.Empty);
+            httpContext.Session.SetString(SessionPerfilConfigurado,
+                data.Usuario.PerfilConfigurado ? "true" : "false");
         }
+    }
+
+    public static void MarcarPerfilConfigurado(HttpContext httpContext)
+    {
+        httpContext.Session.SetString(SessionPerfilConfigurado, "true");
+    }
+
+    public static bool EsPerfilConfigurado(HttpContext httpContext)
+    {
+        return httpContext.Session.GetString(SessionPerfilConfigurado) == "true";
     }
 
     private static void CapturarRefreshToken(HttpContext httpContext, HttpResponseMessage response)

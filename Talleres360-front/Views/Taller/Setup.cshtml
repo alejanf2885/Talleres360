@@ -1,0 +1,156 @@
+@model Talleres360_front.Models.Taller.SetupTallerForm
+@{
+    ViewData["Title"] = "Configura tu taller";
+    Layout = "_LayoutAuth";
+}
+
+<div class="auth-card auth-card-wide">
+
+    <div class="auth-logo">
+        <svg width="40" height="40" viewBox="0 0 56 56" fill="none">
+            <path d="M14 10 A24 24 0 1 0 42 10" stroke="oklch(0.68 0.18 245)" stroke-width="3" stroke-linecap="round" fill="none"/>
+            <circle cx="14" cy="10" r="4" fill="oklch(0.68 0.18 245)"/>
+            <circle cx="42" cy="10" r="4" fill="oklch(0.68 0.18 245)"/>
+            <rect x="25.5" y="26" width="5" height="20" rx="2.5" fill="white"/>
+            <rect x="20" y="25" width="16" height="4" rx="2" fill="white"/>
+        </svg>
+        <div>
+            <div class="auth-logo-name">Talleres<span>360</span></div>
+            <div class="auth-logo-sub">Configura tu taller</div>
+        </div>
+    </div>
+
+    <div style="margin-bottom:24px;">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+            <div style="width:24px;height:24px;border-radius:50%;background:oklch(0.60 0.18 245);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;flex-shrink:0;">1</div>
+            <div style="flex:1;height:2px;background:rgba(255,255,255,0.1);border-radius:2px;">
+                <div style="width:50%;height:100%;background:oklch(0.60 0.18 245);border-radius:2px;"></div>
+            </div>
+            <div style="width:24px;height:24px;border-radius:50%;background:rgba(255,255,255,0.1);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:rgba(255,255,255,0.4);flex-shrink:0;">2</div>
+        </div>
+        <div style="display:flex;justify-content:space-between;">
+            <span style="font-size:11px;color:oklch(0.68 0.18 245);font-weight:600;">Datos del taller</span>
+            <span style="font-size:11px;color:rgba(255,255,255,0.3);">Listo</span>
+        </div>
+    </div>
+
+    <h1 class="auth-title">Completa tu perfil</h1>
+    <p class="auth-subtitle">Necesitamos unos datos para configurar tu taller antes de empezar</p>
+
+    @if (!Html.ViewData.ModelState.IsValid && Html.ViewData.ModelState.ContainsKey(string.Empty))
+    {
+        <div class="auth-error-box" style="margin-bottom:16px;">
+            @Html.ValidationSummary(true)
+        </div>
+    }
+
+    <form method="post" class="auth-form" asp-antiforgery="true" id="setup-form">
+
+        <input type="hidden" asp-for="LogoBase64" id="logo-base64" />
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+
+            <div class="auth-form-group">
+                <label asp-for="CIF" class="auth-label">CIF / NIF</label>
+                <input asp-for="CIF" type="text" class="auth-input auth-input-no-icon"
+                       placeholder="B12345678" autocomplete="off" />
+                <span asp-validation-for="CIF" class="field-error"></span>
+            </div>
+
+            <div class="auth-form-group">
+                <label asp-for="Telefono" class="auth-label">Teléfono</label>
+                <input asp-for="Telefono" type="tel" class="auth-input auth-input-no-icon"
+                       placeholder="612 345 678" autocomplete="tel" />
+                <span asp-validation-for="Telefono" class="field-error"></span>
+            </div>
+
+        </div>
+
+        <div class="auth-form-group">
+            <label asp-for="Direccion" class="auth-label">Dirección</label>
+            <input asp-for="Direccion" type="text" class="auth-input auth-input-no-icon"
+                   placeholder="Calle Ejemplo, 12, Nave 3" autocomplete="street-address" />
+            <span asp-validation-for="Direccion" class="field-error"></span>
+        </div>
+
+        <div class="auth-form-group">
+            <label asp-for="Localidad" class="auth-label">Localidad</label>
+            <input asp-for="Localidad" type="text" class="auth-input auth-input-no-icon"
+                   placeholder="Madrid" autocomplete="address-level2" />
+            <span asp-validation-for="Localidad" class="field-error"></span>
+        </div>
+
+        <div class="auth-form-group">
+            <label class="auth-label">Logo del taller <span style="color:rgba(255,255,255,0.3);font-weight:400;">(opcional)</span></label>
+            <div id="logo-drop-area" style="border:2px dashed rgba(255,255,255,0.12);border-radius:8px;padding:20px;text-align:center;cursor:pointer;transition:border-color 150ms;">
+                <div id="logo-placeholder">
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin:0 auto 8px;">
+                        <rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/>
+                        <polyline points="21 15 16 10 5 21"/>
+                    </svg>
+                    <p style="font-size:12px;color:rgba(255,255,255,0.3);margin:0;">Haz clic o arrastra una imagen</p>
+                    <p style="font-size:11px;color:rgba(255,255,255,0.2);margin:4px 0 0;">PNG, JPG — máx. 2 MB</p>
+                </div>
+                <img id="logo-preview" src="" alt="Logo" style="display:none;max-height:80px;max-width:200px;object-fit:contain;margin:0 auto;border-radius:4px;" />
+            </div>
+            <input type="file" id="logo-file-input" accept="image/png,image/jpeg,image/webp" style="display:none;" />
+        </div>
+
+        <button type="submit" class="auth-btn" id="submit-btn" style="margin-top:4px;">
+            Guardar y empezar
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
+            </svg>
+        </button>
+
+    </form>
+
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        const dropArea   = document.getElementById('logo-drop-area');
+        const fileInput  = document.getElementById('logo-file-input');
+        const base64Input = document.getElementById('logo-base64');
+        const preview    = document.getElementById('logo-preview');
+        const placeholder = document.getElementById('logo-placeholder');
+
+        dropArea.addEventListener('click', () => fileInput.click());
+
+        dropArea.addEventListener('dragover', e => {
+            e.preventDefault();
+            dropArea.style.borderColor = 'oklch(0.60 0.18 245)';
+        });
+        dropArea.addEventListener('dragleave', () => {
+            dropArea.style.borderColor = 'rgba(255,255,255,0.12)';
+        });
+        dropArea.addEventListener('drop', e => {
+            e.preventDefault();
+            dropArea.style.borderColor = 'rgba(255,255,255,0.12)';
+            const file = e.dataTransfer.files[0];
+            if (file) processFile(file);
+        });
+
+        fileInput.addEventListener('change', () => {
+            if (fileInput.files[0]) processFile(fileInput.files[0]);
+        });
+
+        function processFile(file) {
+            if (file.size > 2 * 1024 * 1024) {
+                alert('El archivo supera los 2 MB.');
+                return;
+            }
+            const reader = new FileReader();
+            reader.onload = e => {
+                const dataUrl = e.target.result;
+                base64Input.value = dataUrl;
+                preview.src = dataUrl;
+                preview.style.display = 'block';
+                placeholder.style.display = 'none';
+                dropArea.style.borderColor = 'oklch(0.60 0.18 245)';
+            };
+            reader.readAsDataURL(file);
+        }
+    </script>
+}

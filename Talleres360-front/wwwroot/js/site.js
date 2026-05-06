@@ -1,3 +1,27 @@
+// Sidebar toggle (mobile)
+function openSidebar() {
+    const sidebar  = document.getElementById('sidebar');
+    const overlay  = document.getElementById('sidebar-overlay');
+    if (!sidebar) return;
+    sidebar.classList.add('open');
+    overlay?.classList.remove('d-none');
+    document.body.style.overflow = 'hidden';
+}
+
+function closeSidebar() {
+    const sidebar  = document.getElementById('sidebar');
+    const overlay  = document.getElementById('sidebar-overlay');
+    if (!sidebar) return;
+    sidebar.classList.remove('open');
+    overlay?.classList.add('d-none');
+    document.body.style.overflow = '';
+}
+
+// Cerrar sidebar con Escape
+document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') closeSidebar();
+});
+
 // Toast notifications
 function showToast(message, type = 'success', duration = 3500) {
     const container = document.getElementById('toast-container');

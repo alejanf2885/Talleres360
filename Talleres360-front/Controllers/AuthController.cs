@@ -41,6 +41,9 @@ public class AuthController : Controller
             return View(model);
         }
 
+        if (!AuthService.EsPerfilConfigurado(HttpContext))
+            return RedirectToAction("Setup", "Taller");
+
         if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
             return Redirect(returnUrl);
 

@@ -1,0 +1,121 @@
+@model Talleres360_front.Models.Clientes.ClienteFormModel
+@{
+    ViewData["Title"] = "Editar cliente";
+    string nombreCompleto = string.IsNullOrEmpty(Model.Apellidos)
+        ? Model.Nombre
+        : $"{Model.Nombre} {Model.Apellidos}";
+}
+
+<div class="page-header">
+    <div class="flex items-center gap-3">
+        <a asp-action="Index" class="text-[var(--c-text-muted)] hover:text-[var(--c-text)] transition-colors">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="15 18 9 12 15 6"/>
+            </svg>
+        </a>
+        <div>
+            <h1 class="page-title">Editar cliente</h1>
+            <p class="page-subtitle">@nombreCompleto</p>
+        </div>
+    </div>
+</div>
+
+<div class="max-w-2xl">
+    <div class="card">
+
+        @if (!Html.ViewData.ModelState.IsValid && Html.ViewData.ModelState.ContainsKey(string.Empty))
+        {
+            <div class="mb-5 p-3 rounded-lg bg-[var(--c-red-soft)] border border-[var(--c-red)]/20 text-sm text-[var(--c-red)]">
+                @Html.ValidationSummary(true)
+            </div>
+        }
+
+        <form asp-action="Editar" asp-route-id="@Model.Id" method="post" asp-antiforgery="true">
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+                <div class="form-group">
+                    <label asp-for="Nombre" class="form-label">Nombre <span class="text-[var(--c-red)]">*</span></label>
+                    <input asp-for="Nombre" class="form-input" placeholder="Nombre del cliente o empresa" autofocus />
+                    <span asp-validation-for="Nombre" class="form-error"></span>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="Apellidos" class="form-label">Apellidos</label>
+                    <input asp-for="Apellidos" class="form-input" placeholder="Apellidos (personas físicas)" />
+                    <span asp-validation-for="Apellidos" class="form-error"></span>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="NifCif" class="form-label">NIF / CIF</label>
+                    <input asp-for="NifCif" class="form-input" placeholder="12345678A" />
+                    <span asp-validation-for="NifCif" class="form-error"></span>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Tipo de cliente</label>
+                    <label class="flex items-center gap-2 cursor-pointer mt-2">
+                        <input asp-for="EsEmpresa" type="checkbox"
+                               class="w-4 h-4 rounded border-[var(--c-border)] accent-[var(--c-accent)]" />
+                        <span class="text-sm text-[var(--c-text-secondary)]">Es empresa / autónomo</span>
+                    </label>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="Telefono" class="form-label">Teléfono <span class="text-[var(--c-red)]">*</span></label>
+                    <input asp-for="Telefono" type="tel" class="form-input" placeholder="612 345 678" />
+                    <span asp-validation-for="Telefono" class="form-error"></span>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="Email" class="form-label">Correo electrónico <span class="text-[var(--c-red)]">*</span></label>
+                    <input asp-for="Email" type="email" class="form-input" placeholder="cliente@ejemplo.com" />
+                    <span asp-validation-for="Email" class="form-error"></span>
+                </div>
+
+                <div class="form-group md:col-span-2">
+                    <label asp-for="Direccion" class="form-label">Dirección</label>
+                    <input asp-for="Direccion" class="form-input" placeholder="Calle, número, piso…" />
+                    <span asp-validation-for="Direccion" class="form-error"></span>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="CodigoPostal" class="form-label">Código postal</label>
+                    <input asp-for="CodigoPostal" class="form-input" placeholder="28001" />
+                    <span asp-validation-for="CodigoPostal" class="form-error"></span>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="Localidad" class="form-label">Localidad</label>
+                    <input asp-for="Localidad" class="form-input" placeholder="Madrid" />
+                    <span asp-validation-for="Localidad" class="form-error"></span>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="Provincia" class="form-label">Provincia</label>
+                    <input asp-for="Provincia" class="form-input" placeholder="Madrid" />
+                    <span asp-validation-for="Provincia" class="form-error"></span>
+                </div>
+
+                <div class="form-group md:col-span-2">
+                    <label class="flex items-center gap-2 cursor-pointer">
+                        <input asp-for="AceptaComunicaciones" type="checkbox"
+                               class="w-4 h-4 rounded border-[var(--c-border)] accent-[var(--c-accent)]" />
+                        <span class="text-sm text-[var(--c-text-secondary)]">Acepta recibir comunicaciones comerciales (RGPD)</span>
+                    </label>
+                </div>
+
+            </div>
+
+            <div class="flex items-center justify-end gap-3 mt-6 pt-5 border-t border-[var(--c-border)]">
+                <a asp-action="Index" class="btn btn-secondary btn-md">Cancelar</a>
+                <button type="submit" class="btn btn-primary btn-md">Guardar cambios</button>
+            </div>
+
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

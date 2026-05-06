@@ -1,0 +1,50 @@
+@import "tailwindcss";
+@source "../../Views/**/*.cshtml";
+@source "../../Controllers/**/*.cs";
+
+@theme {
+  /* Brand */
+  --color-primary:       #1E2736;
+  --color-primary-mid:   #2C3A52;
+  --color-primary-light: #3D5070;
+
+  /* Accent */
+  --color-accent:        oklch(0.60 0.18 245);
+  --color-accent-hover:  oklch(0.54 0.20 245);
+  --color-accent-soft:   oklch(0.95 0.04 245);
+
+  /* Status */
+  --color-t-green:      oklch(0.65 0.18 150);
+  --color-t-green-soft: oklch(0.96 0.05 150);
+  --color-t-red:        oklch(0.58 0.22 25);
+  --color-t-red-soft:   oklch(0.97 0.04 25);
+  --color-t-yellow:     oklch(0.82 0.16 88);
+  --color-t-yellow-soft:oklch(0.98 0.04 88);
+  --color-t-yellow-text:oklch(0.50 0.16 75);
+  --color-t-blue:       oklch(0.60 0.18 245);
+  --color-t-blue-soft:  oklch(0.95 0.04 245);
+
+  /* Surfaces */
+  --color-surface:  #FFFFFF;
+  --color-t-bg:     #F3F4F8;
+  --color-t-border: #E4E7EE;
+  --color-t-border-mid: #D0D5DF;
+
+  /* Text */
+  --color-t-text:          #1C2333;
+  --color-t-text-secondary:#5A6478;
+  --color-t-text-muted:    #9AA3B5;
+
+  /* Sidebar */
+  --color-sidebar: #161D2D;
+
+  /* Typography */
+  --font-display: 'Space Grotesk', sans-serif;
+  --font-body:    'DM Sans', sans-serif;
+
+  /* Border radius */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+}

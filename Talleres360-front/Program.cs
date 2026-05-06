@@ -1,3 +1,4 @@
+using Talleres360_front.Middlewares;
 using Talleres360_front.Services;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
@@ -24,6 +25,8 @@ builder.Services.AddHttpClient("API", client =>
 
 builder.Services.AddScoped<ApiClient>();
 builder.Services.AddScoped<AuthService>();
+builder.Services.AddScoped<TallerService>();
+builder.Services.AddScoped<ClienteService>();
 
 WebApplication app = builder.Build();
 
@@ -34,14 +37,14 @@ if (!app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.UseStaticFiles();
 app.UseRouting();
 app.UseSession();
+app.UseMiddleware<RefreshTokenMiddleware>();
 app.UseAuthorization();
-app.MapStaticAssets();
 
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}")
-    .WithStaticAssets();
+    pattern: "{controller=Home}/{action=Index}/{id?}");
 
 app.Run();
