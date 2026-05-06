@@ -49,6 +49,20 @@ namespace Talleres360.Controllers
             return Ok(ApiResponse<FacturaDto>.Ok(resultado.Data!, "Factura recuperada."));
         }
 
+        [HttpPost("{id:int:min(1)}/regenerar-pdf")]
+        [TallerAuthorize<IFacturaRepository>]
+        public async Task<IActionResult> RegenerarPdf(int id)
+        {
+            int? tallerId = _userContext.GetTallerId();
+            if (!tallerId.HasValue) return Unauthorized();
+
+            ServiceResult<FacturaDto> resultado = await _facturacionService.RegenerarPdfAsync(tallerId.Value, id);
+            if (!resultado.Success)
+                return BadRequest(new ApiErrorResponse(resultado.ErrorCode!, resultado.Message!));
+
+            return Ok(ApiResponse<FacturaDto>.Ok(resultado.Data!, "PDF regenerado correctamente."));
+        }
+
         [HttpGet("trabajo/{trabajoId:int:min(1)}")]
         public async Task<IActionResult> GetByTrabajo(int trabajoId)
         {

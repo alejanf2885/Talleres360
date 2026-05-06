@@ -11,9 +11,7 @@
     <link rel="stylesheet" href="~/css/site.css" />
     @await RenderSectionAsync("Styles", required: false)
 </head>
-<body data-toast-success="@TempData["Success"]"
-      data-toast-error="@TempData["Error"]"
-      data-toast-warning="@TempData["Warning"]">
+<body>
 
 <div id="sidebar-overlay" class="sidebar-overlay d-none" onclick="closeSidebar()"></div>
 
@@ -60,6 +58,21 @@
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script src="~/js/site.js" asp-append-version="true"></script>
+@{
+    string? toastSuccess = TempData["Success"] as string;
+    string? toastError   = TempData["Error"]   as string;
+    string? toastWarning = TempData["Warning"] as string;
+}
+@if (toastSuccess != null || toastError != null || toastWarning != null)
+{
+    <script>
+        (function() {
+            @if (toastSuccess != null) { <text>showToast(@Json.Serialize(toastSuccess), 'success');</text> }
+            @if (toastError   != null) { <text>showToast(@Json.Serialize(toastError),   'error');</text>   }
+            @if (toastWarning != null) { <text>showToast(@Json.Serialize(toastWarning), 'warning');</text> }
+        })();
+    </script>
+}
 @await RenderSectionAsync("Scripts", required: false)
 
 </body>

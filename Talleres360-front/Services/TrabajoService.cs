@@ -58,8 +58,8 @@ public class TrabajoService
 
     // ── Cobros ────────────────────────────────────────────────────────────────
 
-    public async Task<ApiResult<List<CobroTrabajoDto>>> ObtenerCobrosAsync(int trabajoId) =>
-        await _api.GetResultAsync<List<CobroTrabajoDto>>($"api/v1/trabajos/{trabajoId}/cobros");
+    public async Task<ApiResult<PagedResponse<CobroTrabajoDto>>> ObtenerCobrosAsync(int trabajoId) =>
+        await _api.GetResultAsync<PagedResponse<CobroTrabajoDto>>($"api/v1/trabajos/{trabajoId}/cobros?pageSize=100");
 
     public async Task<ApiResult<CobroTrabajoDto>> RegistrarCobroAsync(
         int trabajoId, CobroFormModel form) =>

@@ -16,7 +16,7 @@ builder.Services.AddSession(options =>
     options.IdleTimeout = TimeSpan.FromMinutes(30);
     options.Cookie.HttpOnly = true;
     options.Cookie.IsEssential = true;
-    options.Cookie.SameSite = SameSiteMode.Strict;
+    options.Cookie.SameSite = SameSiteMode.Lax;
 });
 
 builder.Services.AddHttpClient("API", client =>
@@ -39,6 +39,17 @@ builder.Services.AddScoped<ServicioService>();
 builder.Services.AddScoped<PresupuestoService>();
 builder.Services.AddScoped<FacturaService>();
 
+builder.Services.AddAuthentication()
+.AddCookie("ExternalCookie", o => o.ExpireTimeSpan = TimeSpan.FromMinutes(5))
+.AddGoogle(o =>
+{
+    o.SignInScheme  = "ExternalCookie";
+    o.ClientId      = builder.Configuration["Authentication:Google:ClientId"]!;
+    o.ClientSecret  = builder.Configuration["Authentication:Google:ClientSecret"]!;
+    o.CallbackPath  = "/auth/google-callback";
+    o.SaveTokens    = false;
+});
+
 WebApplication app = builder.Build();
 
 if (!app.Environment.IsDevelopment())
@@ -52,6 +63,7 @@ app.UseStaticFiles();
 app.UseRouting();
 app.UseSession();
 app.UseMiddleware<RefreshTokenMiddleware>();
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllerRoute(

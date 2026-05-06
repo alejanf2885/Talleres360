@@ -76,6 +76,36 @@ namespace Talleres360.Repositories.Usuarios
                 .FirstOrDefaultAsync(u => u.Id == id);
         }
 
+        public async Task<Credencial?> GetCredencialOAuthAsync(int usuarioId, string provider)
+        {
+            return await _context.Credenciales
+                .FirstOrDefaultAsync(c => c.UsuarioId == usuarioId
+                                       && c.TipoInicioSesion == provider
+                                       && !c.Eliminado);
+        }
+
+        public async Task UpsertCredencialOAuthAsync(int usuarioId, string provider, string providerKey)
+        {
+            Credencial? existente = await GetCredencialOAuthAsync(usuarioId, provider);
+            if (existente == null)
+            {
+                await _context.Credenciales.AddAsync(new Credencial
+                {
+                    UsuarioId         = usuarioId,
+                    TipoInicioSesion  = provider,
+                    ProviderKey       = providerKey,
+                    FechaUltimoAcceso = DateTime.Now,
+                    Eliminado         = false
+                });
+            }
+            else
+            {
+                existente.ProviderKey       = providerKey;
+                existente.FechaUltimoAcceso = DateTime.Now;
+            }
+            await _context.SaveChangesAsync();
+        }
+
         public async Task ActivarUsuarioAsync(int usuarioId)
         {
             Usuario? usuario = await _context.Usuarios.FirstOrDefaultAsync(u => u.Id == usuarioId);

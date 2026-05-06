@@ -106,6 +106,48 @@ public class AuthService
         ClearSession(httpContext);
     }
 
+    public async Task<(bool Success, string? ErrorMessage)> VerificarEmailAsync(string token)
+    {
+        HttpClient client = _httpClientFactory.CreateClient("API");
+        HttpResponseMessage response = await client.GetAsync($"api/v1/verification/verify-email?token={Uri.EscapeDataString(token)}");
+        string raw = await response.Content.ReadAsStringAsync();
+
+        if (!response.IsSuccessStatusCode)
+        {
+            ApiErrorResponse? error = JsonSerializer.Deserialize<ApiErrorResponse>(raw, JsonOptions);
+            return (false, error?.Mensaje ?? "El enlace no es válido o ha expirado.");
+        }
+
+        return (true, null);
+    }
+
+    public async Task<(bool Success, string? ErrorMessage)> OAuthLoginAsync(
+        HttpContext httpContext, string provider, string email, string providerKey)
+    {
+        HttpClient client = _httpClientFactory.CreateClient("API");
+        StringContent body = BuildJsonBody(new { Provider = provider, Email = email, ProviderKey = providerKey });
+
+        HttpResponseMessage response = await client.PostAsync("api/v1/auth/oauth-login", body);
+        string raw = await response.Content.ReadAsStringAsync();
+
+        if (!response.IsSuccessStatusCode)
+        {
+            ApiErrorResponse? error = JsonSerializer.Deserialize<ApiErrorResponse>(raw, JsonOptions);
+            return (false, error?.Mensaje ?? "Error al iniciar sesión con Google.");
+        }
+
+        ApiResponse<AuthResponseDto>? result =
+            JsonSerializer.Deserialize<ApiResponse<AuthResponseDto>>(raw, JsonOptions);
+
+        if (result?.Data is null)
+            return (false, "Respuesta inesperada del servidor.");
+
+        GuardarSesion(httpContext, result.Data);
+        CapturarRefreshToken(httpContext, response);
+
+        return (true, null);
+    }
+
     public async Task<(bool Success, string? ErrorMessage)> RegisterAsync(RegistroRequest request)
     {
         HttpClient client = _httpClientFactory.CreateClient("API");

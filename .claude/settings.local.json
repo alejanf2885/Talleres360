@@ -21,7 +21,10 @@
       "Bash(npm install *)",
       "Bash(node_modules/.bin/tailwindcss -i ./wwwroot/css/tailwind.input.css -o ./wwwroot/css/tailwind.css)",
       "Bash(grep -n \"max-w-2xl\\\\|table-cell\\\\|sm\\\\\\\\\\\\\\\\:\\\\|lg\\\\\\\\\\\\\\\\:\\\\|animate-spin\\\\|backdrop-blur\" \"C:\\\\Users\\\\Alumnos MCSD Mañana\\\\source\\\\repos\\\\alejanf2885\\\\Talleres360\\\\Talleres360-front\\\\wwwroot\\\\css\\\\tailwind.css\")",
-      "Bash(grep -v \"^$\")"
+      "Bash(grep -v \"^$\")",
+      "Bash(find \"c:\\\\\\\\Users\\\\\\\\aleja\\\\\\\\source\\\\\\\\Talleres360\\\\\\\\Talleres360\\\\\\\\Controllers\" -type f -iname \"*stats*\")",
+      "Bash(find \"c:\\\\\\\\Users\\\\\\\\aleja\\\\\\\\source\\\\\\\\Talleres360\\\\\\\\Talleres360\\\\\\\\Controllers\" -type f -iname \"*dashboard*\")",
+      "Bash(grep -r \"estadisticas\\\\|dashboard\\\\|resumen\" \"c:\\\\\\\\Users\\\\\\\\aleja\\\\\\\\source\\\\\\\\Talleres360\\\\\\\\Talleres360\\\\\\\\Controllers\" --include=\"*.cs\")"
     ]
   }
 }

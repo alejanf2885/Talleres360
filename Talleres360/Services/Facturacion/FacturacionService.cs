@@ -101,6 +101,31 @@ namespace Talleres360.Services.Facturacion
                     "Error al generar el número de factura.");
             }
 
+            List<LineaFactura> lineas = detalles.Select(d => new LineaFactura
+            {
+                FacturaId           = 0,
+                TallerId            = tallerId,
+                ServicioId          = d.ProductoId,
+                Concepto            = d.Concepto,
+                Cantidad            = d.Cantidad,
+                PrecioUnitario      = d.PrecioUnitario,
+                DescuentoPorcentaje = d.DescuentoPorcentaje,
+                ImpuestoPorcentaje  = d.ImpuestoPorcentaje,
+                SubtotalLinea       = d.Cantidad * d.PrecioUnitario * (1 - d.DescuentoPorcentaje / 100m),
+                TotalLinea          = d.Cantidad * d.PrecioUnitario * (1 - d.DescuentoPorcentaje / 100m) * (1 + d.ImpuestoPorcentaje / 100m)
+            }).ToList();
+
+            decimal subtotalCalculado      = lineas.Sum(l => l.SubtotalLinea);
+            decimal importeIvaCalculado    = lineas.Sum(l => l.TotalLinea - l.SubtotalLinea);
+            decimal totalCalculado         = subtotalCalculado + importeIvaCalculado;
+
+            string estadoPagoFactura = trabajo.EstadoPago switch
+            {
+                TrabajoEstadoPago.PAGADO  => "PAGADO",
+                TrabajoEstadoPago.PARCIAL => "PARCIAL",
+                _                         => "PENDIENTE"
+            };
+
             Factura factura = new Factura
             {
                 TallerId            = tallerId,
@@ -109,10 +134,10 @@ namespace Talleres360.Services.Facturacion
                 NumeroFactura       = numeroFactura,
                 TipoDocumento       = TipoDocumentoComercial.FACTURA,
                 FechaEmision        = DateTime.UtcNow,
-                Subtotal            = trabajo.Subtotal,
-                ImporteImpuestos    = trabajo.ImporteImpuestos,
-                Total               = trabajo.Total,
-                EstadoPago          = "PENDIENTE",
+                Subtotal            = subtotalCalculado,
+                ImporteImpuestos    = importeIvaCalculado,
+                Total               = totalCalculado,
+                EstadoPago          = estadoPagoFactura,
                 ClienteNombre       = cliente != null
                     ? (string.IsNullOrWhiteSpace(cliente.Apellidos) ? cliente.Nombre : $"{cliente.Nombre} {cliente.Apellidos}".Trim())
                     : "Sin cliente",
@@ -130,20 +155,6 @@ namespace Talleres360.Services.Facturacion
                 TallerTelefono      = taller.Telefono
             };
 
-            List<LineaFactura> lineas = detalles.Select(d => new LineaFactura
-            {
-                FacturaId           = 0,
-                TallerId            = tallerId,
-                ServicioId          = d.ProductoId,
-                Concepto            = d.Concepto,
-                Cantidad            = d.Cantidad,
-                PrecioUnitario      = d.PrecioUnitario,
-                DescuentoPorcentaje = d.DescuentoPorcentaje,
-                ImpuestoPorcentaje  = d.ImpuestoPorcentaje,
-                SubtotalLinea       = d.Cantidad * d.PrecioUnitario * (1 - d.DescuentoPorcentaje / 100m),
-                TotalLinea          = d.Cantidad * d.PrecioUnitario * (1 - d.DescuentoPorcentaje / 100m) * (1 + d.ImpuestoPorcentaje / 100m)
-            }).ToList();
-
             List<DesgloseIva> desgloses = lineas
                 .GroupBy(l => l.ImpuestoPorcentaje)
                 .Select(g => new DesgloseIva
@@ -159,7 +170,7 @@ namespace Talleres360.Services.Facturacion
 
             try
             {
-                string urlPdf = await _facturaPdfService.GenerarYSubirAsync(factura, lineas, desgloses);
+                string urlPdf = await _facturaPdfService.GenerarYSubirAsync(factura, lineas, desgloses, taller.Logo);
                 await _facturaRepository.ActualizarUrlPdfAsync(factura.Id, urlPdf);
             }
             catch (Exception ex)
@@ -178,6 +189,32 @@ namespace Talleres360.Services.Facturacion
             return detalle != null
                 ? ServiceResult<TrabajoDto>.Ok(detalle)
                 : ServiceResult<TrabajoDto>.Fail(ErrorCode.SYS_ERROR_GENERICO.ToString(), "Factura generada pero no se pudo recuperar el trabajo.");
+        }
+
+        public async Task<ServiceResult<FacturaDto>> RegenerarPdfAsync(int tallerId, int facturaId)
+        {
+            (Factura? factura, List<LineaFactura> lineas, List<DesgloseIva> desgloses) =
+                await _facturaRepository.ObtenerEntidadParaPdfAsync(facturaId, tallerId);
+
+            if (factura == null)
+                return ServiceResult<FacturaDto>.Fail(ErrorCode.SYS_ENTIDAD_NO_ENCONTRADA.ToString(), "Factura no encontrada.");
+
+            Taller? taller = await _tallerRepository.GetByIdAsync(tallerId);
+
+            try
+            {
+                string urlPdf = await _facturaPdfService.GenerarYSubirAsync(factura, lineas, desgloses, taller?.Logo);
+                await _facturaRepository.ActualizarUrlPdfAsync(facturaId, urlPdf);
+                factura.UrlPdf = urlPdf;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error regenerando PDF para factura {FacturaId}.", facturaId);
+                return ServiceResult<FacturaDto>.Fail(ErrorCode.SYS_ERROR_GENERICO.ToString(), "No se pudo generar el PDF.");
+            }
+
+            ServiceResult<FacturaDto> resultado = await ObtenerPorIdAsync(tallerId, facturaId);
+            return resultado;
         }
 
         public async Task<ServiceResult<PagedResponse<FacturaDto>>> ObtenerTodosAsync(int tallerId, PaginationParams pagination)

@@ -51,6 +51,20 @@ public class FacturasController : Controller
         return View(resultado.Data!);
     }
 
+    [HttpPost("{id:int}/RegenerarPdf")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> RegenerarPdf(int id)
+    {
+        ApiResult<FacturaDto> resultado = await _facturaService.RegenerarPdfAsync(id);
+
+        if (!resultado.Success)
+            TempData["Error"] = resultado.Error?.Mensaje ?? "No se pudo generar el PDF.";
+        else
+            TempData["Success"] = "PDF generado correctamente.";
+
+        return RedirectToAction(nameof(Detalle), new { id });
+    }
+
     [HttpGet("Trabajo/{trabajoId:int}")]
     public async Task<IActionResult> Trabajo(int trabajoId)
     {

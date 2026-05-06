@@ -20,12 +20,10 @@ namespace Talleres360.Notifications.Api.Controllers
         [HttpPost("bienvenida")]
         public async Task<IActionResult> EnviarBienvenida([FromBody] EnviarBienvenidaRequest request)
         {
-            string link = $"{request.FrontendUrl}/auth/verify-email?token={request.Token}";
-
             var datos = new Dictionary<string, string>
             {
                 { "{{Nombre}}", request.Nombre },
-                { "{{Link}}", link }
+                { "{{Link}}", request.Link }
             };
 
             string html = await _templateService.ObtenerPlantillaAsync("EmailBienvenida", datos);

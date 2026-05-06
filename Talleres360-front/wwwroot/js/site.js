@@ -28,7 +28,7 @@ function showToast(message, type = 'success', duration = 3500) {
     if (!container) return;
 
     const toast = document.createElement('div');
-    toast.className = `toast toast-${type}`;
+    toast.className = `t360-toast t360-toast-${type}`;
     toast.textContent = message;
     container.appendChild(toast);
 
@@ -38,17 +38,6 @@ function showToast(message, type = 'success', duration = 3500) {
         setTimeout(() => toast.remove(), 320);
     }, duration);
 }
-
-// Auto-mostrar toasts desde atributos data- en el body (inyectados desde _Layout)
-document.addEventListener('DOMContentLoaded', () => {
-    const success = document.body.dataset.toastSuccess;
-    const error   = document.body.dataset.toastError;
-    const warning = document.body.dataset.toastWarning;
-
-    if (success) showToast(success, 'success');
-    if (error)   showToast(error,   'error');
-    if (warning) showToast(warning, 'warning');
-});
 
 // ── Confirm Modal ─────────────────────────────────────────
 let _confirmCallback = null;

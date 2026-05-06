@@ -55,6 +55,19 @@
                 Descargar PDF
             </a>
         }
+        else
+        {
+            <form asp-action="RegenerarPdf" asp-route-id="@Model.Id" method="post">
+                @Html.AntiForgeryToken()
+                <button type="submit" class="btn btn-secondary btn-md">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="23 4 23 10 17 10"/>
+                        <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
+                    </svg>
+                    Generar PDF
+                </button>
+            </form>
+        }
     </div>
 </div>
 
@@ -68,19 +81,19 @@
     <div class="col-6 col-md-3">
         <div class="card" style="padding:16px;">
             <div class="small" style="color:var(--c-text-muted);">Subtotal</div>
-            <div class="fw-semibold mt-1" style="color:var(--c-text);font-size:18px;">@Model.Subtotal.ToString("N2") €</div>
+            <div class="fw-semibold mt-1" style="color:var(--c-text);font-size:18px;">@Model.Subtotal.ToString("N2") â‚¬</div>
         </div>
     </div>
     <div class="col-6 col-md-3">
         <div class="card" style="padding:16px;">
             <div class="small" style="color:var(--c-text-muted);">IVA</div>
-            <div class="fw-semibold mt-1" style="color:var(--c-text);font-size:18px;">@Model.ImporteImpuestos.ToString("N2") €</div>
+            <div class="fw-semibold mt-1" style="color:var(--c-text);font-size:18px;">@Model.ImporteImpuestos.ToString("N2") â‚¬</div>
         </div>
     </div>
     <div class="col-6 col-md-3">
         <div class="card" style="padding:16px;">
             <div class="small" style="color:var(--c-text-muted);">Total</div>
-            <div class="fw-semibold mt-1" style="color:var(--c-text);font-size:18px;">@Model.Total.ToString("N2") €</div>
+            <div class="fw-semibold mt-1" style="color:var(--c-text);font-size:18px;">@Model.Total.ToString("N2") â‚¬</div>
         </div>
     </div>
 </div>
@@ -100,11 +113,11 @@
                 </div>
                 <div class="col-6">
                     <div class="small" style="color:var(--c-text-muted);">Email</div>
-                    <div class="small fw-semibold">@(string.IsNullOrWhiteSpace(Model.ClienteEmail) ? "—" : Model.ClienteEmail)</div>
+                    <div class="small fw-semibold">@(string.IsNullOrWhiteSpace(Model.ClienteEmail) ? "â€”" : Model.ClienteEmail)</div>
                 </div>
                 <div class="col-6">
-                    <div class="small" style="color:var(--c-text-muted);">Teléfono</div>
-                    <div class="small fw-semibold">@(string.IsNullOrWhiteSpace(Model.ClienteTelefono) ? "—" : Model.ClienteTelefono)</div>
+                    <div class="small" style="color:var(--c-text-muted);">TelÃ©fono</div>
+                    <div class="small fw-semibold">@(string.IsNullOrWhiteSpace(Model.ClienteTelefono) ? "â€”" : Model.ClienteTelefono)</div>
                 </div>
                 <div class="col-6">
                     <div class="small" style="color:var(--c-text-muted);">Trabajo</div>
@@ -114,20 +127,20 @@
                     }
                     else
                     {
-                        <span class="small fw-semibold">—</span>
+                        <span class="small fw-semibold">â€”</span>
                     }
                 </div>
                 <div class="col-12">
-                    <div class="small" style="color:var(--c-text-muted);">Método de pago</div>
-                    <div class="small fw-semibold">@(string.IsNullOrWhiteSpace(Model.MetodoPago) ? "—" : Model.MetodoPago)</div>
+                    <div class="small" style="color:var(--c-text-muted);">MÃ©todo de pago</div>
+                    <div class="small fw-semibold">@(string.IsNullOrWhiteSpace(Model.MetodoPago) ? "â€”" : Model.MetodoPago)</div>
                 </div>
             </div>
         </div>
 
         <div class="table-card">
             <div class="table-toolbar">
-                <span class="fw-semibold" style="color:var(--c-text);">Líneas facturadas</span>
-                <span class="small" style="color:var(--c-text-muted);">@lineas.Count línea@(lineas.Count != 1 ? "s" : "")</span>
+                <span class="fw-semibold" style="color:var(--c-text);">LÃ­neas facturadas</span>
+                <span class="small" style="color:var(--c-text-muted);">@lineas.Count lÃ­nea@(lineas.Count != 1 ? "s" : "")</span>
             </div>
             <div class="table-wrap">
                 <table class="t360">
@@ -146,7 +159,7 @@
                         {
                             <tr>
                                 <td colspan="6" class="text-center py-4" style="color:var(--c-text-muted);">
-                                    <p class="small">No hay líneas registradas en esta factura.</p>
+                                    <p class="small">No hay lÃ­neas registradas en esta factura.</p>
                                 </td>
                             </tr>
                         }
@@ -159,10 +172,10 @@
                                         <div class="fw-semibold small" style="color:var(--c-text);">@linea.Concepto</div>
                                     </td>
                                     <td class="text-end small">@linea.Cantidad.ToString("0.##")</td>
-                                    <td class="text-end small d-none d-sm-table-cell">@linea.PrecioUnitario.ToString("N2") €</td>
-                                    <td class="text-end small d-none d-sm-table-cell">@(linea.DescuentoPorcentaje > 0 ? linea.DescuentoPorcentaje.ToString("0.##") + "%" : "—")</td>
+                                    <td class="text-end small d-none d-sm-table-cell">@linea.PrecioUnitario.ToString("N2") â‚¬</td>
+                                    <td class="text-end small d-none d-sm-table-cell">@(linea.DescuentoPorcentaje > 0 ? linea.DescuentoPorcentaje.ToString("0.##") + "%" : "â€”")</td>
                                     <td class="text-end small d-none d-sm-table-cell">@linea.ImpuestoPorcentaje.ToString("0.##")%</td>
-                                    <td class="text-end small fw-semibold">@linea.TotalLinea.ToString("N2") €</td>
+                                    <td class="text-end small fw-semibold">@linea.TotalLinea.ToString("N2") â‚¬</td>
                                 </tr>
                             }
                         }

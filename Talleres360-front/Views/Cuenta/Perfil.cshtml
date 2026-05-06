@@ -1,0 +1,162 @@
+@model Talleres360_front.Models.Cuenta.PerfilTallerForm
+@{
+    ViewData["Title"] = "Perfil del taller";
+}
+
+<div class="page-header">
+    <div>
+        <h1 class="page-title">Perfil del taller</h1>
+        <p class="page-subtitle">Información y configuración de tu taller</p>
+    </div>
+</div>
+
+<div class="w-100" style="max-width:720px;">
+
+    @if (!Html.ViewData.ModelState.IsValid && Html.ViewData.ModelState.ContainsKey(string.Empty))
+    {
+        <div class="mb-3 p-3 rounded-3 border" style="background:var(--c-red-soft);color:var(--c-red);border-color:rgba(12,18,30,0.15);">
+            @Html.ValidationSummary(true)
+        </div>
+    }
+
+    <!-- Info del taller -->
+    <div class="card mb-3">
+        <div class="d-flex align-items-center gap-3">
+            @if (!string.IsNullOrEmpty(Model.LogoActual) && Model.LogoActual.StartsWith("data:"))
+            {
+                <img src="@Model.LogoActual" alt="Logo" style="width:52px;height:52px;object-fit:contain;border-radius:10px;border:1px solid var(--c-border);background:var(--c-bg-muted);" />
+            }
+            else
+            {
+                <div style="width:52px;height:52px;border-radius:10px;border:1px solid var(--c-border);background:var(--c-accent-soft);display:flex;align-items:center;justify-content:center;">
+                    <svg width="22" height="22" viewBox="0 0 56 56" fill="none">
+                        <path d="M14 10 A24 24 0 1 0 42 10" stroke="var(--c-accent)" stroke-width="3" stroke-linecap="round" fill="none"/>
+                        <circle cx="14" cy="10" r="4" fill="var(--c-accent)"/>
+                        <circle cx="42" cy="10" r="4" fill="var(--c-accent)"/>
+                    </svg>
+                </div>
+            }
+            <div>
+                <div style="font-size:16px;font-weight:700;color:var(--c-text);line-height:1.2;">@Model.NombreTaller</div>
+                @if (!string.IsNullOrEmpty(Model.TipoSuscripcion))
+                {
+                    <div style="margin-top:4px;">
+                        <span class="badge badge-activo" style="font-size:11px;">@Model.TipoSuscripcion</span>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+
+    <!-- Formulario -->
+    <div class="card">
+        <form asp-action="Perfil" method="post" asp-antiforgery="true">
+            <input type="hidden" asp-for="LogoBase64" id="logo-base64" />
+            <input type="hidden" asp-for="LogoActual" />
+            <input type="hidden" asp-for="NombreTaller" />
+            <input type="hidden" asp-for="TipoSuscripcion" />
+
+            <h2 style="font-size:13px;font-weight:700;color:var(--c-text-muted);text-transform:uppercase;letter-spacing:.06em;margin:0 0 16px;">
+                Datos del taller
+            </h2>
+
+            <div class="row g-3">
+
+                <div class="form-group col-12 col-md-6">
+                    <label asp-for="CIF" class="form-label">CIF / NIF</label>
+                    <input asp-for="CIF" class="form-input" placeholder="B12345678" autocomplete="off" />
+                    <span asp-validation-for="CIF" class="form-error"></span>
+                </div>
+
+                <div class="form-group col-12 col-md-6">
+                    <label asp-for="Telefono" class="form-label">Teléfono</label>
+                    <input asp-for="Telefono" type="tel" class="form-input" placeholder="612 345 678" />
+                    <span asp-validation-for="Telefono" class="form-error"></span>
+                </div>
+
+                <div class="form-group col-12">
+                    <label asp-for="Direccion" class="form-label">Dirección</label>
+                    <input asp-for="Direccion" class="form-input" placeholder="Calle Ejemplo, 12, Nave 3" />
+                    <span asp-validation-for="Direccion" class="form-error"></span>
+                </div>
+
+                <div class="form-group col-12 col-md-6">
+                    <label asp-for="Localidad" class="form-label">Localidad</label>
+                    <input asp-for="Localidad" class="form-input" placeholder="Madrid" />
+                    <span asp-validation-for="Localidad" class="form-error"></span>
+                </div>
+
+            </div>
+
+            <div class="mt-4 pt-3" style="border-top:1px solid var(--c-border);">
+                <h2 style="font-size:13px;font-weight:700;color:var(--c-text-muted);text-transform:uppercase;letter-spacing:.06em;margin:0 0 12px;">
+                    Logo
+                </h2>
+                <div class="d-flex align-items-start gap-3 flex-wrap">
+                    <div id="logo-preview-wrap" style="flex-shrink:0;width:72px;height:72px;border-radius:10px;border:1px solid var(--c-border);background:var(--c-bg-muted);display:flex;align-items:center;justify-content:center;overflow:hidden;">
+                        @if (!string.IsNullOrEmpty(Model.LogoActual) && Model.LogoActual.StartsWith("data:"))
+                        {
+                            <img id="logo-preview-img" src="@Model.LogoActual" alt="Logo" style="max-width:100%;max-height:100%;object-fit:contain;" />
+                        }
+                        else
+                        {
+                            <img id="logo-preview-img" src="" alt="" style="display:none;max-width:100%;max-height:100%;object-fit:contain;" />
+                            <svg id="logo-preview-icon" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--c-border)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="3" y="3" width="18" height="18" rx="2"/>
+                                <circle cx="8.5" cy="8.5" r="1.5"/>
+                                <polyline points="21 15 16 10 5 21"/>
+                            </svg>
+                        }
+                    </div>
+                    <div>
+                        <button type="button" class="btn btn-secondary btn-md" id="logo-btn">
+                            Cambiar logo
+                        </button>
+                        <p class="small mt-2 mb-0" style="color:var(--c-text-muted);">PNG, JPG — máx. 2 MB. Si no cambias el logo, se conserva el actual.</p>
+                    </div>
+                </div>
+                <input type="file" id="logo-file-input" accept="image/png,image/jpeg,image/webp" style="display:none;" />
+            </div>
+
+            <div class="d-flex align-items-center justify-content-end gap-3 mt-4 pt-4 border-top" style="border-color:var(--c-border);">
+                <button type="submit" class="btn btn-primary btn-md">Guardar cambios</button>
+            </div>
+
+        </form>
+    </div>
+
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        const logoBtn     = document.getElementById('logo-btn');
+        const fileInput   = document.getElementById('logo-file-input');
+        const base64Input = document.getElementById('logo-base64');
+        const previewImg  = document.getElementById('logo-preview-img');
+        const previewIcon = document.getElementById('logo-preview-icon');
+
+        logoBtn.addEventListener('click', () => fileInput.click());
+
+        fileInput.addEventListener('change', () => {
+            const file = fileInput.files[0];
+            if (file) processFile(file);
+        });
+
+        function processFile(file) {
+            if (file.size > 2 * 1024 * 1024) {
+                alert('El archivo supera los 2 MB.');
+                return;
+            }
+            const reader = new FileReader();
+            reader.onload = e => {
+                base64Input.value = e.target.result;
+                previewImg.src = e.target.result;
+                previewImg.style.display = 'block';
+                if (previewIcon) previewIcon.style.display = 'none';
+                logoBtn.textContent = 'Cambiar logo';
+            };
+            reader.readAsDataURL(file);
+        }
+    </script>
+}

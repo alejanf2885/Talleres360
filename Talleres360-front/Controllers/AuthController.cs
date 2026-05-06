@@ -1,3 +1,6 @@
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Mvc;
 using Talleres360.Dtos.Auth;
 using Talleres360_front.Models.Auth;
@@ -80,11 +83,68 @@ public class AuthController : Controller
         return RedirectToAction(nameof(VerificacionPendiente));
     }
 
+    // GET /auth/verify-email?token=...
+    [HttpGet("~/auth/verify-email")]
+    public async Task<IActionResult> VerifyEmail(string? token)
+    {
+        if (string.IsNullOrWhiteSpace(token))
+            return View("VerifyEmailResult", (bool?)false);
+
+        (bool success, string? error) = await _authService.VerificarEmailAsync(token);
+        TempData["VerifyError"] = error;
+        return View("VerifyEmailResult", (bool?)success);
+    }
+
     // GET /auth/verificacion-pendiente
     [HttpGet]
     public IActionResult VerificacionPendiente()
     {
         return View();
+    }
+
+    // GET /auth/GoogleLogin
+    [HttpGet]
+    public IActionResult GoogleLogin()
+    {
+        AuthenticationProperties props = new() { RedirectUri = Url.Action(nameof(GoogleCallback)) };
+        return Challenge(props, GoogleDefaults.AuthenticationScheme);
+    }
+
+    // GET /auth/GoogleCallback  (llamado tras el handshake del middleware)
+    [HttpGet]
+    public async Task<IActionResult> GoogleCallback()
+    {
+        AuthenticateResult result = await HttpContext.AuthenticateAsync("ExternalCookie");
+
+        if (!result.Succeeded)
+        {
+            TempData["Error"] = $"No se pudo iniciar sesión con Google: {result.Failure?.Message ?? "error desconocido"}";
+            return RedirectToAction(nameof(Login));
+        }
+
+        string? email       = result.Principal?.FindFirstValue(ClaimTypes.Email);
+        string? providerKey = result.Principal?.FindFirstValue(ClaimTypes.NameIdentifier);
+
+        if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(providerKey))
+        {
+            TempData["Error"] = "Google no proporcionó los datos necesarios.";
+            return RedirectToAction(nameof(Login));
+        }
+
+        await HttpContext.SignOutAsync("ExternalCookie");
+
+        (bool success, string? errorMsg) = await _authService.OAuthLoginAsync(HttpContext, "GOOGLE", email, providerKey);
+
+        if (!success)
+        {
+            TempData["Error"] = errorMsg;
+            return RedirectToAction(nameof(Login));
+        }
+
+        if (!AuthService.EsPerfilConfigurado(HttpContext))
+            return RedirectToAction("Setup", "Taller");
+
+        return RedirectToAction("Index", "Home");
     }
 
     // POST /auth/logout

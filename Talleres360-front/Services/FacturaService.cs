@@ -21,4 +21,7 @@ public class FacturaService
 
     public async Task<ApiResult<FacturaDto>> ObtenerFacturaPorTrabajoAsync(int trabajoId) =>
         await _api.GetResultAsync<FacturaDto>($"api/v1/facturas/trabajo/{trabajoId}");
+
+    public async Task<ApiResult<FacturaDto>> RegenerarPdfAsync(int facturaId) =>
+        await _api.PostResultAsync<FacturaDto>($"api/v1/facturas/{facturaId}/regenerar-pdf", new { });
 }

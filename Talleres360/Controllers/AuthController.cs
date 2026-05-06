@@ -93,6 +93,42 @@ namespace Talleres360.Controllers
             return Ok(ApiResponse<object>.Ok(authResponse, $"¡Bienvenido de nuevo, {usuario.Nombre}!"));
         }
 
+        [HttpPost("oauth-login")]
+        [AllowAnonymous]
+        [EnableRateLimiting("AuthStrict")]
+        public async Task<IActionResult> OAuthLogin([FromBody] OAuthLoginRequest request)
+        {
+            ServiceResult<UsuarioLoginDto> resultado =
+                await _authService.ValidarOAuthLoginAsync(request.Provider, request.Email, request.ProviderKey);
+
+            if (!resultado.Success)
+            {
+                int statusCode = resultado.ErrorCode == ErrorCode.AUTH_CUENTA_INACTIVA.ToString()
+                                 ? StatusCodes.Status403Forbidden
+                                 : StatusCodes.Status401Unauthorized;
+
+                return StatusCode(statusCode, new ApiErrorResponse(
+                    codigo: resultado.ErrorCode ?? ErrorCode.AUTH_CREDENCIALES_INCORRECTAS.ToString(),
+                    mensaje: resultado.Message ?? "No se pudo iniciar sesión con el proveedor externo."
+                ));
+            }
+
+            UsuarioLoginDto usuario = resultado.Data!;
+
+            string jwtToken    = _tokenService.GenerarJwtToken(usuario);
+            string refreshToken = await _refreshTokenService.CrearRefreshTokenAsync(usuario.Id);
+
+            Response.AppendRefreshTokenCookie(refreshToken);
+
+            AuthResponseDto authResponse = new AuthResponseDto
+            {
+                Token   = jwtToken,
+                Usuario = usuario
+            };
+
+            return Ok(ApiResponse<object>.Ok(authResponse, $"¡Bienvenido, {usuario.Nombre}!"));
+        }
+
         [HttpPost("refresh")]
         [EnableRateLimiting("RefreshPolicy")]
         public async Task<IActionResult> Refresh()

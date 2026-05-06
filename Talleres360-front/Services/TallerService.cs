@@ -1,5 +1,6 @@
 using Talleres360.Dtos.Responses;
 using Talleres360.Dtos.Talleres;
+using Talleres360_front.Models;
 using Talleres360_front.Models.Taller;
 
 namespace Talleres360_front.Services;
@@ -11,6 +12,12 @@ public class TallerService
     public TallerService(ApiClient api)
     {
         _api = api;
+    }
+
+    public async Task<WorkshopDto?> ObtenerPerfilAsync()
+    {
+        ApiResult<WorkshopDto> result = await _api.GetResultAsync<WorkshopDto>("api/v1/workshops/my-workshop");
+        return result.Success ? result.Data : null;
     }
 
     public async Task<(bool Success, string? ErrorMessage)> ConfigurarPerfilAsync(SetupTallerForm form)

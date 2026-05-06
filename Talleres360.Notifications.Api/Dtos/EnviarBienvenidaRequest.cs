@@ -11,10 +11,7 @@ namespace Talleres360.Notifications.Api.Dtos
         [EmailAddress(ErrorMessage = "El email no es válido")]
         public string Email { get; set; } = string.Empty;
 
-        [Required(ErrorMessage = "El token es obligatorio")]
-        public string Token { get; set; } = string.Empty;
-
-        [Required(ErrorMessage = "La URL del frontend es obligatoria")]
-        public string FrontendUrl { get; set; } = string.Empty;
+        [Required(ErrorMessage = "El link es obligatorio")]
+        public string Link { get; set; } = string.Empty;
     }
 }

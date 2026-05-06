@@ -55,11 +55,11 @@ namespace Talleres360.Controllers
             {
                 return StatusCode(StatusCodes.Status500InternalServerError, new ApiErrorResponse(
                     codigo: resultadoActivacion.ErrorCode ?? ErrorCode.SYS_ERROR_GENERICO.ToString(),
-                    mensaje: resultadoActivacion.Message ?? "Ocurrió un problema al activar la cuenta."
+                    mensaje: resultadoActivacion.Message ?? "Ocurriï¿½ un problema al activar la cuenta."
                 ));
             }
 
-            return Ok(ApiResponse<bool>.Ok(true, "¡Cuenta verificada! Ya puedes iniciar sesión."));
+            return Ok(ApiResponse<bool>.Ok(true, "ï¿½Cuenta verificada! Ya puedes iniciar sesiï¿½n."));
         }
 
         [HttpPost("resend")]
@@ -76,14 +76,14 @@ namespace Talleres360.Controllers
 
             Usuario usuario = resultadoUser.Data!;
 
-            // Validar que no esté ya activo ANTES de generar token
+            // Validar que no estï¿½ ya activo ANTES de generar token
             if (usuario.Activo)
             {
                 return Ok(ApiResponse<bool>.Ok(true, "Si el correo existe, se ha enviado un enlace."));
             }
 
-            string token = await _verificacionService.GenerarTokenRegistroAsync(usuario.Id);
-            ServiceResult<bool> resultadoEnvio = await _notificacionService.EnviarBienvenidaAsync(usuario, token);
+            string link = await _verificacionService.GenerarLinkVerificacionAsync(usuario.Id);
+            ServiceResult<bool> resultadoEnvio = await _notificacionService.EnviarBienvenidaAsync(usuario, link);
 
             if (!resultadoEnvio.Success)
             {
@@ -93,7 +93,7 @@ namespace Talleres360.Controllers
                 ));
             }
 
-            return Ok(ApiResponse<bool>.Ok(true, "Se ha enviado un nuevo enlace de activación."));
+            return Ok(ApiResponse<bool>.Ok(true, "Se ha enviado un nuevo enlace de activaciï¿½n."));
         }
     }
 }

@@ -15,5 +15,6 @@ namespace Talleres360.Interfaces.Facturacion
         Task<FacturaDto?> ObtenerPorIdAsync(int facturaId, int tallerId);
         Task<FacturaDto?> ObtenerPorTrabajoAsync(int trabajoId, int tallerId);
         Task<bool> PerteneceATallerAsync(int id, int tallerId);
+        Task<(Factura? Factura, List<LineaFactura> Lineas, List<DesgloseIva> Desgloses)> ObtenerEntidadParaPdfAsync(int facturaId, int tallerId);
     }
 }

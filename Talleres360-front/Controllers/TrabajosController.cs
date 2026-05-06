@@ -70,13 +70,13 @@ public class TrabajosController : Controller
         }
 
         ApiResult<List<DetalleTrabajoDto>> lineas = await _trabajoService.ObtenerLineasAsync(id);
-        ApiResult<List<CobroTrabajoDto>>   cobros = await _trabajoService.ObtenerCobrosAsync(id);
+        ApiResult<PagedResponse<CobroTrabajoDto>> cobros = await _trabajoService.ObtenerCobrosAsync(id);
 
         var productosResult = await _inventarioService.ListarProductosAsync(1, 200);
         var serviciosResult = await _servicioService.ListarServiciosAsync(1, 200);
 
         ViewData["Lineas"]     = lineas.Data ?? new List<DetalleTrabajoDto>();
-        ViewData["Cobros"]     = cobros.Data ?? new List<CobroTrabajoDto>();
+        ViewData["Cobros"]     = cobros.Data?.Data?.ToList() ?? new List<CobroTrabajoDto>();
         ViewData["ProductosCatalog"] = productosResult.Data?.Data ?? new List<Talleres360.Dtos.Inventario.ProductoDto>();
         ViewData["ServiciosCatalog"] = serviciosResult.Data?.Data ?? new List<Talleres360.Dtos.Servicios.ServicioDto>();
         ViewData["LineaForm"]  = new LineaTrabajoFormModel();
@@ -247,7 +247,7 @@ public class TrabajosController : Controller
     {
         ApiResult<TrabajoDto> trabajo = await _trabajoService.ObtenerAsync(id);
         ApiResult<List<DetalleTrabajoDto>> lineas = await _trabajoService.ObtenerLineasAsync(id);
-        ApiResult<List<CobroTrabajoDto>> cobros = await _trabajoService.ObtenerCobrosAsync(id);
+        ApiResult<PagedResponse<CobroTrabajoDto>> cobros = await _trabajoService.ObtenerCobrosAsync(id);
 
         if (!ModelState.IsValid)
         {
@@ -260,7 +260,8 @@ public class TrabajosController : Controller
         if (trabajo.Success && lineas.Success && cobros.Success)
         {
             decimal totalLineas = lineas.Data!.Sum(l => l.Cantidad * l.PrecioUnitario * (1 - l.DescuentoPorcentaje / 100) * (1 + l.ImpuestoPorcentaje / 100));
-            decimal totalCobrado = cobros.Data!.Sum(c => c.Importe);
+            List<CobroTrabajoDto> listaCobroActual = cobros.Data?.Data?.ToList() ?? new List<CobroTrabajoDto>();
+            decimal totalCobrado = listaCobroActual.Sum(c => c.Importe);
             decimal pendiente = totalLineas - totalCobrado;
 
             if (cobroForm.Importe > pendiente)
@@ -283,17 +284,17 @@ public class TrabajosController : Controller
     }
 
     private async Task<IActionResult> ReloadDetalleView(
-        int id, 
-        ApiResult<TrabajoDto> trabajo, 
-        ApiResult<List<DetalleTrabajoDto>> lineas, 
-        ApiResult<List<CobroTrabajoDto>> cobros,
+        int id,
+        ApiResult<TrabajoDto> trabajo,
+        ApiResult<List<DetalleTrabajoDto>> lineas,
+        ApiResult<PagedResponse<CobroTrabajoDto>> cobros,
         CobroFormModel cobroForm)
     {
         var productosResult = await _inventarioService.ListarProductosAsync(1, 200);
         var serviciosResult = await _servicioService.ListarServiciosAsync(1, 200);
 
         ViewData["Lineas"]     = lineas.Data ?? new List<DetalleTrabajoDto>();
-        ViewData["Cobros"]     = cobros.Data ?? new List<CobroTrabajoDto>();
+        ViewData["Cobros"]     = cobros.Data?.Data?.ToList() ?? new List<CobroTrabajoDto>();
         ViewData["ProductosCatalog"] = productosResult.Data?.Data ?? new List<Talleres360.Dtos.Inventario.ProductoDto>();
         ViewData["ServiciosCatalog"] = serviciosResult.Data?.Data ?? new List<Talleres360.Dtos.Servicios.ServicioDto>();
         ViewData["LineaForm"]  = new LineaTrabajoFormModel();

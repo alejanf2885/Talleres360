@@ -8,26 +8,21 @@ namespace Talleres360.Services.Emails
     public class HttpNotificacionService : INotificacionService
     {
         private readonly HttpClient _httpClient;
-        private readonly IConfiguration _config;
 
-        public HttpNotificacionService(HttpClient httpClient, IConfiguration config)
+        public HttpNotificacionService(HttpClient httpClient)
         {
             _httpClient = httpClient;
-            _config = config;
         }
 
-        public async Task<ServiceResult<bool>> EnviarBienvenidaAsync(Usuario usuario, string token)
+        public async Task<ServiceResult<bool>> EnviarBienvenidaAsync(Usuario usuario, string link)
         {
             try
             {
-                string frontendUrl = _config["AppSettings:FrontendUrl"] ?? "https://localhost:4200";
-
                 var payload = new
                 {
                     nombre = usuario.Nombre,
                     email = usuario.Email,
-                    token,
-                    frontendUrl
+                    link
                 };
 
                 var response = await _httpClient.PostAsJsonAsync("api/v1/notificaciones/bienvenida", payload);

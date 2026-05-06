@@ -11,5 +11,6 @@ namespace Talleres360.Interfaces.Facturacion
         Task<ServiceResult<PagedResponse<FacturaDto>>> ObtenerTodosAsync(int tallerId, PaginationParams pagination);
         Task<ServiceResult<FacturaDto>> ObtenerPorIdAsync(int tallerId, int facturaId);
         Task<ServiceResult<FacturaDto>> ObtenerPorTrabajoAsync(int tallerId, int trabajoId);
+        Task<ServiceResult<FacturaDto>> RegenerarPdfAsync(int tallerId, int facturaId);
     }
 }

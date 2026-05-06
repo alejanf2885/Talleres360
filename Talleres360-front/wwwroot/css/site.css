@@ -827,7 +827,7 @@ table.t360 tbody tr.selected td { background: var(--c-accent-soft); }
   z-index: 9999;
 }
 
-.toast {
+.t360-toast {
   min-width: 280px;
   max-width: 380px;
   padding: 13px 18px;
@@ -841,9 +841,9 @@ table.t360 tbody tr.selected td { background: var(--c-accent-soft); }
   animation: toastIn 0.2s ease;
 }
 
-.toast-success { border-left-color: var(--c-green); }
-.toast-error   { border-left-color: var(--c-red); }
-.toast-warning { border-left-color: var(--c-yellow); }
+.t360-toast-success { border-left-color: var(--c-green); }
+.t360-toast-error   { border-left-color: var(--c-red); }
+.t360-toast-warning { border-left-color: var(--c-yellow); }
 
 /* ═══════════════════════════════════════════════════════
    CONFIRM MODAL
@@ -1047,6 +1047,23 @@ table.t360 tbody tr.selected td { background: var(--c-accent-soft); }
 
 .auth-btn:hover { background: oklch(0.54 0.20 245); }
 .auth-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.auth-btn-social {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  background: #fff;
+  color: #3c4043;
+  border: 1px solid rgba(100,160,230,0.25);
+  font-size: 14px;
+  font-weight: 500;
+  padding: 10px 16px;
+  border-radius: 8px;
+  text-decoration: none;
+  transition: background .15s, border-color .15s;
+}
+.auth-btn-social:hover { background: #f8f9fa; border-color: #aaa; color: #3c4043; }
 
 .auth-divider {
   display: flex;

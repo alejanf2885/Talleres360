@@ -10,16 +10,18 @@ namespace Talleres360.Services.Facturacion
         private readonly Factura _factura;
         private readonly List<LineaFactura> _lineas;
         private readonly List<DesgloseIva> _desgloses;
+        private readonly byte[]? _logoBytes;
 
         private static readonly string ColorPrimario = "#1E3A5F";
         private static readonly string ColorSecundario = "#F0F4F8";
         private static readonly string ColorBorde = "#CBD5E0";
 
-        public FacturaPdfTemplate(Factura factura, List<LineaFactura> lineas, List<DesgloseIva> desgloses)
+        public FacturaPdfTemplate(Factura factura, List<LineaFactura> lineas, List<DesgloseIva> desgloses, byte[]? logoBytes = null)
         {
-            _factura = factura;
-            _lineas = lineas;
+            _factura   = factura;
+            _lineas    = lineas;
             _desgloses = desgloses;
+            _logoBytes = logoBytes;
         }
 
         public DocumentMetadata GetMetadata() => new DocumentMetadata
@@ -52,6 +54,10 @@ namespace Talleres360.Services.Facturacion
                     // Datos del taller
                     row.RelativeItem(2).Column(c =>
                     {
+                        if (_logoBytes != null && _logoBytes.Length > 0)
+                        {
+                            c.Item().PaddingBottom(4).Width(60).Image(_logoBytes).FitWidth();
+                        }
                         c.Item().Text(_factura.TallerNombre ?? string.Empty)
                             .FontSize(14).Bold().FontColor(ColorPrimario);
                         if (!string.IsNullOrWhiteSpace(_factura.TallerCif))

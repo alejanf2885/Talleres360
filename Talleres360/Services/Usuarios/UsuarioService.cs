@@ -101,7 +101,7 @@ namespace Talleres360.Services.Usuarios
                 if (usuarioPersistido == null)
                 {
                     _logger.LogWarning(
-                        "Post-save check: no se encontró UsuarioId={UsuarioId} en BD (sin filtros).",
+                        "Post-save check: no se encontrï¿½ UsuarioId={UsuarioId} en BD (sin filtros).",
                         usuario.Id);
                 }
                 else
@@ -136,8 +136,8 @@ namespace Talleres360.Services.Usuarios
 
                 try
                 {
-                    string token = await _verificacionService.GenerarTokenRegistroAsync(usuario.Id);
-                    await _notificacionService.EnviarBienvenidaAsync(usuario, token);
+                    string link = await _verificacionService.GenerarLinkVerificacionAsync(usuario.Id);
+                    await _notificacionService.EnviarBienvenidaAsync(usuario, link);
                 }
                 catch (Exception ex)
                 {
@@ -151,12 +151,12 @@ namespace Talleres360.Services.Usuarios
             catch (Exception ex)
             {
                 _logger.LogError(ex,
-                    "Error crítico creando usuario admin para taller {TallerId}",
+                    "Error crï¿½tico creando usuario admin para taller {TallerId}",
                     tallerId);
 
                 return ServiceResult<Usuario>.Fail(
                     ErrorCode.SYS_ERROR_GENERICO.ToString(),
-                    "Fallo crítico en la base de datos.");
+                    "Fallo crï¿½tico en la base de datos.");
             }
         }
 
@@ -173,7 +173,7 @@ namespace Talleres360.Services.Usuarios
             if (existe)
                 return ServiceResult<bool>.Fail(
                     ErrorCode.REG_EMAIL_YA_REGISTRADO.ToString(),
-                    "El correo electrónico ya se encuentra registrado en el sistema.");
+                    "El correo electrï¿½nico ya se encuentra registrado en el sistema.");
 
             return ServiceResult<bool>.Ok(true);
         }

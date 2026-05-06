@@ -1,5 +1,35 @@
+@model Talleres360_front.Models.DashboardViewModel
+@using Talleres360.Dtos.Citas
+@using Talleres360.Dtos.Trabajos
+@using Talleres360.Enums
 @{
     ViewData["Title"] = "Dashboard";
+
+    string BadgeClsTrabajo(TrabajoEstado e) => e switch {
+        TrabajoEstado.ABIERTO          => "badge-activo",
+        TrabajoEstado.EN_PROCESO       => "badge-en-curso",
+        TrabajoEstado.PENDIENTE_PIEZAS => "badge-pendiente",
+        TrabajoEstado.CERRADO          => "badge-pagado",
+        TrabajoEstado.CANCELADO        => "badge-inactivo",
+        _                              => "badge-inactivo"
+    };
+    string BadgeLblTrabajo(TrabajoEstado e) => e switch {
+        TrabajoEstado.ABIERTO          => "Abierto",
+        TrabajoEstado.EN_PROCESO       => "En proceso",
+        TrabajoEstado.PENDIENTE_PIEZAS => "Pend. piezas",
+        TrabajoEstado.CERRADO          => "Cerrado",
+        TrabajoEstado.CANCELADO        => "Cancelado",
+        _                              => e.ToString()
+    };
+
+    string BadgeClsCita(CitaEstado e) => e switch {
+        CitaEstado.PENDIENTE  => "badge-pendiente",
+        CitaEstado.CONFIRMADA => "badge-activo",
+        CitaEstado.EN_PROCESO => "badge-en-curso",
+        CitaEstado.COMPLETADA => "badge-pagado",
+        CitaEstado.CANCELADA  => "badge-inactivo",
+        _                     => "badge-inactivo"
+    };
 }
 
 <div class="page-header">
@@ -7,12 +37,12 @@
         <h1 class="page-title">Dashboard</h1>
         <p class="page-subtitle">Resumen de actividad del taller</p>
     </div>
-    <button class="btn btn-primary btn-md" type="button">
+    <a asp-controller="Trabajos" asp-action="Crear" class="btn btn-primary btn-md">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
         </svg>
         Nueva orden
-    </button>
+    </a>
 </div>
 
 <div class="grid-4" style="margin-bottom:20px;">
@@ -27,13 +57,16 @@
                 </svg>
             </div>
         </div>
-        <div class="stat-value">—</div>
-        <div class="stat-delta"><span>Esta semana</span></div>
+        <div class="stat-value">@Model.OrdenesAbiertas</div>
+        <div class="stat-delta">
+            <a asp-controller="Trabajos" asp-action="Index" asp-route-estado="ABIERTO"
+               style="font-size:12px;color:var(--c-accent);font-weight:500;">Ver órdenes →</a>
+        </div>
     </div>
 
     <div class="stat-card">
         <div class="stat-card-header">
-            <span class="stat-label">Citas hoy</span>
+            <span class="stat-label">Citas pendientes</span>
             <div class="stat-icon" style="background:var(--c-blue-soft);color:var(--c-blue);">
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
                     <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
@@ -42,8 +75,11 @@
                 </svg>
             </div>
         </div>
-        <div class="stat-value">—</div>
-        <div class="stat-delta"><span>Pendientes de confirmar</span></div>
+        <div class="stat-value">@Model.CitasPendientes</div>
+        <div class="stat-delta">
+            <a asp-controller="Citas" asp-action="Index" asp-route-estado="PENDIENTE"
+               style="font-size:12px;color:var(--c-accent);font-weight:500;">Ver citas →</a>
+        </div>
     </div>
 
     <div class="stat-card">
@@ -56,22 +92,26 @@
                 </svg>
             </div>
         </div>
-        <div class="stat-value">—</div>
-        <div class="stat-delta"><span>Total registrados</span></div>
+        <div class="stat-value">@Model.TotalClientes</div>
+        <div class="stat-delta">
+            <span style="font-size:12px;color:var(--c-text-muted);">+@Model.ClientesNuevosEsteMes este mes</span>
+        </div>
     </div>
 
     <div class="stat-card">
         <div class="stat-card-header">
-            <span class="stat-label">Pendiente de cobro</span>
+            <span class="stat-label">Accesos rápidos</span>
             <div class="stat-icon" style="background:var(--c-yellow-soft);color:var(--c-yellow-text);">
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                    <line x1="12" y1="1" x2="12" y2="23"/>
-                    <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+                    <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
                 </svg>
             </div>
         </div>
-        <div class="stat-value">—</div>
-        <div class="stat-delta"><span>Sin cobrar</span></div>
+        <div style="display:flex;flex-direction:column;gap:6px;margin-top:6px;">
+            <a asp-controller="Citas" asp-action="Crear" style="font-size:12px;color:var(--c-accent);font-weight:500;">+ Nueva cita</a>
+            <a asp-controller="Clientes" asp-action="Crear" style="font-size:12px;color:var(--c-accent);font-weight:500;">+ Nuevo cliente</a>
+            <a asp-controller="Presupuestos" asp-action="Crear" style="font-size:12px;color:var(--c-accent);font-weight:500;">+ Nuevo presupuesto</a>
+        </div>
     </div>
 
 </div>
@@ -80,32 +120,75 @@
 
     <div class="card">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
-            <h2 style="font-family:var(--font-display);font-size:14px;font-weight:700;color:var(--c-text);margin:0;">
-                Últimas órdenes
-            </h2>
-            <a asp-controller="Trabajos" asp-action="Index"
-               style="font-size:12px;font-weight:600;color:var(--c-accent);">
-                Ver todas →
-            </a>
+            <h2 style="font-family:var(--font-display);font-size:14px;font-weight:700;color:var(--c-text);margin:0;">Últimas órdenes</h2>
+            <a asp-controller="Trabajos" asp-action="Index" style="font-size:12px;font-weight:600;color:var(--c-accent);">Ver todas →</a>
         </div>
-        <p style="font-size:13px;color:var(--c-text-muted);text-align:center;padding:24px 0;">
-            Las órdenes recientes aparecerán aquí
-        </p>
+
+        @if (!Model.UltimasOrdenes.Any())
+        {
+            <p style="font-size:13px;color:var(--c-text-muted);text-align:center;padding:24px 0;">No hay órdenes recientes</p>
+        }
+        else
+        {
+            @foreach (TrabajoDto t in Model.UltimasOrdenes)
+            {
+                <a asp-controller="Trabajos" asp-action="Detalle" asp-route-id="@t.Id"
+                   style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--c-border);text-decoration:none;gap:12px;">
+                    <div style="min-width:0;">
+                        <div style="font-size:13px;font-weight:600;color:var(--c-text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
+                            @(t.TituloMantenimiento ?? t.NumeroDocumento ?? $"Orden #{t.Id}")
+                        </div>
+                        <div style="font-size:11px;color:var(--c-text-muted);margin-top:2px;">
+                            @t.FechaCreacion.ToString("dd/MM/yyyy")
+                            @if (t.Total > 0)
+                            {
+                                <span style="margin-left:6px;">· @t.Total.ToString("C", System.Globalization.CultureInfo.CreateSpecificCulture("es-ES"))</span>
+                            }
+                        </div>
+                    </div>
+                    <span class="badge @BadgeClsTrabajo(t.Estado)" style="flex-shrink:0;">@BadgeLblTrabajo(t.Estado)</span>
+                </a>
+            }
+        }
     </div>
 
     <div class="card">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
-            <h2 style="font-family:var(--font-display);font-size:14px;font-weight:700;color:var(--c-text);margin:0;">
-                Próximas citas
-            </h2>
-            <a asp-controller="Citas" asp-action="Index"
-               style="font-size:12px;font-weight:600;color:var(--c-accent);">
-                Ver todas →
-            </a>
+            <h2 style="font-family:var(--font-display);font-size:14px;font-weight:700;color:var(--c-text);margin:0;">Citas pendientes</h2>
+            <a asp-controller="Citas" asp-action="Index" style="font-size:12px;font-weight:600;color:var(--c-accent);">Ver todas →</a>
         </div>
-        <p style="font-size:13px;color:var(--c-text-muted);text-align:center;padding:24px 0;">
-            Las citas próximas aparecerán aquí
-        </p>
+
+        @if (!Model.ProximasCitas.Any())
+        {
+            <p style="font-size:13px;color:var(--c-text-muted);text-align:center;padding:24px 0;">No hay citas pendientes</p>
+        }
+        else
+        {
+            @foreach (CitaDto c in Model.ProximasCitas)
+            {
+                string nombreCliente = c.ClienteNombre ?? c.NombreClienteTemp ?? "Sin cliente";
+                <a asp-controller="Citas" asp-action="Editar" asp-route-id="@c.Id"
+                   style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--c-border);text-decoration:none;gap:12px;">
+                    <div style="min-width:0;">
+                        <div style="font-size:13px;font-weight:600;color:var(--c-text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
+                            @nombreCliente
+                        </div>
+                        <div style="font-size:11px;color:var(--c-text-muted);margin-top:2px;">
+                            @c.FechaCita.ToString("dd/MM/yyyy")
+                            @if (!string.IsNullOrEmpty(c.HoraAproximada))
+                            {
+                                <span style="margin-left:4px;">· @c.HoraAproximada</span>
+                            }
+                            @if (!string.IsNullOrEmpty(c.VehiculoMatricula))
+                            {
+                                <span style="margin-left:4px;">· @c.VehiculoMatricula</span>
+                            }
+                        </div>
+                    </div>
+                    <span class="badge @BadgeClsCita(c.Estado)" style="flex-shrink:0;">Pendiente</span>
+                </a>
+            }
+        }
     </div>
 
 </div>

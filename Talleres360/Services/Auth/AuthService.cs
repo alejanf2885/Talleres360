@@ -81,5 +81,42 @@ namespace Talleres360.Services.Auth
 
             return ServiceResult<UsuarioLoginDto>.Ok(dto);
         }
+
+        public async Task<ServiceResult<UsuarioLoginDto>> ValidarOAuthLoginAsync(
+            string provider, string email, string providerKey)
+        {
+            string emailNormalizado = email.Trim().ToLower();
+
+            Usuario? usuario = await _userRepo.GetByEmailAsync(emailNormalizado);
+
+            if (usuario == null || usuario.Eliminado)
+                return ServiceResult<UsuarioLoginDto>.Fail(
+                    ErrorCode.AUTH_CREDENCIALES_INCORRECTAS.ToString(),
+                    "No existe ninguna cuenta con ese correo electrónico.");
+
+            if (!usuario.Activo)
+                return ServiceResult<UsuarioLoginDto>.Fail(
+                    ErrorCode.AUTH_CUENTA_INACTIVA.ToString(),
+                    "Tu cuenta aún no está verificada. Revisa tu correo electrónico.");
+
+            await _userRepo.UpsertCredencialOAuthAsync(usuario.Id, provider, providerKey);
+
+            bool perfilConfigurado = false;
+            if (usuario.TallerId.HasValue)
+                perfilConfigurado = await _tallerService.VerificarPerfilConfiguradoAsync(usuario.TallerId.Value);
+
+            UsuarioLoginDto dto = new UsuarioLoginDto
+            {
+                Id                = usuario.Id,
+                Nombre            = usuario.Nombre,
+                Email             = usuario.Email,
+                Rol               = usuario.Rol.ToString(),
+                TallerId          = usuario.TallerId,
+                SecurityStamp     = usuario.SecurityStamp,
+                PerfilConfigurado = perfilConfigurado
+            };
+
+            return ServiceResult<UsuarioLoginDto>.Ok(dto);
+        }
     }
 }

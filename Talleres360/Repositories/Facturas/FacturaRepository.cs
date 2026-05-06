@@ -123,6 +123,25 @@ namespace Talleres360.Repositories.Facturas
         public async Task<bool> PerteneceATallerAsync(int id, int tallerId) =>
             await _context.Facturas.AnyAsync(f => f.Id == id && f.TallerId == tallerId);
 
+        public async Task<(Factura? Factura, List<LineaFactura> Lineas, List<DesgloseIva> Desgloses)> ObtenerEntidadParaPdfAsync(int facturaId, int tallerId)
+        {
+            Factura? factura = await _context.Facturas
+                .FirstOrDefaultAsync(f => f.Id == facturaId && f.TallerId == tallerId);
+
+            if (factura == null)
+                return (null, new List<LineaFactura>(), new List<DesgloseIva>());
+
+            List<LineaFactura> lineas = await _context.LineasFactura
+                .Where(l => l.FacturaId == facturaId)
+                .ToListAsync();
+
+            List<DesgloseIva> desgloses = await _context.DesglosesIva
+                .Where(d => d.FacturaId == facturaId)
+                .ToListAsync();
+
+            return (factura, lineas, desgloses);
+        }
+
         private async Task<FacturaDto> MapToDtoConLineasAsync(Factura f)
         {
             List<LineaFacturaDto> lineas = await _context.LineasFactura

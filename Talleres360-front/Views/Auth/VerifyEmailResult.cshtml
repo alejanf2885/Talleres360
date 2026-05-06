@@ -1,0 +1,52 @@
+@model bool?
+@{
+    ViewData["Title"] = "Verificación de cuenta";
+    Layout = "_LayoutAuth";
+    bool ok = Model == true;
+    string? errorMsg = TempData["VerifyError"] as string;
+}
+
+<div class="auth-card" style="text-align:center;">
+
+    <div style="width:56px;height:56px;border-radius:50%;display:flex;align-items:center;
+                justify-content:center;margin:0 auto 20px;
+                background:@(ok ? "oklch(0.60 0.18 145 / 0.12)" : "oklch(0.60 0.18 20 / 0.12)");">
+        @if (ok)
+        {
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="oklch(0.55 0.18 145)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="20 6 9 17 4 12"/>
+            </svg>
+        }
+        else
+        {
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="oklch(0.55 0.18 20)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+            </svg>
+        }
+    </div>
+
+    @if (ok)
+    {
+        <h1 class="auth-title">¡Cuenta activada!</h1>
+        <p class="auth-subtitle" style="margin-bottom:28px;">
+            Tu correo ha sido verificado correctamente. Ya puedes iniciar sesión.
+        </p>
+        <a asp-controller="Auth" asp-action="Login" class="auth-btn btn w-100">
+            Iniciar sesión
+        </a>
+    }
+    else
+    {
+        <h1 class="auth-title">Enlace no válido</h1>
+        <p class="auth-subtitle" style="margin-bottom:8px;">
+            @(errorMsg ?? "El enlace de verificación no es válido o ha expirado.")
+        </p>
+        <p style="font-size:12px;color:#2C4060;margin-bottom:24px;">
+            Solicita un nuevo enlace desde la página de inicio de sesión.
+        </p>
+        <a asp-controller="Auth" asp-action="Login" class="auth-btn btn w-100">
+            Volver al inicio de sesión
+        </a>
+    }
+
+</div>
